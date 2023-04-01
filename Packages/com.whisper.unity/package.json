@@ -1,0 +1,14 @@
+{
+  "name": "com.whisper.unity",
+  "version": "1.0.0",
+  "displayName": "Whisper",
+  "description": "Whisper is high-performance automatic speech recognition (ASR) model, developed by OpenAI.\n\nThis is Unity bindings of whisper.cpp infrence implementation.",
+  "unity": "2020.1",
+  "license": "MIT",
+  "licensesUrl": "https://github.com/Macoron/whisper.unity/blob/master/LICENSE.MD",
+  "documentationUrl": "https://github.com/Macoron/whisper.unity/blob/master/README.md",
+  "author": {
+    "name": "Macoron",
+    "url": "https://github.com/Macoron"
+  }
+} 
