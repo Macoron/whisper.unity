@@ -11,6 +11,25 @@ namespace Whisper
          private string _languageManaged;
          private IntPtr _languagePtr = IntPtr.Zero;
          
+         private unsafe WhisperParams(WhisperNativeParams param)
+         {
+             _param = param;
+     
+             // copy language string to managed memory
+             var strPtr = new IntPtr(param.language);
+             _languageManaged = Marshal.PtrToStringAnsi(strPtr);
+         }
+     
+         ~WhisperParams()
+         {
+             FreeLanguageString();
+         }
+         
+        #region Parameters
+        
+        /// <summary>
+        /// Native C++ struct parameters. To change use setters.
+        /// </summary>
          public WhisperNativeParams NativeParams => _param;
          
          /// <summary>
@@ -37,6 +56,43 @@ namespace Whisper
                  _param.n_threads = value;
              }
          }
+
+         /// <summary>
+         /// Max tokens to use from past text as prompt for the decoder.
+         /// </summary>
+         public int MaxTextContextCount
+         {
+             get => _param.n_max_text_ctx;
+             set => _param.n_max_text_ctx = value;
+         }
+
+         /// <summary>
+         /// Start audio offset in ms.
+         /// </summary>
+         public int OffsetMs
+         {
+             get => _param.offset_ms;
+             set => _param.offset_ms = value;
+         }
+
+         /// <summary>
+         /// Audio duration to process in ms.
+         /// </summary>
+         // TODO: doesn't work correctly
+         public int DurationMs
+         {
+             get => _param.duration_ms;
+             set => _param.duration_ms = value;
+         }
+         
+         /// <summary>
+         /// Translate from source language to English.
+         /// </summary>
+         public bool Translate
+         {
+             get => _param.translate;
+             set => _param.translate = value;
+         }
      
          /// <summary>
          /// Output text language code (ISO 639-1). For example "en", "es" or "de".
@@ -60,20 +116,9 @@ namespace Whisper
                  }
              }
          }
+         
+         #endregion
 
-         private unsafe WhisperParams(WhisperNativeParams param)
-         {
-             _param = param;
-     
-             // copy language string to managed memory
-             var strPtr = new IntPtr(param.language);
-             _languageManaged = Marshal.PtrToStringAnsi(strPtr);
-         }
-     
-         ~WhisperParams()
-         {
-             FreeLanguageString();
-         }
 
          private void FreeLanguageString()
          {

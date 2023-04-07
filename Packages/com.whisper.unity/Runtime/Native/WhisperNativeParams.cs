@@ -22,11 +22,12 @@ namespace Whisper.Native
         public WhisperSamplingStrategy strategy;
 
         public int n_threads;
-        int n_max_text_ctx; // max tokens to use from past text as prompt for the decoder
-        int offset_ms; // start offset in ms
-        int duration_ms; // audio duration to process in ms
+        public int n_max_text_ctx; // max tokens to use from past text as prompt for the decoder
+        public int offset_ms; // start offset in ms
+        public int duration_ms; // audio duration to process in ms
 
-        [MarshalAs(UnmanagedType.U1)] bool translate;
+        [MarshalAs(UnmanagedType.U1)] 
+        public bool translate;
 
         [MarshalAs(UnmanagedType.U1)]
         public bool no_context; // do not use past transcription (if any) as initial prompt for the decoder
