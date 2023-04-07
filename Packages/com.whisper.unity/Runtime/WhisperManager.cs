@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
+using Whisper.Native;
 
 namespace Whisper
 {
@@ -15,8 +16,12 @@ namespace Whisper
         [Tooltip("Should model weights be loaded on awake?")]
         private bool initOnAwake = true;
     
+        [Header("Parameters")]
         [SerializeField]
-        [Tooltip("Output text language. Use \"auto\" for auto-detection.")]
+        private WhisperSamplingStrategy strategy = WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY;
+        
+        [SerializeField]
+        [Tooltip("Output text language. Use empty or \"auto\" for auto-detection.")]
         private string language = "en";
         
         private WhisperWrapper _whisper;
@@ -57,7 +62,7 @@ namespace Whisper
                 var path = Path.Combine(Application.streamingAssetsPath, modelPath);
                 _whisper = await WhisperWrapper.InitFromFileAsync(path);
                 
-                _params = WhisperParams.GetDefaultParams();
+                _params = WhisperParams.GetDefaultParams(strategy);
                 _params.Language = language;
             }
             catch (Exception e)

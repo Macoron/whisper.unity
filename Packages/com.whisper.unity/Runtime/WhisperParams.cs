@@ -12,6 +12,17 @@ namespace Whisper
          private IntPtr _languagePtr = IntPtr.Zero;
          
          public WhisperNativeParams NativeParams => _param;
+         
+         /// <summary>
+         /// Sampling Whisper strategy.
+         /// Greedy tends to be faster, but has lower quality.
+         /// Beam search slower, but higher quality.
+         /// </summary>
+         public WhisperSamplingStrategy Strategy
+         {
+             get => _param.strategy;
+             set => _param.strategy = value;
+         }
      
          /// <summary>
          /// Output text language code (ISO 639-1). For example "en", "es" or "de".
@@ -35,7 +46,7 @@ namespace Whisper
                  }
              }
          }
-         
+
          private unsafe WhisperParams(WhisperNativeParams param)
          {
              _param = param;
