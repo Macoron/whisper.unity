@@ -26,21 +26,13 @@ namespace Whisper.Native
         public int offset_ms; // start offset in ms
         public int duration_ms; // audio duration to process in ms
 
-        [MarshalAs(UnmanagedType.U1)] 
-        public bool translate;
-
-        [MarshalAs(UnmanagedType.U1)]
-        public bool no_context; // do not use past transcription (if any) as initial prompt for the decoder
-
-        [MarshalAs(UnmanagedType.U1)] bool single_segment; // force single segment output (useful for streaming)
-        [MarshalAs(UnmanagedType.U1)] bool print_special; // print special tokens (e.g. <SOT>, <EOT>, <BEG>, etc.)
-        [MarshalAs(UnmanagedType.U1)] bool print_progress; // print progress information
-
-        [MarshalAs(UnmanagedType.U1)]
-        bool print_realtime; // print results from within whisper.cpp (avoid it, use callback instead)
-
-        [MarshalAs(UnmanagedType.U1)]
-        bool print_timestamps; // print timestamps for each text segment when printing realtime
+        [MarshalAs(UnmanagedType.U1)] public bool translate;
+        [MarshalAs(UnmanagedType.U1)] public bool no_context; // do not use past transcription (if any) as initial prompt for the decoder
+        [MarshalAs(UnmanagedType.U1)] public bool single_segment; // force single segment output (useful for streaming)
+        [MarshalAs(UnmanagedType.U1)] public bool print_special; // print special tokens (e.g. <SOT>, <EOT>, <BEG>, etc.)
+        [MarshalAs(UnmanagedType.U1)] public bool print_progress; // print progress information
+        [MarshalAs(UnmanagedType.U1)] public bool print_realtime; // print results from within whisper.cpp (avoid it, use callback instead)
+        [MarshalAs(UnmanagedType.U1)] public bool print_timestamps; // print timestamps for each text segment when printing realtime
 
         // [EXPERIMENTAL] token-level timestamps
         [MarshalAs(UnmanagedType.U1)] bool token_timestamps; // enable token-level timestamps

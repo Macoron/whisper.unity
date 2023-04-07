@@ -78,7 +78,7 @@ namespace Whisper
          /// <summary>
          /// Audio duration to process in ms.
          /// </summary>
-         // TODO: doesn't work correctly
+         // TODO: doesn't work correctly for some reason
          public int DurationMs
          {
              get => _param.duration_ms;
@@ -92,6 +92,66 @@ namespace Whisper
          {
              get => _param.translate;
              set => _param.translate = value;
+         }
+
+         /// <summary>
+         /// Do not use past transcription (if any) as initial prompt for the decoder.
+         /// </summary>
+         public bool NoContext
+         {
+             get => _param.no_context;
+             set => _param.no_context = value;
+         }
+
+         /// <summary>
+         /// Force single segment output (useful for streaming).
+         /// </summary>
+         public bool SingleSegment
+         {
+             get => _param.single_segment;
+             set => _param.single_segment = value;
+         }
+         
+         /// <summary>
+         /// Print special tokens (e.g. SOT, EOT, BEG, etc.)
+         /// </summary>
+         public bool PrintSpecial
+         {
+             get => _param.print_special;
+             set => _param.print_special = value;
+         }
+
+         /// <summary>
+         /// Print progress information in C++ log.
+         /// It won't be shown in Unity console, but visible in Unity log file.
+         /// <a href="https://docs.unity3d.com/Manual/LogFiles.html">Log file location.</a>
+         /// </summary>
+         public bool PrintProgress
+         {
+             get => _param.print_progress;
+             set => _param.print_progress = value;
+         }
+
+         /// <summary>
+         /// Print results from within whisper.cpp in C++ log (avoid it, use callback instead).
+         /// It won't be shown in Unity console, but visible in Unity log file.
+         /// <a href="https://docs.unity3d.com/Manual/LogFiles.html">Log file location.</a>
+         /// </summary>
+         public bool PrintRealtime
+         {
+             get => _param.print_realtime;
+             set => _param.print_realtime = value;
+         }
+         
+         /// <summary>
+         /// Print timestamps for each text segment when printing realtime in C++ log.
+         /// It won't be shown in Unity console, but visible in Unity log file.
+         /// <a href="https://docs.unity3d.com/Manual/LogFiles.html">Log file location.</a>
+         /// </summary>
+         public bool PrintTimestamps
+         {
+             get => _param.print_timestamps;
+             set => _param.print_timestamps = value;
          }
      
          /// <summary>
