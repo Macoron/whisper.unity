@@ -13,24 +13,23 @@ namespace Whisper
          
          public WhisperNativeParams NativeParams => _param;
      
+         /// <summary>
+         /// Output text language code (ISO 639-1). For example "en", "es" or "de".
+         /// For auto-detection, set to null, "" or "auto".
+         /// </summary>
          public string Language
          {
              get => _languageManaged;
              set
              {
-                 if (string.IsNullOrEmpty(value))
-                     throw new ArgumentException("Null or empty language strings are not allowed!");
-                 
                  _languageManaged = value;
                  unsafe
                  {
-                     // if C# allocated new string before - clear it
-                     // but only clear C# string, not C++ literals
-                     // this code assumes that whisper will not change language string in C++
-                     if (_languagePtr != IntPtr.Zero)
-                         Marshal.FreeHGlobal(_languagePtr);
+                     // free previous string
+                     FreeLanguageString();
                      
                      // copies string in unmanaged memory to avoid GC
+                     if (_languageManaged == null) return;
                      _languagePtr = Marshal.StringToHGlobalAnsi(_languageManaged);
                      _param.language = (byte*)_languagePtr;
                  }
@@ -48,8 +47,17 @@ namespace Whisper
      
          ~WhisperParams()
          {
+             FreeLanguageString();
+         }
+
+         private void FreeLanguageString()
+         {
+             // if C# allocated new string before - clear it
+             // but only clear C# string, not C++ literals
+             // this code assumes that whisper will not change language string in C++
              if (_languagePtr != IntPtr.Zero)
                  Marshal.FreeHGlobal(_languagePtr);
+             _languagePtr = IntPtr.Zero;
          }
          
          public static WhisperParams GetDefaultParams(WhisperSamplingStrategy strategy =
