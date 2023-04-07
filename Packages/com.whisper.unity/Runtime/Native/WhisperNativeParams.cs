@@ -21,7 +21,7 @@ namespace Whisper.Native
     {
         public WhisperSamplingStrategy strategy;
 
-        int n_threads;
+        public int n_threads;
         int n_max_text_ctx; // max tokens to use from past text as prompt for the decoder
         int offset_ms; // start offset in ms
         int duration_ms; // audio duration to process in ms

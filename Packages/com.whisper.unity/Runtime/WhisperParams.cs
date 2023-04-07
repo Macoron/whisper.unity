@@ -23,6 +23,20 @@ namespace Whisper
              get => _param.strategy;
              set => _param.strategy = value;
          }
+
+         /// <summary>
+         /// Count of threads (n_threads), should be >= 1.
+         /// </summary>
+         public int ThreadsCount
+         {
+             get => _param.n_threads;
+             set
+             {
+                 if (value < 1)
+                     throw new ArgumentException("Number of threads should be bigger or equal one.");
+                 _param.n_threads = value;
+             }
+         }
      
          /// <summary>
          /// Output text language code (ISO 639-1). For example "en", "es" or "de".
