@@ -145,7 +145,7 @@ namespace Whisper
         public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
-            var buffer = await ReadAndroidFile(modelPath);
+            var buffer = await FileUtils.ReadFileAsync(modelPath);
             var res = await InitFromBufferAsync(buffer);
             return res;
 #else
@@ -156,6 +156,11 @@ namespace Whisper
         
         public static WhisperWrapper InitFromFile(string modelPath)
         {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            var buffer = FileUtils.ReadFile(modelPath);
+            var res = InitFromBuffer(buffer);
+            return res;
+#else
             // load model weights
             Debug.Log($"Trying to load Whisper model from {modelPath}...");
         
@@ -184,6 +189,7 @@ namespace Whisper
             Debug.Log($"Whisper model is loaded, total time: {sw.ElapsedMilliseconds} ms.");
             
             return new WhisperWrapper(ctx);
+#endif
         }
 
         public static WhisperWrapper InitFromBuffer(byte[] buffer)
@@ -227,26 +233,6 @@ namespace Whisper
         {
             var asyncTask = Task.Factory.StartNew(() => InitFromBuffer(buffer));
             return await asyncTask;
-        }
-        
-        // ReSharper disable once UnusedMember.Local
-        private static async Task<byte[]> ReadAndroidFile(string path)
-        {
-            var request = UnityWebRequest.Get(path);
-            request.SendWebRequest();
-
-            while (!request.isDone)
-                await Task.Yield();
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError($"Error while opening weights at {path}!");
-                if (!string.IsNullOrEmpty(request.error))
-                    Debug.LogError(request.error);
-                return null;
-            }
-
-            return request.downloadHandler.data;
         }
     }
 }
