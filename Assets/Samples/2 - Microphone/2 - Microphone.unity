@@ -798,7 +798,10 @@ MonoBehaviour:
   language: auto
   translateToEnglish: 0
   strategy: 0
-  noContext: 0
+  noContext: 1
+  singleSegment: 1
+  speedUp: 0
+  audioCtx: 0
 --- !u!1 &637716610
 GameObject:
   m_ObjectHideFlags: 0
