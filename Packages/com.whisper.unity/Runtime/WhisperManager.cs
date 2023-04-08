@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
+using Whisper.Native;
 
 namespace Whisper
 {
@@ -14,10 +15,31 @@ namespace Whisper
         [SerializeField]
         [Tooltip("Should model weights be loaded on awake?")]
         private bool initOnAwake = true;
-    
+        
+        [Header("Language")]
+        [Tooltip("Output text language. Use empty or \"auto\" for auto-detection.")]
+        public string language = "en";
+        [Tooltip("Force output text to English translation. Improves translation quality.")]
+        public bool translateToEnglish;
+        
+        [Header("Advanced settings")]
         [SerializeField]
-        [Tooltip("Output text language. Use \"auto\" for auto-detection.")]
-        private string language = "en";
+        private WhisperSamplingStrategy strategy = WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY;
+
+        [Tooltip("Do not use past transcription (if any) as initial prompt for the decoder.")]
+        public bool noContext = true;
+        
+        [Tooltip("Force single segment output (useful for streaming).")]
+        public bool singleSegment = true;
+        
+        [Header("Experimental settings")]
+        [Tooltip("[EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder. " +
+                 "These can significantly reduce the quality of the output.")]
+        public bool speedUp = false;
+        
+        [Tooltip("[EXPERIMENTAL] Overwrite the audio context size (0 = use default). " +
+                 "These can significantly reduce the quality of the output.")]
+        public int audioCtx;
         
         private WhisperWrapper _whisper;
         private WhisperParams _params;
@@ -25,7 +47,7 @@ namespace Whisper
         public bool IsLoaded => _whisper != null;
         public bool IsLoading { get; private set; }
         public bool IsBusy { get; private set; }
-        
+
         private async void Awake()
         {
             if (!initOnAwake)
@@ -56,9 +78,7 @@ namespace Whisper
             {
                 var path = Path.Combine(Application.streamingAssetsPath, modelPath);
                 _whisper = await WhisperWrapper.InitFromFileAsync(path);
-                
-                _params = WhisperParams.GetDefaultParams();
-                _params.Language = language;
+                _params = WhisperParams.GetDefaultParams(strategy);
             }
             catch (Exception e)
             {
@@ -76,6 +96,7 @@ namespace Whisper
             if (!isLoaded)
                 return null;
             
+            UpdateParams();
             var res = await _whisper.GetTextAsync(clip, _params);
             return res;
         }
@@ -89,18 +110,20 @@ namespace Whisper
             var isLoaded = await CheckIfLoaded();
             if (!isLoaded)
                 return null;
-            
+
+            UpdateParams();
             var res = await _whisper.GetTextAsync(samples, frequency, channels, _params);
             return res;
         }
-        
-        /// <summary>
-        /// Choose text output language.
-        /// </summary>
-        public void SetLanguage(string newLanguage)
+
+        private void UpdateParams()
         {
-            language = newLanguage;
-            _params.Language = newLanguage;
+            _params.Language = language;
+            _params.Translate = translateToEnglish;
+            _params.NoContext = noContext;
+            _params.SingleSegment = singleSegment;
+            _params.SpeedUp = speedUp;
+            _params.AudioCtx = audioCtx;
         }
 
         private async Task<bool> CheckIfLoaded()

@@ -14,32 +14,29 @@ namespace Whisper.Native
         WHISPER_SAMPLING_BEAM_SEARCH = 1, // similar to OpenAI's BeamSearchDecoder
     };
 
-    // This is direct copy of C++ struct
-    // Do not change or add any fields without changing it in whisper.cpp
+
+    /// <summary>
+    /// This is direct copy of C++ struct.
+    /// Do not change or add any fields without changing it in whisper.cpp.
+    /// Do not change it in runtime directly, use <see cref="WhisperParams"/>.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct WhisperNativeParams
     {
         public WhisperSamplingStrategy strategy;
 
-        int n_threads;
-        int n_max_text_ctx; // max tokens to use from past text as prompt for the decoder
-        int offset_ms; // start offset in ms
-        int duration_ms; // audio duration to process in ms
+        public int n_threads;
+        public int n_max_text_ctx; // max tokens to use from past text as prompt for the decoder
+        public int offset_ms; // start offset in ms
+        public int duration_ms; // audio duration to process in ms
 
-        [MarshalAs(UnmanagedType.U1)] bool translate;
-
-        [MarshalAs(UnmanagedType.U1)]
-        public bool no_context; // do not use past transcription (if any) as initial prompt for the decoder
-
-        [MarshalAs(UnmanagedType.U1)] bool single_segment; // force single segment output (useful for streaming)
-        [MarshalAs(UnmanagedType.U1)] bool print_special; // print special tokens (e.g. <SOT>, <EOT>, <BEG>, etc.)
-        [MarshalAs(UnmanagedType.U1)] bool print_progress; // print progress information
-
-        [MarshalAs(UnmanagedType.U1)]
-        bool print_realtime; // print results from within whisper.cpp (avoid it, use callback instead)
-
-        [MarshalAs(UnmanagedType.U1)]
-        bool print_timestamps; // print timestamps for each text segment when printing realtime
+        [MarshalAs(UnmanagedType.U1)] public bool translate;
+        [MarshalAs(UnmanagedType.U1)] public bool no_context; // do not use past transcription (if any) as initial prompt for the decoder
+        [MarshalAs(UnmanagedType.U1)] public bool single_segment; // force single segment output (useful for streaming)
+        [MarshalAs(UnmanagedType.U1)] public bool print_special; // print special tokens (e.g. <SOT>, <EOT>, <BEG>, etc.)
+        [MarshalAs(UnmanagedType.U1)] public bool print_progress; // print progress information
+        [MarshalAs(UnmanagedType.U1)] public bool print_realtime; // print results from within whisper.cpp (avoid it, use callback instead)
+        [MarshalAs(UnmanagedType.U1)] public bool print_timestamps; // print timestamps for each text segment when printing realtime
 
         // [EXPERIMENTAL] token-level timestamps
         [MarshalAs(UnmanagedType.U1)] bool token_timestamps; // enable token-level timestamps
@@ -51,8 +48,8 @@ namespace Whisper.Native
 
         // [EXPERIMENTAL] speed-up techniques
         // note: these can significantly reduce the quality of the output
-        [MarshalAs(UnmanagedType.U1)] bool speed_up; // speed-up the audio by 2x using Phase Vocoder
-        int audio_ctx; // overwrite the audio context size (0 = use default)
+        [MarshalAs(UnmanagedType.U1)] public bool speed_up; // speed-up the audio by 2x using Phase Vocoder
+        public int audio_ctx; // overwrite the audio context size (0 = use default)
 
         // tokens to provide to the whisper decoder as initial prompt
         // these are prepended to any existing text context from a previous call
