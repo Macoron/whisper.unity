@@ -15,14 +15,21 @@ namespace Whisper
         [SerializeField]
         [Tooltip("Should model weights be loaded on awake?")]
         private bool initOnAwake = true;
-    
-        [Header("Parameters")]
-        [SerializeField]
-        private WhisperSamplingStrategy strategy = WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY;
         
+        [Header("Language")]
         [SerializeField]
         [Tooltip("Output text language. Use empty or \"auto\" for auto-detection.")]
         private string language = "en";
+        [SerializeField]
+        [Tooltip("Force output text to English translation. Improves translation quality.")]
+        private bool translateToEnglish;
+        
+        [Header("Advanced settings")]
+        [SerializeField]
+        private WhisperSamplingStrategy strategy = WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY;
+        [SerializeField]
+        [Tooltip("Do not use past transcription (if any) as initial prompt for the decoder.")]
+        private bool noContext;
         
         private WhisperWrapper _whisper;
         private WhisperParams _params;
@@ -64,6 +71,8 @@ namespace Whisper
                 
                 _params = WhisperParams.GetDefaultParams(strategy);
                 _params.Language = language;
+                _params.Translate = translateToEnglish;
+                _params.NoContext = noContext;
             }
             catch (Exception e)
             {

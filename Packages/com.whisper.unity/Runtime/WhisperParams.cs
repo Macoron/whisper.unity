@@ -5,11 +5,21 @@ using Whisper.Native;
 
 namespace Whisper
 {
+    /// <summary>
+    /// Wrapper of native C++ whisper parameters.
+    /// Use it to safely change inference parameters.
+    /// </summary>
     public class WhisperParams
      {
          private WhisperNativeParams _param;
          private string _languageManaged;
          private IntPtr _languagePtr = IntPtr.Zero;
+         
+         /// <summary>
+         /// Native C++ struct parameters.
+         /// Do not change it in runtime directly, use setters.
+         /// </summary>
+         public WhisperNativeParams NativeParams => _param;
          
          private unsafe WhisperParams(WhisperNativeParams param)
          {
@@ -24,18 +34,11 @@ namespace Whisper
          {
              FreeLanguageString();
          }
-         
-        #region Parameters
+
+         #region Basic Parameters
         
-        /// <summary>
-        /// Native C++ struct parameters. To change use setters.
-        /// </summary>
-         public WhisperNativeParams NativeParams => _param;
-         
          /// <summary>
-         /// Sampling Whisper strategy.
-         /// Greedy tends to be faster, but has lower quality.
-         /// Beam search slower, but higher quality.
+         /// Sampling Whisper strategy (greedy or beam search).
          /// </summary>
          public WhisperSamplingStrategy Strategy
          {
@@ -88,6 +91,11 @@ namespace Whisper
          /// <summary>
          /// Translate from source language to English.
          /// </summary>
+         /// <remarks>
+         /// Generally improves English translation. 
+         /// Override <see cref="Language"/> parameter. If you want to translate
+         /// to another language, set this to false and use <see cref="Language"/> parameter.
+         /// </remarks>
          public bool Translate
          {
              get => _param.translate;
@@ -158,6 +166,11 @@ namespace Whisper
          /// Output text language code (ISO 639-1). For example "en", "es" or "de".
          /// For auto-detection, set to null, "" or "auto".
          /// </summary>
+         /// <remarks>
+         /// Input audio can be in any language. Whisper will try to translate your audio
+         /// to selected language. If you want to translate into English use <see cref="Translate"/>
+         /// for better quality.
+         /// </remarks>
          public string Language
          {
              get => _languageManaged;
@@ -179,7 +192,6 @@ namespace Whisper
          
          #endregion
 
-
          private void FreeLanguageString()
          {
              // if C# allocated new string before - clear it
@@ -194,11 +206,17 @@ namespace Whisper
              WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY)
          {
              Debug.Log($"Requesting default Whisper params for strategy {strategy}...");
-             var param = WhisperNative.whisper_full_default_params(strategy);
-             param.no_context = true;
+             var nativeParams = WhisperNative.whisper_full_default_params(strategy);
              Debug.Log("Default params generated!");
-                 
-             return new WhisperParams(param);
+
+             var param = new WhisperParams(nativeParams)
+             {
+                 // usually don't need C++ output log in Unity
+                 PrintProgress = false,
+                 PrintRealtime = false,
+                 PrintTimestamps = false
+             };
+             return param;
          }
      }   
 }

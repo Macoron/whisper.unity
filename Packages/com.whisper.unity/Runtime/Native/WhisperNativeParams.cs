@@ -14,8 +14,12 @@ namespace Whisper.Native
         WHISPER_SAMPLING_BEAM_SEARCH = 1, // similar to OpenAI's BeamSearchDecoder
     };
 
-    // This is direct copy of C++ struct
-    // Do not change or add any fields without changing it in whisper.cpp
+
+    /// <summary>
+    /// This is direct copy of C++ struct.
+    /// Do not change or add any fields without changing it in whisper.cpp.
+    /// Do not change it in runtime directly, use <see cref="WhisperParams"/>.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct WhisperNativeParams
     {
@@ -44,7 +48,7 @@ namespace Whisper.Native
 
         // [EXPERIMENTAL] speed-up techniques
         // note: these can significantly reduce the quality of the output
-        [MarshalAs(UnmanagedType.U1)] bool speed_up; // speed-up the audio by 2x using Phase Vocoder
+        [MarshalAs(UnmanagedType.U1)] public bool speed_up; // speed-up the audio by 2x using Phase Vocoder
         int audio_ctx; // overwrite the audio context size (0 = use default)
 
         // tokens to provide to the whisper decoder as initial prompt
