@@ -176,6 +176,9 @@ namespace Whisper
              get => _languageManaged;
              set
              {
+                 if (_languageManaged == value)
+                     return;
+                 
                  _languageManaged = value;
                  unsafe
                  {

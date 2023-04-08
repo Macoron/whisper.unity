@@ -20,6 +20,7 @@ namespace Whisper.Samples
         public Text outputText;
         public Text timeText;
         public Dropdown languageDropdown;
+        public Toggle translateToggle;
 
         private float _recordStart;
         private bool _isRecording;
@@ -28,7 +29,13 @@ namespace Whisper.Samples
         private void Awake()
         {
             button.onClick.AddListener(OnButtonPressed);
+
+            languageDropdown.value = languageDropdown.options
+                .FindIndex((op) => op.text == whisper.language);
             languageDropdown.onValueChanged.AddListener(OnLanguageChanged);
+
+            translateToggle.isOn = whisper.translateToEnglish;
+            translateToggle.onValueChanged.AddListener(OnTranslateChanged);
         }
 
         private void Update()
@@ -55,7 +62,12 @@ namespace Whisper.Samples
         private void OnLanguageChanged(int ind)
         {
             var opt = languageDropdown.options[ind];
-            whisper.SetLanguage(opt.text);
+            whisper.language = opt.text;
+        }
+        
+        private void OnTranslateChanged(bool translate)
+        {
+            whisper.translateToEnglish = translate;
         }
 
         public void StartRecord()
