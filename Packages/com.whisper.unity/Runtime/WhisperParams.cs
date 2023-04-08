@@ -195,6 +195,30 @@ namespace Whisper
          
          #endregion
 
+         #region Speed Up
+
+         /// <summary>
+         /// [EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder.
+         /// These can significantly reduce the quality of the output.
+         /// </summary>
+         public bool SpeedUp
+         {
+             get => _param.speed_up;
+             set => _param.speed_up = value;
+         }
+
+         /// <summary>
+         /// [EXPERIMENTAL] Overwrite the audio context size (0 = use default).
+         /// These can significantly reduce the quality of the output.
+         /// </summary>
+         public int AudioCtx
+         {
+             get => _param.audio_ctx;
+             set => _param.audio_ctx = value;
+         }
+
+         #endregion
+         
          private void FreeLanguageString()
          {
              // if C# allocated new string before - clear it

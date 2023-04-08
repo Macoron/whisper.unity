@@ -25,9 +25,21 @@ namespace Whisper
         [Header("Advanced settings")]
         [SerializeField]
         private WhisperSamplingStrategy strategy = WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY;
-        [SerializeField]
+
         [Tooltip("Do not use past transcription (if any) as initial prompt for the decoder.")]
-        public bool noContext;
+        public bool noContext = true;
+        
+        [Tooltip("Force single segment output (useful for streaming).")]
+        public bool singleSegment = true;
+        
+        [Header("Experimental settings")]
+        [Tooltip("[EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder. " +
+                 "These can significantly reduce the quality of the output.")]
+        public bool speedUp = false;
+        
+        [Tooltip("[EXPERIMENTAL] Overwrite the audio context size (0 = use default). " +
+                 "These can significantly reduce the quality of the output.")]
+        public int audioCtx;
         
         private WhisperWrapper _whisper;
         private WhisperParams _params;
@@ -109,6 +121,9 @@ namespace Whisper
             _params.Language = language;
             _params.Translate = translateToEnglish;
             _params.NoContext = noContext;
+            _params.SingleSegment = singleSegment;
+            _params.SpeedUp = speedUp;
+            _params.AudioCtx = audioCtx;
         }
 
         private async Task<bool> CheckIfLoaded()

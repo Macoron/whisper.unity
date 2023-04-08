@@ -49,7 +49,7 @@ namespace Whisper.Native
         // [EXPERIMENTAL] speed-up techniques
         // note: these can significantly reduce the quality of the output
         [MarshalAs(UnmanagedType.U1)] public bool speed_up; // speed-up the audio by 2x using Phase Vocoder
-        int audio_ctx; // overwrite the audio context size (0 = use default)
+        public int audio_ctx; // overwrite the audio context size (0 = use default)
 
         // tokens to provide to the whisper decoder as initial prompt
         // these are prepended to any existing text context from a previous call
