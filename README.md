@@ -9,7 +9,7 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 - Windows (x86_64)
 - MacOS (Intel and ARM)
 - iOS (Device and Simulator)
-- Android (ARM64, unstable, [see this issue](https://github.com/Macoron/whisper.unity/issues/2))
+- Android (ARM64)
 
 ## Getting started
 Clone this repository and open it as regular Unity project. It comes with examples and tiny multilanguage model weights.
