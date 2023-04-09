@@ -6,9 +6,9 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Whisper.Utils;
 
-// Testing loading network in different ways
 namespace Whisper.Tests
 {
+    // Testing loading network in different ways
     public class WhisperInitTests
     {
         private readonly string _modelPath = Path.Combine(Application.streamingAssetsPath, "Whisper/ggml-tiny.bin");
