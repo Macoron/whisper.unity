@@ -9,8 +9,8 @@ namespace Whisper.Tests
     {
         private readonly string _modelPath = Path.Combine(Application.streamingAssetsPath, "Whisper/ggml-tiny.bin");
         private readonly float[] _buffer = new float[16000];
-        private const int Frequency = 16000;
-        private const int Channels = 1;
+        private const int Frequency = 8000;
+        private const int Channels = 2;
 
         private WhisperWrapper _whisper;
         private WhisperParams _params;

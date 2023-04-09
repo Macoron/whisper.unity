@@ -19,8 +19,18 @@
                 "value": "{\"m_Value\":\"com.whisper.unity\"}"
             },
             {
+                "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "key": "PathsToExclude",
+                "value": "{\"m_Value\":\"{ProjectPath}/Packages/com.whisper.unity/Runtime/Utils/RotatingCube.cs\"}"
+            },
+            {
                 "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "EnableCodeCoverage",
+                "value": "{\"m_Value\":true}"
+            },
+            {
+                "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "key": "GenerateAdditionalMetrics",
                 "value": "{\"m_Value\":false}"
             }
         ]

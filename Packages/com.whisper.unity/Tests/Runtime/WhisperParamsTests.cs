@@ -4,7 +4,7 @@ using Whisper.Native;
 namespace Whisper.Tests
 {
     [TestFixture]
-    public class WhisperParamsTest
+    public class WhisperParamsTests
     {
         [Test]
         [TestCase(WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY)]

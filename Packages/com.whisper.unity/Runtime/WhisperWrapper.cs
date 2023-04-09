@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 using Whisper.Native;
 using Whisper.Utils;
 using Debug = UnityEngine.Debug;
