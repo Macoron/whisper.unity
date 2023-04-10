@@ -330,6 +330,12 @@ MonoBehaviour:
   modelPath: Whisper/ggml-tiny.bin
   initOnAwake: 1
   language: en
+  translateToEnglish: 0
+  strategy: 0
+  noContext: 1
+  singleSegment: 0
+  speedUp: 0
+  audioCtx: 0
 --- !u!1 &637716610
 GameObject:
   m_ObjectHideFlags: 0
@@ -639,7 +645,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   manager: {fileID: 587639199}
   clip: {fileID: 8300000, guid: 2f8a92ae57b4341c68e81202d049ca31, type: 3}
-  echoSound: 1
+  echoSound: 0
+  streamAnswer: 1
   button: {fileID: 2099288375}
   outputText: {fileID: 203807867}
   timeText: {fileID: 167558892}

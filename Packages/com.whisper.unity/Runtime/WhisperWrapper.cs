@@ -31,12 +31,14 @@ namespace Whisper
             Result = builder.ToString();
         }
     }
+
+    public delegate void OnNewSegmentDelegate(int index, string text);
     
     public class WhisperWrapper
     {
         public const int WhisperSampleRate = 16000;
 
-        public event Action<string> OnNewSegment;
+        public event OnNewSegmentDelegate OnNewSegment;
 
         private readonly IntPtr _whisperCtx;
         private readonly WhisperNativeParams _params;
@@ -105,7 +107,6 @@ namespace Whisper
             var n = WhisperNative.whisper_full_n_segments(_whisperCtx);
             Debug.Log($"Number of text segments: {n}");
 
-
             var list = new List<string>();
             for (var i = 0; i < n; ++i) {
                 Debug.Log($"Requesting text segment {i}...");
@@ -159,7 +160,10 @@ namespace Whisper
             var s0 = nSegments - nNew;
             for (var i = s0; i < nSegments; i++)
             {
-                
+                // raise event with new text segment
+                var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
+                var text = Marshal.PtrToStringAnsi(textPtr);
+                OnNewSegment?.Invoke(i, text);
             }
         }
         

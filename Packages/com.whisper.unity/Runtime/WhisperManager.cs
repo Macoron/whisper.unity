@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using Whisper.Native;
+using Whisper.Utils;
 
 namespace Whisper
 {
@@ -40,9 +41,12 @@ namespace Whisper
         [Tooltip("[EXPERIMENTAL] Overwrite the audio context size (0 = use default). " +
                  "These can significantly reduce the quality of the output.")]
         public int audioCtx;
-        
+
+        public event OnNewSegmentDelegate OnNewSegment;
+
         private WhisperWrapper _whisper;
         private WhisperParams _params;
+        private readonly MainThreadDispatcher _dispatcher = new();
 
         public bool IsLoaded => _whisper != null;
         public bool IsLoading { get; private set; }
@@ -54,7 +58,12 @@ namespace Whisper
                 return;
             await InitModel();
         }
-        
+
+        private void Update()
+        {
+            _dispatcher.Update();
+        }
+
         /// <summary>
         /// Load model and default parameters. Prepare it for text transcription.
         /// </summary>
@@ -79,6 +88,7 @@ namespace Whisper
                 var path = Path.Combine(Application.streamingAssetsPath, modelPath);
                 _whisper = await WhisperWrapper.InitFromFileAsync(path);
                 _params = WhisperParams.GetDefaultParams(strategy);
+                _whisper.OnNewSegment += OnNewSegmentHandler;
             }
             catch (Exception e)
             {
@@ -86,7 +96,7 @@ namespace Whisper
             }
             IsLoading = false;
         }
-        
+
         /// <summary>
         /// Get transcription from audio clip.
         /// </summary>
@@ -141,6 +151,14 @@ namespace Whisper
             }
 
             return IsLoaded;
+        }
+        
+        private void OnNewSegmentHandler(int index, string text)
+        {
+            _dispatcher.Execute(() =>
+            {
+                OnNewSegment?.Invoke(index, text);
+            });
         }
     }
 }
