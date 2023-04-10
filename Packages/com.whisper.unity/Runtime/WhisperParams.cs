@@ -218,6 +218,16 @@ namespace Whisper
          }
 
          #endregion
+
+         #region Callbacks
+
+         public whisper_new_segment_callback NewSegmentCallback
+         {
+             get => _param.new_segment_callback;
+             set => _param.new_segment_callback = value;
+         }
+
+         #endregion
          
          private void FreeLanguageString()
          {

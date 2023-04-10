@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Whisper.Native;
 using Whisper.Utils;
 using Debug = UnityEngine.Debug;
@@ -34,6 +35,8 @@ namespace Whisper
     public class WhisperWrapper
     {
         public const int WhisperSampleRate = 16000;
+
+        public event Action<string> OnNewSegment;
 
         private readonly IntPtr _whisperCtx;
         private readonly WhisperNativeParams _params;
@@ -90,10 +93,14 @@ namespace Whisper
             
             Debug.Log($"Audio data is preprocessed, total time: {sw.ElapsedMilliseconds} ms.");
             
-            // Start inference
-            if (!InferenceWhisper(readySamples, param.NativeParams))
+            // register callback (if no custom exist)
+            var nativeParams = param.NativeParams;
+            nativeParams.new_segment_callback ??= HandleNewSegment;
+
+            // start inference
+            if (!InferenceWhisper(readySamples, nativeParams))
                 return null;
-            
+
             Debug.Log("Trying to get number of text segments...");
             var n = WhisperNative.whisper_full_n_segments(_whisperCtx);
             Debug.Log($"Number of text segments: {n}");
@@ -113,7 +120,7 @@ namespace Whisper
             Debug.Log($"Final text: {res.Result}");
             return res;
         }
-        
+
         public async Task<WhisperResult> GetTextAsync(float[] samples, int frequency, int channels, WhisperParams param)
         {
             var asyncTask = Task.Factory.StartNew(() => GetText(samples, frequency, channels, param));
@@ -139,6 +146,21 @@ namespace Whisper
 
             Debug.Log($"Whisper inference finished, total time: {sw.ElapsedMilliseconds} ms.");
             return true;
+        }
+        
+        private void HandleNewSegment(IntPtr ctx, int nNew, IntPtr userDataPtr)
+        {
+            // this shouldn't happen unless you do something like running
+            // several instance of whisper in the same time with same parameters struct?
+            Assert.AreEqual(_whisperCtx, ctx);
+
+            // start reading new segments
+            var nSegments = WhisperNative.whisper_full_n_segments(_whisperCtx);
+            var s0 = nSegments - nNew;
+            for (var i = s0; i < nSegments; i++)
+            {
+                
+            }
         }
         
         public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath)
