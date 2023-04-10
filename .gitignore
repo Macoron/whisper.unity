@@ -260,3 +260,4 @@ tmp/
 *.DS_Store
 mono_crash.*.json
 *.blob
+CodeCoverage/
