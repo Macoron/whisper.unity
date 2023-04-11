@@ -31,7 +31,7 @@ namespace Whisper
         public bool noContext = true;
         
         [Tooltip("Force single segment output (useful for streaming).")]
-        public bool singleSegment = true;
+        public bool singleSegment;
         
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder. " +
@@ -50,7 +50,6 @@ namespace Whisper
 
         public bool IsLoaded => _whisper != null;
         public bool IsLoading { get; private set; }
-        public bool IsBusy { get; private set; }
 
         private async void Awake()
         {

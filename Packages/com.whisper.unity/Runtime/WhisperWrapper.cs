@@ -161,6 +161,7 @@ namespace Whisper
         [MonoPInvokeCallback(typeof(whisper_new_segment_callback))]
         private static void NewSegmentCallbackStatic(IntPtr ctx, int nNew, IntPtr userDataPtr)
         {
+            // relay this static function to wrapper instance
             var wrapper = (WhisperWrapper) GCHandle.FromIntPtr(userDataPtr).Target;
             wrapper.NewSegmentCallback(nNew);
         }
