@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AOT;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Whisper.Native;
 using Whisper.Utils;
 using Debug = UnityEngine.Debug;
@@ -43,6 +42,7 @@ namespace Whisper
 
         private readonly IntPtr _whisperCtx;
         private readonly WhisperNativeParams _params;
+        private readonly object _lock = new();
 
         private WhisperWrapper(IntPtr whisperCtx)
         {
@@ -87,49 +87,52 @@ namespace Whisper
 
         public WhisperResult GetText(float[] samples, int frequency, int channels, WhisperParams param)
         {
-            // preprocess data if necessary
-            Debug.Log("Preprocessing audio data...");
-            var sw = new Stopwatch();
-            sw.Start();
-            
-            var readySamples = AudioUtils.Preprocess(samples,frequency, channels, WhisperSampleRate);
-            
-            Debug.Log($"Audio data is preprocessed, total time: {sw.ElapsedMilliseconds} ms.");
-            
-            var gch = GCHandle.Alloc(this);
-            var nativeParams = param.NativeParams;
-
-            // add callback (if no custom callback set)
-            if (nativeParams.new_segment_callback == null &&
-                nativeParams.new_segment_callback_user_data == IntPtr.Zero)
+            lock (_lock)
             {
-                nativeParams.new_segment_callback = NewSegmentCallbackStatic;
-                nativeParams.new_segment_callback_user_data = GCHandle.ToIntPtr(gch);
-            }
-
-            // start inference
-            if (!InferenceWhisper(readySamples, nativeParams))
-                return null;
+                // preprocess data if necessary
+                Debug.Log("Preprocessing audio data...");
+                var sw = new Stopwatch();
+                sw.Start();
             
-            gch.Free();
+                var readySamples = AudioUtils.Preprocess(samples,frequency, channels, WhisperSampleRate);
+            
+                Debug.Log($"Audio data is preprocessed, total time: {sw.ElapsedMilliseconds} ms.");
+            
+                var gch = GCHandle.Alloc(this);
+                var nativeParams = param.NativeParams;
 
-            Debug.Log("Trying to get number of text segments...");
-            var n = WhisperNative.whisper_full_n_segments(_whisperCtx);
-            Debug.Log($"Number of text segments: {n}");
+                // add callback (if no custom callback set)
+                if (nativeParams.new_segment_callback == null &&
+                    nativeParams.new_segment_callback_user_data == IntPtr.Zero)
+                {
+                    nativeParams.new_segment_callback = NewSegmentCallbackStatic;
+                    nativeParams.new_segment_callback_user_data = GCHandle.ToIntPtr(gch);
+                }
 
-            var list = new List<string>();
-            for (var i = 0; i < n; ++i) {
-                Debug.Log($"Requesting text segment {i}...");
-                var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
-                var text = Marshal.PtrToStringAnsi(textPtr);
-                Debug.Log(text);
+                // start inference
+                if (!InferenceWhisper(readySamples, nativeParams))
+                    return null;
+            
+                gch.Free();
 
-                list.Add(text);
+                Debug.Log("Trying to get number of text segments...");
+                var n = WhisperNative.whisper_full_n_segments(_whisperCtx);
+                Debug.Log($"Number of text segments: {n}");
+
+                var list = new List<string>();
+                for (var i = 0; i < n; ++i) {
+                    Debug.Log($"Requesting text segment {i}...");
+                    var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
+                    var text = Marshal.PtrToStringAnsi(textPtr);
+                    Debug.Log(text);
+
+                    list.Add(text);
+                }
+
+                var res = new WhisperResult(list);
+                Debug.Log($"Final text: {res.Result}");
+                return res;
             }
-
-            var res = new WhisperResult(list);
-            Debug.Log($"Final text: {res.Result}");
-            return res;
         }
 
         public async Task<WhisperResult> GetTextAsync(float[] samples, int frequency, int channels, WhisperParams param)
