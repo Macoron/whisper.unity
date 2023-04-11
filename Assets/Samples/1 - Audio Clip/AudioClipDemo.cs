@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Whisper.Samples
@@ -10,7 +11,7 @@ namespace Whisper.Samples
         public WhisperManager manager;
         public AudioClip clip;
         public bool echoSound = true;
-        public bool streamAnswer = true;
+        public bool streamSegments = true;
 
         [Header("UI")]
         public Button button;
@@ -22,7 +23,7 @@ namespace Whisper.Samples
         private void Awake()
         {
             button.onClick.AddListener(ButtonPressed);
-            if (streamAnswer)
+            if (streamSegments)
                 manager.OnNewSegment += OnNewSegmentHandler;
         }
 
