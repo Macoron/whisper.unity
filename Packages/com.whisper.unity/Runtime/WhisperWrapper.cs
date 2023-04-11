@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using AOT;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Whisper.Native;
@@ -95,13 +96,22 @@ namespace Whisper
             
             Debug.Log($"Audio data is preprocessed, total time: {sw.ElapsedMilliseconds} ms.");
             
-            // register callback (if no custom exist)
+            var gch = GCHandle.Alloc(this);
             var nativeParams = param.NativeParams;
-            nativeParams.new_segment_callback ??= HandleNewSegment;
+
+            // add callback (if no custom callback set)
+            if (nativeParams.new_segment_callback == null &&
+                nativeParams.new_segment_callback_user_data == IntPtr.Zero)
+            {
+                nativeParams.new_segment_callback = NewSegmentCallbackStatic;
+                nativeParams.new_segment_callback_user_data = GCHandle.ToIntPtr(gch);
+            }
 
             // start inference
             if (!InferenceWhisper(readySamples, nativeParams))
                 return null;
+            
+            gch.Free();
 
             Debug.Log("Trying to get number of text segments...");
             var n = WhisperNative.whisper_full_n_segments(_whisperCtx);
@@ -126,7 +136,6 @@ namespace Whisper
         {
             var asyncTask = Task.Factory.StartNew(() => GetText(samples, frequency, channels, param));
             return await asyncTask;
-            
         }
 
         private unsafe bool InferenceWhisper(float[] samples, WhisperNativeParams param)
@@ -148,13 +157,16 @@ namespace Whisper
             Debug.Log($"Whisper inference finished, total time: {sw.ElapsedMilliseconds} ms.");
             return true;
         }
-        
-        private void HandleNewSegment(IntPtr ctx, int nNew, IntPtr userDataPtr)
-        {
-            // this shouldn't happen unless you do something like running
-            // several instance of whisper in the same time with same parameters struct?
-            Assert.AreEqual(_whisperCtx, ctx);
 
+        [MonoPInvokeCallback(typeof(whisper_new_segment_callback))]
+        private static void NewSegmentCallbackStatic(IntPtr ctx, int nNew, IntPtr userDataPtr)
+        {
+            var wrapper = (WhisperWrapper) GCHandle.FromIntPtr(userDataPtr).Target;
+            wrapper.NewSegmentCallback(nNew);
+        }
+        
+        private void NewSegmentCallback(int nNew)
+        {
             // start reading new segments
             var nSegments = WhisperNative.whisper_full_n_segments(_whisperCtx);
             var s0 = nSegments - nNew;

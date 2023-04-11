@@ -28,6 +28,10 @@ namespace Whisper
              // copy language string to managed memory
              var strPtr = new IntPtr(param.language);
              _languageManaged = Marshal.PtrToStringAnsi(strPtr);
+             
+             // reset callbacks
+             _param.new_segment_callback = null;
+             _param.new_segment_callback_user_data = IntPtr.Zero;
          }
      
          ~WhisperParams()

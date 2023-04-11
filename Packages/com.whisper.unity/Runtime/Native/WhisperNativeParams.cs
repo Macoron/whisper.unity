@@ -109,7 +109,7 @@ namespace Whisper.Native
 
         // called for every newly generated text segment
         public whisper_new_segment_callback new_segment_callback;
-        void* new_segment_callback_user_data;
+        public System.IntPtr new_segment_callback_user_data;
 
         // called each time before the encoder starts
         void* encoder_begin_callback;
