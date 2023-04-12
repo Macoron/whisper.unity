@@ -8,6 +8,7 @@ namespace Whisper.Samples
     public class MicrophoneDemo : MonoBehaviour
     {
         public WhisperManager whisper;
+        public bool streamSegments = true;
 
         [Header("Mic settings")] 
         public int maxLengthSec = 30;
@@ -25,6 +26,7 @@ namespace Whisper.Samples
         private float _recordStart;
         private bool _isRecording;
         private AudioClip _clip;
+        private string _buffer;
 
         private void Awake()
         {
@@ -36,8 +38,11 @@ namespace Whisper.Samples
 
             translateToggle.isOn = whisper.translateToEnglish;
             translateToggle.onValueChanged.AddListener(OnTranslateChanged);
+            
+            if (streamSegments)
+                whisper.OnNewSegment += WhisperOnOnNewSegment;
         }
-
+        
         private void Update()
         {
             if (!_isRecording)
@@ -119,6 +124,8 @@ namespace Whisper.Samples
 
         private async void Transcribe(float[] data)
         {
+            _buffer = "";
+            
             var sw = new Stopwatch();
             sw.Start();
             
@@ -129,6 +136,12 @@ namespace Whisper.Samples
                 return;
 
             outputText.text = res.Result;
+        }
+        
+        private void WhisperOnOnNewSegment(int index, string text)
+        {
+            _buffer += text;
+            outputText.text = _buffer + "...";
         }
     }
 }

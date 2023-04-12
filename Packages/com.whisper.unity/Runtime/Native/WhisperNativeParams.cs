@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 // ReSharper disable CommentTypo
 
 using whisper_token_ptr = System.IntPtr;
+using whisper_context_ptr = System.IntPtr;
 
 namespace Whisper.Native
 {
@@ -14,6 +15,9 @@ namespace Whisper.Native
         WHISPER_SAMPLING_BEAM_SEARCH = 1, // similar to OpenAI's BeamSearchDecoder
     };
 
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, int n_new, System.IntPtr user_data);
+    
 
     /// <summary>
     /// This is direct copy of C++ struct.
@@ -104,8 +108,8 @@ namespace Whisper.Native
         beam_search_struct beam_search;
 
         // called for every newly generated text segment
-        void* new_segment_callback;
-        void* new_segment_callback_user_data;
+        public whisper_new_segment_callback new_segment_callback;
+        public System.IntPtr new_segment_callback_user_data;
 
         // called each time before the encoder starts
         void* encoder_begin_callback;

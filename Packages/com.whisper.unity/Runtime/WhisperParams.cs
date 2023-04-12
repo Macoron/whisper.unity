@@ -28,6 +28,10 @@ namespace Whisper
              // copy language string to managed memory
              var strPtr = new IntPtr(param.language);
              _languageManaged = Marshal.PtrToStringAnsi(strPtr);
+             
+             // reset callbacks
+             _param.new_segment_callback = null;
+             _param.new_segment_callback_user_data = IntPtr.Zero;
          }
      
          ~WhisperParams()
@@ -215,6 +219,32 @@ namespace Whisper
          {
              get => _param.audio_ctx;
              set => _param.audio_ctx = value;
+         }
+
+         #endregion
+
+         #region Callbacks
+
+         /// <summary>
+         /// Called for every newly generated text segment.
+         /// Because of IL2CPP, this should be a static function.
+         /// <see cref="WhisperWrapper"/> and <see cref="WhisperManager"/> will use it
+         /// to raise their custom event.
+         /// </summary>
+         public whisper_new_segment_callback NewSegmentCallback
+         {
+             get => _param.new_segment_callback;
+             set => _param.new_segment_callback = value;
+         }
+
+         /// <summary>
+         /// Pointer to data that you want to pass as a parameter for callback.
+         /// It will be relayed from whisper code without any changes.
+         /// </summary>
+         public IntPtr NewSegmentCallbackUseData
+         {
+             get => _param.new_segment_callback_user_data;
+             set => _param.new_segment_callback_user_data = value;
          }
 
          #endregion
