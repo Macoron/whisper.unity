@@ -7,9 +7,9 @@ using whisper_context_ptr = System.IntPtr;
 namespace Whisper.Native
 {
     /// <summary>
-    /// Bindings to native whisper functions.
+    /// Bindings to native whisper.cpp functions.
     /// </summary>
-    public static class WhisperNative
+    public static unsafe class WhisperNative
     {
         
 #if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
@@ -22,12 +22,21 @@ namespace Whisper.Native
     
         [DllImport(LibraryName)]
         public static extern whisper_context_ptr whisper_init_from_buffer(IntPtr buffer, UIntPtr buffer_size);
+        
+        [DllImport(LibraryName)]
+        public static extern int whisper_lang_max_id();
+        
+        [DllImport(LibraryName)]
+        public static extern int whisper_lang_id(string lang);
+
+        [DllImport(LibraryName)]
+        public static extern IntPtr whisper_lang_str(int id);
     
         [DllImport(LibraryName)]
         public static extern WhisperNativeParams whisper_full_default_params(WhisperSamplingStrategy strategy);
     
         [DllImport(LibraryName)]
-        public static extern unsafe int whisper_full(whisper_context_ptr ctx, WhisperNativeParams param, 
+        public static extern int whisper_full(whisper_context_ptr ctx, WhisperNativeParams param, 
             float* samples, int n_samples);
     
         [DllImport(LibraryName)]
