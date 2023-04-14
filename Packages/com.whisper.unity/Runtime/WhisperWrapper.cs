@@ -17,10 +17,14 @@ namespace Whisper
     {
         public readonly List<string> Segments;
         public readonly string Result;
+        public readonly int LanguageId;
+        public readonly string Language;
 
-        public WhisperResult(List<string> segments)
+        public WhisperResult(List<string> segments, int languageId)
         {
             Segments = segments;
+            LanguageId = languageId;
+            Language = WhisperLanguage.GetLanguageString(languageId);
             
             // generate full string based on segments
             var builder = new StringBuilder();
@@ -129,7 +133,8 @@ namespace Whisper
                     list.Add(text);
                 }
 
-                var res = new WhisperResult(list);
+                var langId = WhisperNative.whisper_full_lang_id(_whisperCtx);
+                var res = new WhisperResult(list, langId);
                 Debug.Log($"Final text: {res.Result}");
                 return res;
             }

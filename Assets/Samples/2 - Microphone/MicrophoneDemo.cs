@@ -135,7 +135,10 @@ namespace Whisper.Samples
             if (res == null)
                 return;
 
-            outputText.text = res.Result;
+            var text = res.Result;
+            if (whisper.language == "auto" || whisper.language == "")
+                text += $"\n\nLanguage: {res.Language}";
+            outputText.text = text;
         }
         
         private void WhisperOnOnNewSegment(int index, string text)

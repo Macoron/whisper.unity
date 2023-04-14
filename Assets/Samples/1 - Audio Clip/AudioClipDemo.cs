@@ -44,6 +44,9 @@ namespace Whisper.Samples
             
             var text = res.Result;
             print(text);
+
+            if (manager.language == "auto" || manager.language == "")
+                text += $"\n\nLanguage: {res.Language}";
             outputText.text = text;
         }
         
