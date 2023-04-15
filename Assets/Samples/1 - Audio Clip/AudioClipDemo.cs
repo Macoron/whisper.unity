@@ -39,7 +39,9 @@ namespace Whisper.Samples
             if (res == null) 
                 return;
 
-            timeText.text = $"Time: {sw.ElapsedMilliseconds} ms";
+            var time = sw.ElapsedMilliseconds;
+            var rate = clip.length / (time * 0.001f);
+            timeText.text = $"Time: {time} ms\nRate: {rate:F1}x";
             
             var text = res.Result;
             print(text);

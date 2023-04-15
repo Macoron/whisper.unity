@@ -160,7 +160,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000061035156, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0.0001, y: 0.000032424927}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &145324201
@@ -261,18 +261,18 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 68
+    m_FontSize: 60
     m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 68
+    m_BestFit: 1
+    m_MinSize: 5
+    m_MaxSize: 60
     m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'Time:'
+  m_Text: 'Time: '
 --- !u!222 &167558893
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -739,7 +739,8 @@ MonoBehaviour:
   manager: {fileID: 587639199}
   clip: {fileID: 8300000, guid: 2f8a92ae57b4341c68e81202d049ca31, type: 3}
   echoSound: 1
-  streamAnswer: 1
+  streamSegments: 1
+  printLanguage: 1
   button: {fileID: 2099288375}
   outputText: {fileID: 203807867}
   timeText: {fileID: 167558892}

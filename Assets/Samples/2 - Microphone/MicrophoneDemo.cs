@@ -28,6 +28,7 @@ namespace Whisper.Samples
         private bool _isRecording;
         private AudioClip _clip;
         private string _buffer;
+        private float _length;
 
         private void Awake()
         {
@@ -102,6 +103,7 @@ namespace Whisper.Samples
 
             Microphone.End(null);
             _isRecording = false;
+            _length = Time.realtimeSinceStartup - _recordStart;
 
             Transcribe(data);
         }
@@ -132,7 +134,9 @@ namespace Whisper.Samples
             
             var res = await whisper.GetTextAsync(data, _clip.frequency, _clip.channels);
 
-            timeText.text = $"Time: {sw.ElapsedMilliseconds} ms";
+            var time = sw.ElapsedMilliseconds;
+            var rate =_length / (time * 0.001f);
+            timeText.text = $"Time: {time} ms\nRate: {rate:F1}x";
             if (res == null)
                 return;
 
