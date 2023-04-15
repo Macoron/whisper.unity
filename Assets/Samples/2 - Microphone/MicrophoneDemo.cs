@@ -9,6 +9,7 @@ namespace Whisper.Samples
     {
         public WhisperManager whisper;
         public bool streamSegments = true;
+        public bool printLanguage = true;
 
         [Header("Mic settings")] 
         public int maxLengthSec = 30;
@@ -136,7 +137,7 @@ namespace Whisper.Samples
                 return;
 
             var text = res.Result;
-            if (whisper.language == "auto" || whisper.language == "")
+            if (printLanguage)
                 text += $"\n\nLanguage: {res.Language}";
             outputText.text = text;
         }
