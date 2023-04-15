@@ -96,6 +96,17 @@ namespace Whisper
             IsLoading = false;
         }
 
+        public bool IsMultilingual()
+        {
+            if (!IsLoaded)
+            {
+                Debug.LogError("Whisper model isn't loaded! Init Whisper model first!");
+                return false;
+            }
+
+            return _whisper.IsMultilingual;
+        }
+
         /// <summary>
         /// Get transcription from audio clip.
         /// </summary>

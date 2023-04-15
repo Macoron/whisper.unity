@@ -60,6 +60,8 @@ namespace Whisper
             WhisperNative.whisper_free(_whisperCtx);
         }
 
+        public bool IsMultilingual => WhisperNative.whisper_is_multilingual(_whisperCtx) != 0;
+
         public WhisperResult GetText(AudioClip clip, WhisperParams param)
         {
             // try to load data
