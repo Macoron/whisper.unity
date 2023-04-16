@@ -347,18 +347,18 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 68
+    m_FontSize: 60
     m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 68
+    m_BestFit: 1
+    m_MinSize: 5
+    m_MaxSize: 60
     m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 1
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'Time:'
+  m_Text: 'Time: '
 --- !u!222 &167558893
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1694,7 +1694,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Press button to get transcript...
+  m_Text: Press button to start recording...
 --- !u!222 &1194114917
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1901,6 +1901,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   whisper: {fileID: 587639199}
   streamSegments: 1
+  printLanguage: 1
   maxLengthSec: 30
   frequency: 16000
   echo: 1
