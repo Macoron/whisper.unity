@@ -5,11 +5,18 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 
 > This repository comes with "ggml-tiny.bin" model weights. This is the smallest and fastest version of whisper model, but it has worse quality comparing to other models. If you want better quality, check out [other models weights](#downloading-other-model-weights).
 
+**Main features:**
+- Multilingual, supports around 60 languages
+- Can translate one language to another (e.g. German speech to English text)
+- Different models sizes offering speed and accuracy tradeoffs
+- Runs on local users device without Internet connection
+- Free and open source, can be used in commercial projects
+
 **Supported platforms:**
-- Windows (x86_64)
-- MacOS (Intel and ARM)
-- iOS (Device and Simulator)
-- Android (ARM64)
+- [x] Windows (x86_64)
+- [x] MacOS (Intel and ARM)
+- [x] iOS (Device and Simulator)
+- [x] Android (ARM64)
 
 ## Samples
 
