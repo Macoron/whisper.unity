@@ -2744,16 +2744,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   whisper: {fileID: 587639199}
+  microphoneRecord: {fileID: 1337591123}
   streamSegments: 1
   printLanguage: 1
   button: {fileID: 2099288375}
   buttonText: {fileID: 1431014845}
   outputText: {fileID: 1194114916}
   timeText: {fileID: 167558892}
-  microphoneDropdown: {fileID: 948466958}
   languageDropdown: {fileID: 1400360880}
   translateToggle: {fileID: 1425433665}
-  microphoneRecord: {fileID: 1337591123}
 --- !u!114 &1337591123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2769,6 +2768,8 @@ MonoBehaviour:
   maxLengthSec: 30
   frequency: 16000
   echo: 1
+  microphoneDropdown: {fileID: 948466958}
+  microphoneDefaultLabel: Default mic
 --- !u!1 &1345287211
 GameObject:
   m_ObjectHideFlags: 0

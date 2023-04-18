@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace Whisper.Samples
+namespace Whisper.Utils
 {
     public class MicrophoneRecord : MonoBehaviour
     {
-        [Header("Mic settings")]
         public int maxLengthSec = 30;
         public int frequency = 16000;
         public bool echo = true;
+        
+        [Header("Microphone selection (optional)")] 
+        [CanBeNull] public Dropdown microphoneDropdown;
+        public string microphoneDefaultLabel = "Default microphone";
         
         private float _recordStart;
         private AudioClip _clip;
@@ -33,6 +38,20 @@ namespace Whisper.Samples
 
         public IEnumerable<string> AvailableMicDevices => Microphone.devices;
 
+        private void Awake()
+        {
+            if(microphoneDropdown != null)
+            {
+                microphoneDropdown.options = AvailableMicDevices
+                    .Prepend(microphoneDefaultLabel)
+                    .Select(text => new Dropdown.OptionData(text))
+                    .ToList();
+                microphoneDropdown.value = microphoneDropdown.options
+                    .FindIndex(op => op.text == microphoneDefaultLabel);
+                microphoneDropdown.onValueChanged.AddListener(OnMicrophoneChanged);
+            }
+        }
+
         private void Update()
         {
             if (!IsRecording)
@@ -41,6 +60,13 @@ namespace Whisper.Samples
             var timePassed = Time.realtimeSinceStartup - _recordStart;
             if (timePassed > maxLengthSec)
                 StopRecord();
+        }
+
+        private void OnMicrophoneChanged(int ind)
+        {
+            if (microphoneDropdown == null) return;
+            var opt = microphoneDropdown.options[ind];
+            SelectedMicDevice = opt.text == microphoneDefaultLabel ? null : opt.text;
         }
 
         public void StartRecord()
@@ -72,10 +98,10 @@ namespace Whisper.Samples
             IsRecording = false;
             _length = Time.realtimeSinceStartup - _recordStart;
 
-            OnRecordStop?.Invoke(data, _clip, _length);
+            OnRecordStop?.Invoke(data, _clip.frequency, _clip.channels, _length);
         }
         
-        public delegate void OnRecordStopDelegate(float[] data, AudioClip clip, float length);
+        public delegate void OnRecordStopDelegate(float[] data, int frequency, int channels, float length);
         public event OnRecordStopDelegate OnRecordStop;
 
         private float[] GetTrimmedData()

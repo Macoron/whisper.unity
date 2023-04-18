@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using Whisper.Utils;
 
 namespace Whisper.Samples
 {
@@ -17,11 +17,8 @@ namespace Whisper.Samples
         public Text buttonText;
         public Text outputText;
         public Text timeText;
-        public Dropdown microphoneDropdown;
         public Dropdown languageDropdown;
         public Toggle translateToggle;
-
-        private const string MicrophoneDefaultLabel = "Default mic";
         
         private string _buffer;
 
@@ -29,14 +26,6 @@ namespace Whisper.Samples
         {
             button.onClick.AddListener(OnButtonPressed);
 
-            microphoneDropdown.options = microphoneRecord.AvailableMicDevices
-                .Prepend(MicrophoneDefaultLabel)
-                .Select(text => new Dropdown.OptionData(text))
-                .ToList();
-            microphoneDropdown.value = microphoneDropdown.options
-                .FindIndex(op => op.text == MicrophoneDefaultLabel);
-            microphoneDropdown.onValueChanged.AddListener(OnMicrophoneChanged);
-            
             languageDropdown.value = languageDropdown.options
                 .FindIndex(op => op.text == whisper.language);
             languageDropdown.onValueChanged.AddListener(OnLanguageChanged);
@@ -60,12 +49,6 @@ namespace Whisper.Samples
             if (buttonText)
                 buttonText.text = microphoneRecord.IsRecording ? "Stop" : "Record";
         }
-
-        private void OnMicrophoneChanged(int ind)
-        {
-            var opt = microphoneDropdown.options[ind];
-            microphoneRecord.SelectedMicDevice = opt.text == MicrophoneDefaultLabel ? null : opt.text;
-        }
         
         private void OnLanguageChanged(int ind)
         {
@@ -78,14 +61,14 @@ namespace Whisper.Samples
             whisper.translateToEnglish = translate;
         }
 
-        private async void Transcribe(float[] data, AudioClip clip, float length)
+        private async void Transcribe(float[] data, int frequency, int channels, float length)
         {
             _buffer = "";
             
             var sw = new Stopwatch();
             sw.Start();
             
-            var res = await whisper.GetTextAsync(data, clip.frequency, clip.channels);
+            var res = await whisper.GetTextAsync(data, frequency, channels);
 
             var time = sw.ElapsedMilliseconds;
             var rate = length / (time * 0.001f);
