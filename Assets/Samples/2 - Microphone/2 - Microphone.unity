@@ -2708,6 +2708,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1337591121}
   - component: {fileID: 1337591122}
+  - component: {fileID: 1337591123}
   m_Layer: 0
   m_Name: Demo
   m_TagString: Untagged
@@ -2745,9 +2746,6 @@ MonoBehaviour:
   whisper: {fileID: 587639199}
   streamSegments: 1
   printLanguage: 1
-  maxLengthSec: 30
-  frequency: 16000
-  echo: 1
   button: {fileID: 2099288375}
   buttonText: {fileID: 1431014845}
   outputText: {fileID: 1194114916}
@@ -2755,6 +2753,22 @@ MonoBehaviour:
   microphoneDropdown: {fileID: 948466958}
   languageDropdown: {fileID: 1400360880}
   translateToggle: {fileID: 1425433665}
+  microphoneRecord: {fileID: 1337591123}
+--- !u!114 &1337591123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337591120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bc03a4c19604ea394e364f8fc632928, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxLengthSec: 30
+  frequency: 16000
+  echo: 1
 --- !u!1 &1345287211
 GameObject:
   m_ObjectHideFlags: 0
