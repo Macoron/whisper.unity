@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +23,8 @@ namespace Whisper.Samples
         public Text buttonText;
         public Text outputText;
         public Text timeText;
+        private const string MicrophoneDefaultLabel = "Default mic";
+        public Dropdown microphoneDropdown;
         public Dropdown languageDropdown;
         public Toggle translateToggle;
 
@@ -29,11 +33,18 @@ namespace Whisper.Samples
         private AudioClip _clip;
         private string _buffer;
         private float _length;
+        private string _selectedMicDevice;
+        private string _recordStartMicDevice;
 
         private void Awake()
         {
             button.onClick.AddListener(OnButtonPressed);
 
+            microphoneDropdown.options = new List<Dropdown.OptionData> { new(MicrophoneDefaultLabel) };
+            microphoneDropdown.options.AddRange(Microphone.devices.Select(micName => new Dropdown.OptionData(micName)));
+            microphoneDropdown.value = microphoneDropdown.options.FindIndex(op => op.text == MicrophoneDefaultLabel);
+            microphoneDropdown.onValueChanged.AddListener(OnMicrophoneChanged);
+            
             languageDropdown.value = languageDropdown.options
                 .FindIndex((op) => op.text == whisper.language);
             languageDropdown.onValueChanged.AddListener(OnLanguageChanged);
@@ -66,6 +77,12 @@ namespace Whisper.Samples
                 buttonText.text = _isRecording ? "Stop" : "Record";
         }
 
+        private void OnMicrophoneChanged(int ind)
+        {
+            var opt = microphoneDropdown.options[ind];
+            _selectedMicDevice = opt.text == MicrophoneDefaultLabel ? null : opt.text;
+        }
+        
         private void OnLanguageChanged(int ind)
         {
             var opt = languageDropdown.options[ind];
@@ -83,7 +100,8 @@ namespace Whisper.Samples
                 return;
 
             _recordStart = Time.realtimeSinceStartup;
-            _clip = Microphone.Start(null, false, maxLengthSec, frequency);
+            _recordStartMicDevice = _selectedMicDevice;
+            _clip = Microphone.Start(_recordStartMicDevice, false, maxLengthSec, frequency);
             _isRecording = true;
         }
 
@@ -101,7 +119,7 @@ namespace Whisper.Samples
                 AudioSource.PlayClipAtPoint(echoClip, Vector3.zero);
             }
 
-            Microphone.End(null);
+            Microphone.End(_recordStartMicDevice);
             _isRecording = false;
             _length = Time.realtimeSinceStartup - _recordStart;
 
@@ -111,7 +129,7 @@ namespace Whisper.Samples
         private float[] GetTrimmedData()
         {
             // get microphone samples and current position
-            var pos = Microphone.GetPosition(null);
+            var pos = Microphone.GetPosition(_recordStartMicDevice);
             var origData = new float[_clip.samples * _clip.channels];
             _clip.GetData(origData, 0);
 
