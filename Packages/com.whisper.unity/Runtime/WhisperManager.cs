@@ -46,7 +46,7 @@ namespace Whisper
 
         private WhisperWrapper _whisper;
         private WhisperParams _params;
-        private readonly MainThreadDispatcher _dispatcher = new();
+        private readonly MainThreadDispatcher _dispatcher = new MainThreadDispatcher();
 
         public bool IsLoaded => _whisper != null;
         public bool IsLoading { get; private set; }

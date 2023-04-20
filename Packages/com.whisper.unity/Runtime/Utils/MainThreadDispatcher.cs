@@ -10,7 +10,7 @@ namespace Whisper.Utils
     /// </summary>
     public class MainThreadDispatcher
     {
-        private readonly ConcurrentQueue<Task> _actions = new();
+        private readonly ConcurrentQueue<Task> _actions = new ConcurrentQueue<Task>();
 
         /// <summary>
         /// Add action to be executed on main Unity thread.

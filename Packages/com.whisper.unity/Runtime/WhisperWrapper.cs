@@ -46,7 +46,7 @@ namespace Whisper
 
         private readonly IntPtr _whisperCtx;
         private readonly WhisperNativeParams _params;
-        private readonly object _lock = new();
+        private readonly object _lock = new object();
 
         private WhisperWrapper(IntPtr whisperCtx)
         {
