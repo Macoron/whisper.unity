@@ -27,7 +27,7 @@ namespace Whisper.Utils
 #if UNITY_ANDROID && !UNITY_EDITOR
             return await ReadFileWebRequestAsync(path);
 #else
-            return await File.ReadAllBytesAsync(path);
+            return await ReadAllBytesAsync(path);
 #endif
         }
 
@@ -41,7 +41,7 @@ namespace Whisper.Utils
             
             while (!request.isDone) {}
             
-            if (request.result != UnityWebRequest.Result.Success)
+            if (HasError(request))
             {
                 Debug.LogError($"Error while opening weights at {path}!");
                 if (!string.IsNullOrEmpty(request.error))
@@ -63,7 +63,7 @@ namespace Whisper.Utils
             while (!request.isDone)
                 await Task.Yield();
 
-            if (request.result != UnityWebRequest.Result.Success)
+            if (HasError(request))
             {
                 Debug.LogError($"Error while opening weights at {path}!");
                 if (!string.IsNullOrEmpty(request.error))
@@ -72,6 +72,27 @@ namespace Whisper.Utils
             }
 
             return request.downloadHandler.data;
+        }
+
+        // to suppress obsolete warning
+        private static bool HasError(UnityWebRequest request)
+        {
+#if UNITY_2020_1_OR_NEWER
+            return request.result != UnityWebRequest.Result.Success;
+#else
+            return request.isHttpError || request.isNetworkError;
+#endif
+        }
+        
+        // to support .NET Standard 2.0
+        private static async Task<byte[]> ReadAllBytesAsync(string path)
+        {
+#if UNITY_2021_2_OR_NEWER 
+            return await File.ReadAllBytesAsync(path);
+#else
+            var task = Task.Factory.StartNew(() => File.ReadAllBytes(path));
+            return await task;
+#endif
         }
     }
 }
