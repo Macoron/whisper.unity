@@ -159,12 +159,12 @@ namespace Whisper
             var s0 = nSegments - nNew;
             for (var i = s0; i < nSegments; i++)
             {
-                // raise event with new text segment
+                // get segment text and timestamps
                 var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
                 var text = Marshal.PtrToStringAnsi(textPtr);
                 var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
                 var stop = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
-
+                
                 var segment = new WhisperSegment(i, text, start, stop);
                 OnNewSegment?.Invoke(segment);
             }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -26,19 +27,38 @@ namespace Whisper
         }
     }
 
+    /// <summary>
+    /// Segment of whisper audio transcription.
+    /// Can be a few words, a sentence, or even a paragraph.
+    /// </summary>
     public class WhisperSegment
     {
+        /// <summary>
+        /// Segment index in current Whisper context.
+        /// </summary>
         public readonly int Index;
+        
+        /// <summary>
+        /// Combined text of all tokens in this segment.
+        /// </summary>
         public readonly string Text;
-        public readonly ulong Start;
-        public readonly ulong Stop;
+        
+        /// <summary>
+        /// Segment start timestamp based on transcribed audio.
+        /// </summary>
+        public readonly TimeSpan Start;
+        
+        /// <summary>
+        /// Segment end timestamp based on transcribed audio.
+        /// </summary>
+        public readonly TimeSpan End;
 
-        public WhisperSegment(int index, string text, ulong start, ulong stop)
+        public WhisperSegment(int index, string text, ulong start, ulong end)
         {
             Index = index;
             Text = text;
-            Start = start;
-            Stop = stop;
+            Start = TimeSpan.FromMilliseconds(start * 10);
+            End = TimeSpan.FromMilliseconds(end * 10);
         }
     }
 }

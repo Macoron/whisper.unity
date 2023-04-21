@@ -11,6 +11,7 @@ namespace Whisper.Samples
         public bool echoSound = true;
         public bool streamSegments = true;
         public bool printLanguage = true;
+        public bool showTimestamps = true;
 
         [Header("UI")]
         public Button button;
@@ -48,12 +49,20 @@ namespace Whisper.Samples
 
             if (printLanguage)
                 text += $"\n\nLanguage: {res.Language}";
-            outputText.text = text;
+            //outputText.text = text;
         }
         
         private void OnNewSegmentHandler(WhisperSegment segment)
         {
-            _buffer += segment.Text;
+            var timestamp = "";
+            if (showTimestamps)
+            {
+                var startStr = segment.Start.ToString(@"mm\:ss\:fff");
+                var stopStr = segment.End.ToString(@"mm\:ss\:fff");
+                timestamp = $"<b>[{startStr}->{stopStr}]</b>";
+            }
+            
+            _buffer += timestamp + segment.Text + "\n";
             outputText.text = _buffer + "...";
         }
     }
