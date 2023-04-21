@@ -47,6 +47,12 @@ namespace Whisper.Native
         
         [DllImport(LibraryName)]
         public static extern int whisper_is_multilingual(whisper_context_ptr ctx);
+        
+        [DllImport(LibraryName)]
+        public static extern ulong whisper_full_get_segment_t0(whisper_context_ptr ctx, int i_segment);
+        
+        [DllImport(LibraryName)]
+        public static extern ulong whisper_full_get_segment_t1(whisper_context_ptr ctx, int i_segment);
     
         [DllImport(LibraryName)]
         public static extern IntPtr whisper_full_get_segment_text(whisper_context_ptr ctx, int i_segment);

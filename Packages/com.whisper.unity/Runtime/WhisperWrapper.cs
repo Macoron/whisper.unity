@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using AOT;
 using UnityEngine;
@@ -13,30 +12,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Whisper
 {
-    public class WhisperResult
-    {
-        public readonly List<string> Segments;
-        public readonly string Result;
-        public readonly int LanguageId;
-        public readonly string Language;
-
-        public WhisperResult(List<string> segments, int languageId)
-        {
-            Segments = segments;
-            LanguageId = languageId;
-            Language = WhisperLanguage.GetLanguageString(languageId);
-            
-            // generate full string based on segments
-            var builder = new StringBuilder();
-            foreach (var seg in segments)
-            {
-                builder.Append(seg);
-            }
-            Result = builder.ToString();
-        }
-    }
-
-    public delegate void OnNewSegmentDelegate(int index, string text);
+    public delegate void OnNewSegmentDelegate(WhisperSegment text);
     
     public class WhisperWrapper
     {
@@ -186,7 +162,11 @@ namespace Whisper
                 // raise event with new text segment
                 var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
                 var text = Marshal.PtrToStringAnsi(textPtr);
-                OnNewSegment?.Invoke(i, text);
+                var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
+                var stop = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
+
+                var segment = new WhisperSegment(i, text, start, stop);
+                OnNewSegment?.Invoke(segment);
             }
         }
         

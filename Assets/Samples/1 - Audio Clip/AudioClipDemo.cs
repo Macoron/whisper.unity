@@ -51,9 +51,9 @@ namespace Whisper.Samples
             outputText.text = text;
         }
         
-        private void OnNewSegmentHandler(int index, string text)
+        private void OnNewSegmentHandler(WhisperSegment segment)
         {
-            _buffer += text;
+            _buffer += segment.Text;
             outputText.text = _buffer + "...";
         }
     }

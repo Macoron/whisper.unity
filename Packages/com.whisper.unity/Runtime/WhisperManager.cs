@@ -163,11 +163,11 @@ namespace Whisper
             return IsLoaded;
         }
         
-        private void OnNewSegmentHandler(int index, string text)
+        private void OnNewSegmentHandler(WhisperSegment segment)
         {
             _dispatcher.Execute(() =>
             {
-                OnNewSegment?.Invoke(index, text);
+                OnNewSegment?.Invoke(segment);
             });
         }
     }
