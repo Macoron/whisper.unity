@@ -101,14 +101,18 @@ namespace Whisper
                 var n = WhisperNative.whisper_full_n_segments(_whisperCtx);
                 Debug.Log($"Number of text segments: {n}");
 
-                var list = new List<string>();
+                var list = new List<WhisperSegment>();
                 for (var i = 0; i < n; ++i) {
                     Debug.Log($"Requesting text segment {i}...");
                     var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
                     var text = Marshal.PtrToStringAnsi(textPtr);
                     Debug.Log(text);
+                    
+                    var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
+                    var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
+                    var segment = new WhisperSegment(i, text, start, end);
 
-                    list.Add(text);
+                    list.Add(segment);
                 }
 
                 var langId = WhisperNative.whisper_full_lang_id(_whisperCtx);
@@ -163,9 +167,9 @@ namespace Whisper
                 var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
                 var text = Marshal.PtrToStringAnsi(textPtr);
                 var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
-                var stop = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
+                var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
                 
-                var segment = new WhisperSegment(i, text, start, stop);
+                var segment = new WhisperSegment(i, text, start, end);
                 OnNewSegment?.Invoke(segment);
             }
         }

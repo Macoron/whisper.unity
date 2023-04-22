@@ -6,12 +6,12 @@ namespace Whisper
 {
     public class WhisperResult
     {
-        public readonly List<string> Segments;
+        public readonly List<WhisperSegment> Segments;
         public readonly string Result;
         public readonly int LanguageId;
         public readonly string Language;
 
-        public WhisperResult(List<string> segments, int languageId)
+        public WhisperResult(List<WhisperSegment> segments, int languageId)
         {
             Segments = segments;
             LanguageId = languageId;
@@ -21,14 +21,14 @@ namespace Whisper
             var builder = new StringBuilder();
             foreach (var seg in segments)
             {
-                builder.Append(seg);
+                builder.Append(seg.Text);
             }
             Result = builder.ToString();
         }
     }
 
     /// <summary>
-    /// Segment of whisper audio transcription.
+    /// Single segment of whisper audio transcription.
     /// Can be a few words, a sentence, or even a paragraph.
     /// </summary>
     public class WhisperSegment
@@ -59,6 +59,17 @@ namespace Whisper
             Text = text;
             Start = TimeSpan.FromMilliseconds(start * 10);
             End = TimeSpan.FromMilliseconds(end * 10);
+        }
+
+        /// <summary>
+        /// Write segment start and end timestamps as a human-readable string.
+        /// </summary>
+        public string TimestampToString()
+        {
+            var startStr = Start.ToString(@"mm\:ss\:fff");
+            var stopStr = End.ToString(@"mm\:ss\:fff");
+            var timestamp = $"[{startStr}->{stopStr}]";
+            return timestamp;
         }
     }
 }
