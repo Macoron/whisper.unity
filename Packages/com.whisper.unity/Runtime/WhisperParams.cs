@@ -266,6 +266,7 @@ namespace Whisper
              var nativeParams = WhisperNative.whisper_full_default_params(strategy);
              Debug.Log("Default params generated!");
 
+             nativeParams.token_timestamps = true;
              var param = new WhisperParams(nativeParams)
              {
                  // usually don't need C++ output log in Unity

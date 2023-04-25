@@ -27,19 +27,19 @@ namespace Whisper.Native
     public struct WhisperNativeTokenData 
     {
         public whisper_token id;  // token id
-        whisper_token tid; // forced timestamp token id
+        public whisper_token tid; // forced timestamp token id
 
         public float p;           // probability of the token
         public float plog;        // log probability of the token
-        float pt;          // probability of the timestamp token
-        float ptsum;       // sum of probabilities of all timestamp tokens
+        public float pt;          // probability of the timestamp token
+        public float ptsum;       // sum of probabilities of all timestamp tokens
 
         // token-level timestamp data
         // do not use if you haven't computed token-level timestamps
-        ulong t0;        // start time of the token
-        ulong t1;        //   end time of the token
+        public ulong t0;        // start time of the token
+        public ulong t1;        //   end time of the token
 
-        float vlen;        // voice length of the token
+        public float vlen;        // voice length of the token
     }
     
     /// <summary>
@@ -66,7 +66,7 @@ namespace Whisper.Native
         [MarshalAs(UnmanagedType.U1)] public bool print_timestamps; // print timestamps for each text segment when printing realtime
 
         // [EXPERIMENTAL] token-level timestamps
-        [MarshalAs(UnmanagedType.U1)] bool token_timestamps; // enable token-level timestamps
+        [MarshalAs(UnmanagedType.U1)] public bool token_timestamps; // enable token-level timestamps
         float thold_pt; // timestamp token probability threshold (~0.01)
         float thold_ptsum; // timestamp token sum probability threshold (~0.01)
         int max_len; // max segment length in characters

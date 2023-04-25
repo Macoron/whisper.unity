@@ -102,16 +102,9 @@ namespace Whisper
                 Debug.Log($"Number of text segments: {n}");
 
                 var list = new List<WhisperSegment>();
-                for (var i = 0; i < n; ++i) {
-                    Debug.Log($"Requesting text segment {i}...");
-                    var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
-                    var text = Marshal.PtrToStringAnsi(textPtr);
-                    Debug.Log(text);
-                    
-                    var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
-                    var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
-                    var segment = new WhisperSegment(i, text, start, end);
-
+                for (var i = 0; i < n; ++i)
+                {
+                    var segment = GetSegment(i);
                     list.Add(segment);
                 }
 
@@ -163,26 +156,32 @@ namespace Whisper
             var s0 = nSegments - nNew;
             for (var i = s0; i < nSegments; i++)
             {
-                // get segment text and timestamps
-                var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
-                var text = Marshal.PtrToStringAnsi(textPtr);
-                var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
-                var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
-                var segment = new WhisperSegment(i, text, start, end);
-                
-                // get all tokens
-                var tokensN = WhisperNative.whisper_full_n_tokens(_whisperCtx, i);
-                for (var j = 0; j < tokensN; j++)
-                {
-                    var nativeToken = WhisperNative.whisper_full_get_token_data(_whisperCtx, i, j);
-                    var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
-                    var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
-                    var token = new WhisperTokenData(nativeToken, textToken);
-                    segment.Tokens.Add(token);
-                }
-                
+                var segment = GetSegment(i);
                 OnNewSegment?.Invoke(segment);
             }
+        }
+
+        private WhisperSegment GetSegment(int i)
+        {
+            // get segment text and timestamps
+            var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
+            var text = Marshal.PtrToStringAnsi(textPtr);
+            var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
+            var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
+            var segment = new WhisperSegment(i, text, start, end);
+                
+            // get all tokens
+            var tokensN = WhisperNative.whisper_full_n_tokens(_whisperCtx, i);
+            for (var j = 0; j < tokensN; j++)
+            {
+                var nativeToken = WhisperNative.whisper_full_get_token_data(_whisperCtx, i, j);
+                var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
+                var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
+                var token = new WhisperTokenData(nativeToken, textToken);
+                segment.Tokens.Add(token);
+            }
+
+            return segment;
         }
         
         public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath)

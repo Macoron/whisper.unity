@@ -79,16 +79,35 @@ namespace Whisper
     public class WhisperTokenData
     {
         public readonly int Id;
+        public readonly int TimestampId;
+
+        public readonly float Prob;
+        public readonly float ProbLog;
+        public readonly float ProbTimestamp; 
+        public readonly float ProbTimestampSum;
+
+        public readonly TimeSpan Start;
+        public readonly TimeSpan End;
+
+        public readonly float VoiceLength;
+        
         public readonly string Text;
-        public readonly float Probability;
-        public readonly float ProbabilityLog;
 
         public WhisperTokenData(WhisperNativeTokenData nativeToken, string text)
         {
             Id = nativeToken.id;
-            Probability = nativeToken.p;
-            ProbabilityLog = nativeToken.plog;
+            TimestampId = nativeToken.tid;
+            Prob = nativeToken.p;
+            ProbLog = nativeToken.plog;
+            ProbTimestamp = nativeToken.pt;
+            ProbTimestampSum = nativeToken.ptsum;
+            Start = TimeSpan.FromMilliseconds(nativeToken.t0 * 10);
+            End = TimeSpan.FromMilliseconds(nativeToken.t1 * 10);
+            VoiceLength = nativeToken.vlen;
+            
             Text = text;
         }
+        
+        
     }
 }
