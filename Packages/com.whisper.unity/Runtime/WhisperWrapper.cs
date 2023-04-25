@@ -168,8 +168,19 @@ namespace Whisper
                 var text = Marshal.PtrToStringAnsi(textPtr);
                 var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
                 var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
-                
                 var segment = new WhisperSegment(i, text, start, end);
+                
+                // get all tokens
+                var tokensN = WhisperNative.whisper_full_n_tokens(_whisperCtx, i);
+                for (var j = 0; j < tokensN; j++)
+                {
+                    var nativeToken = WhisperNative.whisper_full_get_token_data(_whisperCtx, i, j);
+                    var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
+                    var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
+                    var token = new WhisperTokenData(nativeToken, textToken);
+                    segment.Tokens.Add(token);
+                }
+                
                 OnNewSegment?.Invoke(segment);
             }
         }

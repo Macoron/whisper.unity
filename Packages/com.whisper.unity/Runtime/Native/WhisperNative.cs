@@ -56,6 +56,15 @@ namespace Whisper.Native
     
         [DllImport(LibraryName)]
         public static extern IntPtr whisper_full_get_segment_text(whisper_context_ptr ctx, int i_segment);
+        
+        [DllImport(LibraryName)]
+        public static extern int whisper_full_n_tokens(whisper_context_ptr ctx, int i_segment);
+        
+        [DllImport(LibraryName)]
+        public static extern IntPtr whisper_full_get_token_text(whisper_context_ptr ctx, int i_segment, int i_token);
+        
+        [DllImport(LibraryName)]
+        public static extern WhisperNativeTokenData whisper_full_get_token_data(whisper_context_ptr ctx, int i_segment, int i_token);
     
         [DllImport(LibraryName)]
         public static extern void whisper_free(whisper_context_ptr ctx);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Whisper.Native;
 
 namespace Whisper
 {
@@ -53,6 +54,8 @@ namespace Whisper
         /// </summary>
         public readonly TimeSpan End;
 
+        public readonly List<WhisperTokenData> Tokens = new List<WhisperTokenData>();
+
         public WhisperSegment(int index, string text, ulong start, ulong end)
         {
             Index = index;
@@ -70,6 +73,22 @@ namespace Whisper
             var stopStr = End.ToString(@"mm\:ss\:fff");
             var timestamp = $"[{startStr}->{stopStr}]";
             return timestamp;
+        }
+    }
+
+    public class WhisperTokenData
+    {
+        public readonly int Id;
+        public readonly string Text;
+        public readonly float Probability;
+        public readonly float ProbabilityLog;
+
+        public WhisperTokenData(WhisperNativeTokenData nativeToken, string text)
+        {
+            Id = nativeToken.id;
+            Probability = nativeToken.p;
+            ProbabilityLog = nativeToken.plog;
+            Text = text;
         }
     }
 }
