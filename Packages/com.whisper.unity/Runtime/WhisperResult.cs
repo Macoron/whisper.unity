@@ -54,7 +54,11 @@ namespace Whisper
         /// </summary>
         public readonly TimeSpan End;
 
-        public readonly List<WhisperTokenData> Tokens = new List<WhisperTokenData>();
+        /// <summary>
+        /// Individual segments tokens with their meta information.
+        /// Null if params <see cref="WhisperParams.EnableTokens"/> is false.
+        /// </summary>
+        public WhisperTokenData[] Tokens;
 
         public WhisperSegment(int index, string text, ulong start, ulong end)
         {

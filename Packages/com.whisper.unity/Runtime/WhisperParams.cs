@@ -265,7 +265,7 @@ namespace Whisper
          #region Unity Custom
          
          /// <summary>
-         /// Output in <see cref="WhisperResult"/> list of tokens.
+         /// Output in <see cref="WhisperSegment"/> list of tokens.
          /// </summary>
          public bool EnableTokens { get; set; }
 

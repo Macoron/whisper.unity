@@ -177,13 +177,14 @@ namespace Whisper
             
             // get all tokens
             var tokensN = WhisperNative.whisper_full_n_tokens(_whisperCtx, i);
+            segment.Tokens = new WhisperTokenData[tokensN];
             for (var j = 0; j < tokensN; j++)
             {
                 var nativeToken = WhisperNative.whisper_full_get_token_data(_whisperCtx, i, j);
                 var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
                 var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
                 var token = new WhisperTokenData(nativeToken, textToken, param.TokenTimestamps);
-                segment.Tokens.Add(token);
+                segment.Tokens[i] = token;
             }
 
             return segment;
