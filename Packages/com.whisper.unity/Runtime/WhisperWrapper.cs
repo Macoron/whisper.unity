@@ -184,7 +184,7 @@ namespace Whisper
                 var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
                 var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
                 var token = new WhisperTokenData(nativeToken, textToken, param.TokenTimestamps);
-                segment.Tokens[i] = token;
+                segment.Tokens[j] = token;
             }
 
             return segment;

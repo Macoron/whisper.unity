@@ -42,6 +42,9 @@ namespace Whisper
                  "These can significantly reduce the quality of the output.")]
         public int audioCtx;
 
+        public bool enableTokens = true;
+        public bool tokensTimestamps = true;
+
         public event OnNewSegmentDelegate OnNewSegment;
 
         private WhisperWrapper _whisper;
@@ -144,6 +147,8 @@ namespace Whisper
             _params.SingleSegment = singleSegment;
             _params.SpeedUp = speedUp;
             _params.AudioCtx = audioCtx;
+            _params.EnableTokens = enableTokens;
+            _params.TokenTimestamps = tokensTimestamps;
         }
 
         private async Task<bool> CheckIfLoaded()
