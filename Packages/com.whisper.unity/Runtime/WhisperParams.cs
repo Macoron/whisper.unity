@@ -199,6 +199,19 @@ namespace Whisper
          
          #endregion
 
+         #region Tokens Parameters
+
+         /// <summary>
+         /// Try to estimate timestamps for each token in segment.
+         /// </summary>
+         public bool TokenTimestamps
+         {
+             get => _param.token_timestamps;
+             set => _param.token_timestamps = value;
+         }
+
+         #endregion
+         
          #region Speed Up
 
          /// <summary>
@@ -248,6 +261,15 @@ namespace Whisper
          }
 
          #endregion
+
+         #region Unity Custom
+         
+         /// <summary>
+         /// Output in <see cref="WhisperResult"/> list of tokens.
+         /// </summary>
+         public bool EnableTokens { get; set; }
+
+         #endregion
          
          private void FreeLanguageString()
          {
@@ -266,7 +288,6 @@ namespace Whisper
              var nativeParams = WhisperNative.whisper_full_default_params(strategy);
              Debug.Log("Default params generated!");
 
-             nativeParams.token_timestamps = true;
              var param = new WhisperParams(nativeParams)
              {
                  // usually don't need C++ output log in Unity

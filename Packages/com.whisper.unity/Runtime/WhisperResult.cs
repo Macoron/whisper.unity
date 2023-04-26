@@ -93,17 +93,20 @@ namespace Whisper
         
         public readonly string Text;
 
-        public WhisperTokenData(WhisperNativeTokenData nativeToken, string text)
+        public WhisperTokenData(WhisperNativeTokenData nativeToken, string text, bool timestamps)
         {
             Id = nativeToken.id;
             TimestampId = nativeToken.tid;
             Prob = nativeToken.p;
             ProbLog = nativeToken.plog;
-            ProbTimestamp = nativeToken.pt;
-            ProbTimestampSum = nativeToken.ptsum;
-            Start = TimeSpan.FromMilliseconds(nativeToken.t0 * 10);
-            End = TimeSpan.FromMilliseconds(nativeToken.t1 * 10);
-            VoiceLength = nativeToken.vlen;
+            if (timestamps)
+            {
+                ProbTimestamp = nativeToken.pt;
+                ProbTimestampSum = nativeToken.ptsum;
+                Start = TimeSpan.FromMilliseconds(nativeToken.t0 * 10);
+                End = TimeSpan.FromMilliseconds(nativeToken.t1 * 10);
+                VoiceLength = nativeToken.vlen;
+            }
             
             Text = text;
         }

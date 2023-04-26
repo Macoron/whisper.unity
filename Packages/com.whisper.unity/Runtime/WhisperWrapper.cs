@@ -79,10 +79,11 @@ namespace Whisper
                 var readySamples = AudioUtils.Preprocess(samples,frequency, channels, WhisperSampleRate);
             
                 Debug.Log($"Audio data is preprocessed, total time: {sw.ElapsedMilliseconds} ms.");
-            
-                var gch = GCHandle.Alloc(this);
-                var nativeParams = param.NativeParams;
 
+                var userData = new WhisperUserData(this, param);
+                var gch = GCHandle.Alloc(userData);
+                var nativeParams = param.NativeParams;
+                
                 // add callback (if no custom callback set)
                 if (nativeParams.new_segment_callback == null &&
                     nativeParams.new_segment_callback_user_data == IntPtr.Zero)
@@ -104,7 +105,7 @@ namespace Whisper
                 var list = new List<WhisperSegment>();
                 for (var i = 0; i < n; ++i)
                 {
-                    var segment = GetSegment(i);
+                    var segment = GetSegment(i, param);
                     list.Add(segment);
                 }
 
@@ -145,23 +146,23 @@ namespace Whisper
         private static void NewSegmentCallbackStatic(IntPtr ctx, int nNew, IntPtr userDataPtr)
         {
             // relay this static function to wrapper instance
-            var wrapper = (WhisperWrapper) GCHandle.FromIntPtr(userDataPtr).Target;
-            wrapper.NewSegmentCallback(nNew);
+            var userData = (WhisperUserData) GCHandle.FromIntPtr(userDataPtr).Target;
+            userData.Wrapper.NewSegmentCallback(nNew, userData.Param);
         }
         
-        private void NewSegmentCallback(int nNew)
+        private void NewSegmentCallback(int nNew, WhisperParams param)
         {
             // start reading new segments
             var nSegments = WhisperNative.whisper_full_n_segments(_whisperCtx);
             var s0 = nSegments - nNew;
             for (var i = s0; i < nSegments; i++)
             {
-                var segment = GetSegment(i);
+                var segment = GetSegment(i, param);
                 OnNewSegment?.Invoke(segment);
             }
         }
 
-        private WhisperSegment GetSegment(int i)
+        private WhisperSegment GetSegment(int i, WhisperParams param)
         {
             // get segment text and timestamps
             var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
@@ -169,7 +170,11 @@ namespace Whisper
             var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
             var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
             var segment = new WhisperSegment(i, text, start, end);
-                
+
+            // return earlier if tokens are disabled
+            if (!param.EnableTokens)
+                return segment;
+            
             // get all tokens
             var tokensN = WhisperNative.whisper_full_n_tokens(_whisperCtx, i);
             for (var j = 0; j < tokensN; j++)
@@ -177,7 +182,7 @@ namespace Whisper
                 var nativeToken = WhisperNative.whisper_full_get_token_data(_whisperCtx, i, j);
                 var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
                 var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
-                var token = new WhisperTokenData(nativeToken, textToken);
+                var token = new WhisperTokenData(nativeToken, textToken, param.TokenTimestamps);
                 segment.Tokens.Add(token);
             }
 
@@ -275,6 +280,18 @@ namespace Whisper
         {
             var asyncTask = Task.Factory.StartNew(() => InitFromBuffer(buffer));
             return await asyncTask;
+        }
+        
+        private struct WhisperUserData
+        {
+            public WhisperWrapper Wrapper;
+            public WhisperParams Param;
+            
+            public WhisperUserData(WhisperWrapper wrapper, WhisperParams param)
+            {
+                Wrapper = wrapper;
+                Param = param;
+            }
         }
     }
 }
