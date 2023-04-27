@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 // ReSharper disable InconsistentNaming
 
 using whisper_context_ptr = System.IntPtr;
+using whisper_token = System.Int32;
 
 namespace Whisper.Native
 {
@@ -31,6 +32,9 @@ namespace Whisper.Native
 
         [DllImport(LibraryName)]
         public static extern IntPtr whisper_lang_str(int id);
+        
+        [DllImport(LibraryName)]
+        public static extern whisper_token whisper_token_eot(whisper_context_ptr ctx);
     
         [DllImport(LibraryName)]
         public static extern WhisperNativeParams whisper_full_default_params(WhisperSamplingStrategy strategy);

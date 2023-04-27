@@ -806,7 +806,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modelPath: Whisper/ggml-tiny.bin
   initOnAwake: 1
-  language: en
+  language: auto
   translateToEnglish: 0
   strategy: 0
   noContext: 1

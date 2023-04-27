@@ -55,7 +55,7 @@ namespace Whisper.Samples
             timeText.text = $"Time: {time} ms\nRate: {rate:F1}x";
 
             // start playing sound
-            var go = new GameObject();
+            var go = new GameObject("Audio Echo");
             var source = go.AddComponent<AudioSource>();
             source.clip = clip;
             source.Play();
@@ -66,9 +66,14 @@ namespace Whisper.Samples
                 var text = GetSubtitles(res, source.time);
                 outputText.text = text;
                 await Task.Yield();
+                
+                // check that audio source still here and wasn't dedtroyed
+                if (!source)
+                    return;
             }
 
             outputText.text = ResultToRichText(res);
+            Destroy(go);
         }
 
         // TODO: this isn't optimized and for demo use only
@@ -124,6 +129,9 @@ namespace Whisper.Samples
         
         private static string TokenToRichText(WhisperTokenData token)
         {
+            if (token.IsSpecial)
+                return "";
+            
             var text = token.Text;
             var textColor = ProbabilityToColor(token.Prob);
             var richText = $"<color={textColor}>{text}</color>";

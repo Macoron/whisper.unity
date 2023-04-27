@@ -183,7 +183,8 @@ namespace Whisper
                 var nativeToken = WhisperNative.whisper_full_get_token_data(_whisperCtx, i, j);
                 var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
                 var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
-                var token = new WhisperTokenData(nativeToken, textToken, param.TokenTimestamps);
+                var isSpecial = nativeToken.id >= WhisperNative.whisper_token_eot(_whisperCtx); 
+                var token = new WhisperTokenData(nativeToken, textToken, param.TokenTimestamps, isSpecial);
                 segment.Tokens[j] = token;
             }
 

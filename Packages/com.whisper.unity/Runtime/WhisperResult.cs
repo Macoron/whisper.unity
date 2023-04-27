@@ -96,8 +96,9 @@ namespace Whisper
         public readonly float VoiceLength;
         
         public readonly string Text;
+        public readonly bool IsSpecial;
 
-        public WhisperTokenData(WhisperNativeTokenData nativeToken, string text, bool timestamps)
+        public WhisperTokenData(WhisperNativeTokenData nativeToken, string text, bool timestamps, bool isSpecial)
         {
             Id = nativeToken.id;
             TimestampId = nativeToken.tid;
@@ -113,6 +114,7 @@ namespace Whisper
             }
             
             Text = text;
+            IsSpecial = isSpecial;
         }
         
         
