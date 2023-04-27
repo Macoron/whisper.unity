@@ -811,10 +811,10 @@ MonoBehaviour:
   strategy: 0
   noContext: 1
   singleSegment: 0
-  speedUp: 0
-  audioCtx: 0
   enableTokens: 1
   tokensTimestamps: 1
+  speedUp: 0
+  audioCtx: 0
 --- !u!1 &637716610
 GameObject:
   m_ObjectHideFlags: 0

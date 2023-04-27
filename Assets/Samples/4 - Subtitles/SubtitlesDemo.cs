@@ -21,6 +21,10 @@ namespace Whisper.Samples
 
         private void Awake()
         {
+            // we need to force this settings for whisper
+            whisper.enableTokens = true;
+            whisper.tokensTimestamps = true;
+            
             languageDropdown.value = languageDropdown.options
                 .FindIndex(op => op.text == whisper.language);
             languageDropdown.onValueChanged.AddListener(OnLanguageChanged);
@@ -48,6 +52,8 @@ namespace Whisper.Samples
             var sw = new Stopwatch();
             sw.Start();
             
+            // TODO: if you want to speed this up, subscribe to segments event
+            // this code will transcribe whole text first
             var res = await whisper.GetTextAsync(clip);
             
             var time = sw.ElapsedMilliseconds;
@@ -61,13 +67,13 @@ namespace Whisper.Samples
             source.Play();
 
             // and show subtitles at the same time
-            while (source.time < clip.length)
+            while (source.isPlaying)
             {
                 var text = GetSubtitles(res, source.time);
                 outputText.text = text;
                 await Task.Yield();
-                
-                // check that audio source still here and wasn't dedtroyed
+
+                // check that audio source still here and wasn't destroyed
                 if (!source)
                     return;
             }

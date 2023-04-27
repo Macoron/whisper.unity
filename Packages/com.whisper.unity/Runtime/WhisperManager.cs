@@ -33,7 +33,13 @@ namespace Whisper
         [Tooltip("Force single segment output (useful for streaming).")]
         public bool singleSegment;
         
+        [Tooltip("Output tokens with their confidence in each segment.")]
+        public bool enableTokens;
+
         [Header("Experimental settings")]
+        [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
+        public bool tokensTimestamps;
+        
         [Tooltip("[EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder. " +
                  "These can significantly reduce the quality of the output.")]
         public bool speedUp = false;
@@ -41,9 +47,6 @@ namespace Whisper
         [Tooltip("[EXPERIMENTAL] Overwrite the audio context size (0 = use default). " +
                  "These can significantly reduce the quality of the output.")]
         public int audioCtx;
-
-        public bool enableTokens = true;
-        public bool tokensTimestamps = true;
 
         public event OnNewSegmentDelegate OnNewSegment;
 
