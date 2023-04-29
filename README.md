@@ -17,6 +17,8 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 - [x] MacOS (Intel and ARM)
 - [x] iOS (Device and Simulator)
 - [x] Android (ARM64)
+- [ ] Linux (see [this issue](https://github.com/Macoron/whisper.unity/issues/19))
+- [ ] WebGL (see [this issue](https://github.com/Macoron/whisper.unity/issues/20))
 
 ## Samples
 
@@ -45,16 +47,17 @@ For more information about models differences and formats read [whisper.cpp read
 ## Compiling C++ libraries from source
 This project comes with prebuild libraries of whisper.cpp for all supported platforms. In case you want to build libraries yourself:
 1. Clone the original [whisper.cpp](https://github.com/ggerganov/whisper.cpp) repository
-2. Open whisper.unity folder with command line
-3. If you are using **Windows** write:
+2. Checkout tag [v1.2.1](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.2.1). Other versions might not work with this Unity bindings.
+3. Open whisper.unity folder with command line
+4. If you are using **Windows** write:
 ```bash
 .\build_cpp.bat path\to\whisper
 ```
-4. If you are using **MacOS** write:
+5. If you are using **MacOS** write:
 ```bash
 bash build_cpp.sh path/to/whisper all path/to/ndk/android.toolchain.cmake
 ```
-5. If build was successful compiled libraries should be automatically update package `Plugins` folder. 
+6. If build was successful compiled libraries should be automatically update package `Plugins` folder. 
  
 Windows will produce only Windows library. MacOS will produce MacOS, iOS and Android libraries.
 
