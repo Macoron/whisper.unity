@@ -22,6 +22,7 @@ namespace Whisper.Native
     /// <summary>
     /// This is direct copy of C++ struct.
     /// Do not change or add any fields without changing it in whisper.cpp.
+    /// Check <see cref="WhisperTokenData"/> for more information.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct WhisperNativeTokenData 

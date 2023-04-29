@@ -202,7 +202,7 @@ namespace Whisper
          #region Tokens Parameters
 
          /// <summary>
-         /// Try to estimate timestamps for each token in segment.
+         /// [EXPERIMENTAL] Try to estimate timestamps for each token in segment.
          /// </summary>
          public bool TokenTimestamps
          {

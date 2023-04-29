@@ -98,7 +98,7 @@ namespace Whisper.Samples
 
                 foreach (var token in seg.Tokens)
                 {
-                    if (time > token.Start)
+                    if (time > token.Timestamp.Start)
                     {
                         var text = TokenToRichText(token);
                         sb.Append(text);
