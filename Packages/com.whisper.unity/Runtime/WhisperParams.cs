@@ -199,6 +199,19 @@ namespace Whisper
          
          #endregion
 
+         #region Tokens Parameters
+
+         /// <summary>
+         /// [EXPERIMENTAL] Try to estimate timestamps for each token in segment.
+         /// </summary>
+         public bool TokenTimestamps
+         {
+             get => _param.token_timestamps;
+             set => _param.token_timestamps = value;
+         }
+
+         #endregion
+         
          #region Speed Up
 
          /// <summary>
@@ -246,6 +259,15 @@ namespace Whisper
              get => _param.new_segment_callback_user_data;
              set => _param.new_segment_callback_user_data = value;
          }
+
+         #endregion
+
+         #region Unity Custom
+         
+         /// <summary>
+         /// Output in <see cref="WhisperSegment"/> list of tokens.
+         /// </summary>
+         public bool EnableTokens { get; set; }
 
          #endregion
          

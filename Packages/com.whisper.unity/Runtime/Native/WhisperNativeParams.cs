@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 
 using whisper_token_ptr = System.IntPtr;
 using whisper_context_ptr = System.IntPtr;
+using whisper_token = System.Int32;
 
 namespace Whisper.Native
 {
@@ -18,7 +19,30 @@ namespace Whisper.Native
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, int n_new, System.IntPtr user_data);
     
+    /// <summary>
+    /// This is direct copy of C++ struct.
+    /// Do not change or add any fields without changing it in whisper.cpp.
+    /// Check <see cref="WhisperTokenData"/> for more information.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WhisperNativeTokenData 
+    {
+        public whisper_token id;  // token id
+        public whisper_token tid; // forced timestamp token id
 
+        public float p;           // probability of the token
+        public float plog;        // log probability of the token
+        public float pt;          // probability of the timestamp token
+        public float ptsum;       // sum of probabilities of all timestamp tokens
+
+        // token-level timestamp data
+        // do not use if you haven't computed token-level timestamps
+        public ulong t0;        // start time of the token
+        public ulong t1;        //   end time of the token
+
+        public float vlen;        // voice length of the token
+    }
+    
     /// <summary>
     /// This is direct copy of C++ struct.
     /// Do not change or add any fields without changing it in whisper.cpp.
@@ -43,7 +67,7 @@ namespace Whisper.Native
         [MarshalAs(UnmanagedType.U1)] public bool print_timestamps; // print timestamps for each text segment when printing realtime
 
         // [EXPERIMENTAL] token-level timestamps
-        [MarshalAs(UnmanagedType.U1)] bool token_timestamps; // enable token-level timestamps
+        [MarshalAs(UnmanagedType.U1)] public bool token_timestamps; // enable token-level timestamps
         float thold_pt; // timestamp token probability threshold (~0.01)
         float thold_ptsum; // timestamp token sum probability threshold (~0.01)
         int max_len; // max segment length in characters

@@ -33,7 +33,13 @@ namespace Whisper
         [Tooltip("Force single segment output (useful for streaming).")]
         public bool singleSegment;
         
+        [Tooltip("Output tokens with their confidence in each segment.")]
+        public bool enableTokens;
+
         [Header("Experimental settings")]
+        [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
+        public bool tokensTimestamps;
+        
         [Tooltip("[EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder. " +
                  "These can significantly reduce the quality of the output.")]
         public bool speedUp = false;
@@ -144,6 +150,8 @@ namespace Whisper
             _params.SingleSegment = singleSegment;
             _params.SpeedUp = speedUp;
             _params.AudioCtx = audioCtx;
+            _params.EnableTokens = enableTokens;
+            _params.TokenTimestamps = tokensTimestamps;
         }
 
         private async Task<bool> CheckIfLoaded()

@@ -79,10 +79,11 @@ namespace Whisper
                 var readySamples = AudioUtils.Preprocess(samples,frequency, channels, WhisperSampleRate);
             
                 Debug.Log($"Audio data is preprocessed, total time: {sw.ElapsedMilliseconds} ms.");
-            
-                var gch = GCHandle.Alloc(this);
-                var nativeParams = param.NativeParams;
 
+                var userData = new WhisperUserData(this, param);
+                var gch = GCHandle.Alloc(userData);
+                var nativeParams = param.NativeParams;
+                
                 // add callback (if no custom callback set)
                 if (nativeParams.new_segment_callback == null &&
                     nativeParams.new_segment_callback_user_data == IntPtr.Zero)
@@ -102,16 +103,9 @@ namespace Whisper
                 Debug.Log($"Number of text segments: {n}");
 
                 var list = new List<WhisperSegment>();
-                for (var i = 0; i < n; ++i) {
-                    Debug.Log($"Requesting text segment {i}...");
-                    var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
-                    var text = Marshal.PtrToStringAnsi(textPtr);
-                    Debug.Log(text);
-                    
-                    var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
-                    var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
-                    var segment = new WhisperSegment(i, text, start, end);
-
+                for (var i = 0; i < n; ++i)
+                {
+                    var segment = GetSegment(i, param);
                     list.Add(segment);
                 }
 
@@ -152,26 +146,49 @@ namespace Whisper
         private static void NewSegmentCallbackStatic(IntPtr ctx, int nNew, IntPtr userDataPtr)
         {
             // relay this static function to wrapper instance
-            var wrapper = (WhisperWrapper) GCHandle.FromIntPtr(userDataPtr).Target;
-            wrapper.NewSegmentCallback(nNew);
+            var userData = (WhisperUserData) GCHandle.FromIntPtr(userDataPtr).Target;
+            userData.Wrapper.NewSegmentCallback(nNew, userData.Param);
         }
         
-        private void NewSegmentCallback(int nNew)
+        private void NewSegmentCallback(int nNew, WhisperParams param)
         {
             // start reading new segments
             var nSegments = WhisperNative.whisper_full_n_segments(_whisperCtx);
             var s0 = nSegments - nNew;
             for (var i = s0; i < nSegments; i++)
             {
-                // get segment text and timestamps
-                var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
-                var text = Marshal.PtrToStringAnsi(textPtr);
-                var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
-                var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
-                
-                var segment = new WhisperSegment(i, text, start, end);
+                var segment = GetSegment(i, param);
                 OnNewSegment?.Invoke(segment);
             }
+        }
+
+        private WhisperSegment GetSegment(int i, WhisperParams param)
+        {
+            // get segment text and timestamps
+            var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
+            var text = Marshal.PtrToStringAnsi(textPtr);
+            var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
+            var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
+            var segment = new WhisperSegment(i, text, start, end);
+
+            // return earlier if tokens are disabled
+            if (!param.EnableTokens)
+                return segment;
+            
+            // get all tokens
+            var tokensN = WhisperNative.whisper_full_n_tokens(_whisperCtx, i);
+            segment.Tokens = new WhisperTokenData[tokensN];
+            for (var j = 0; j < tokensN; j++)
+            {
+                var nativeToken = WhisperNative.whisper_full_get_token_data(_whisperCtx, i, j);
+                var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
+                var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
+                var isSpecial = nativeToken.id >= WhisperNative.whisper_token_eot(_whisperCtx); 
+                var token = new WhisperTokenData(nativeToken, textToken, param.TokenTimestamps, isSpecial);
+                segment.Tokens[j] = token;
+            }
+
+            return segment;
         }
         
         public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath)
@@ -265,6 +282,18 @@ namespace Whisper
         {
             var asyncTask = Task.Factory.StartNew(() => InitFromBuffer(buffer));
             return await asyncTask;
+        }
+        
+        private struct WhisperUserData
+        {
+            public WhisperWrapper Wrapper;
+            public WhisperParams Param;
+            
+            public WhisperUserData(WhisperWrapper wrapper, WhisperParams param)
+            {
+                Wrapper = wrapper;
+                Param = param;
+            }
         }
     }
 }

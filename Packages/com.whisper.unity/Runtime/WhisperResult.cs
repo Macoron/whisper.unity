@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Whisper.Native;
 
 namespace Whisper
 {
@@ -53,6 +54,12 @@ namespace Whisper
         /// </summary>
         public readonly TimeSpan End;
 
+        /// <summary>
+        /// Optional individual tokens with their meta information.
+        /// Null if params <see cref="WhisperParams.EnableTokens"/> is false.
+        /// </summary>
+        public WhisperTokenData[] Tokens;
+
         public WhisperSegment(int index, string text, ulong start, ulong end)
         {
             Index = index;
@@ -70,6 +77,92 @@ namespace Whisper
             var stopStr = End.ToString(@"mm\:ss\:fff");
             var timestamp = $"[{startStr}->{stopStr}]";
             return timestamp;
+        }
+    }
+
+    /// <summary>
+    /// Usually represent a word, part of the word, punctuation marks
+    /// or some special tokens like [EOT], [BEG], etc.
+    /// </summary>
+    public class WhisperTokenData
+    {
+        /// <summary>
+        /// Id of the token in whisper model vocabulary.
+        /// </summary>
+        public readonly int Id;
+        /// <summary>
+        /// Probability (confidence) of the token in [0, 1] range.
+        /// </summary>
+        public readonly float Prob;
+        /// <summary>
+        /// Log probability (confidence) of the token.
+        /// </summary>
+        public readonly float ProbLog;
+        /// <summary>
+        /// Text representation of the token.
+        /// </summary>
+        public readonly string Text;
+        /// <summary>
+        /// True if this token is special token used by whisper, like [EOT], [BEG], etc.
+        /// </summary>
+        public readonly bool IsSpecial;
+        /// <summary>
+        /// Optional token timestamp information.
+        /// Null if params <see cref="WhisperParams.TokenTimestamps"/> is false.
+        /// </summary>
+        public readonly WhisperTokenTimestamp Timestamp;
+
+        public WhisperTokenData(WhisperNativeTokenData nativeToken, string text, bool timestamps, bool isSpecial)
+        {
+            Id = nativeToken.id;
+            Prob = nativeToken.p;
+            ProbLog = nativeToken.plog;
+            Text = text;
+            IsSpecial = isSpecial;
+
+            if (timestamps)
+                Timestamp = new WhisperTokenTimestamp(nativeToken);
+        }
+    }
+
+    /// <summary>
+    /// Optional token timestamp information.
+    /// </summary>
+    public class WhisperTokenTimestamp
+    {
+        /// <summary>
+        /// Forced timestamp token id.
+        /// </summary>
+        public readonly int Id;
+        /// <summary>
+        /// Probability (confidence) of the timestamp in [0, 1] range.
+        /// </summary>
+        public readonly float Prob; 
+        /// <summary>
+        /// Sum of probabilities of all timestamp tokens.
+        /// </summary>
+        public readonly float ProbSum;
+        /// <summary>
+        /// Timestamp of the token start. Relative to the whole audio.
+        /// </summary>
+        public readonly TimeSpan Start;
+        /// <summary>
+        /// Timestamp of the token end. Relative to the whole audio.
+        /// </summary>
+        public readonly TimeSpan End;
+        /// <summary>
+        /// Voice length of the token.
+        /// </summary>
+        public readonly float VoiceLength;
+
+        public WhisperTokenTimestamp(WhisperNativeTokenData nativeToken)
+        {
+            Id = nativeToken.tid;
+            Prob = nativeToken.pt;
+            ProbSum = nativeToken.ptsum;
+            Start = TimeSpan.FromMilliseconds(nativeToken.t0 * 10);
+            End = TimeSpan.FromMilliseconds(nativeToken.t1 * 10);
+            VoiceLength = nativeToken.vlen;
         }
     }
 }
