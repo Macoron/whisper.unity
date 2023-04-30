@@ -40,7 +40,7 @@ https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity
 ### Downloading other model weights
 You can try different Whisper model weights. For example, you can improve English language transcription by using English-only weights or by trying bigger models.
 
-You can download model weights [from here](https://huggingface.co/datasets/ggerganov/whisper.cpp). Just put them into your `StreamingAssets` folder. 
+You can download model weights [from here](https://huggingface.co/ggerganov/whisper.cpp). Just put them into your `StreamingAssets` folder. 
 
 For more information about models differences and formats read [whisper.cpp readme](https://github.com/ggerganov/whisper.cpp#ggml-format) and [OpenAI readme](https://github.com/openai/whisper#available-models-and-languages).
 
