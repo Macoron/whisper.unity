@@ -17,7 +17,7 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 - [x] MacOS (Intel and ARM)
 - [x] iOS (Device and Simulator)
 - [x] Android (ARM64)
-- [ ] Linux (see [this issue](https://github.com/Macoron/whisper.unity/issues/19))
+- [x] Linux (x86_64)
 - [ ] WebGL (see [this issue](https://github.com/Macoron/whisper.unity/issues/20))
 
 ## Samples
@@ -55,11 +55,15 @@ This project comes with prebuild libraries of whisper.cpp for all supported plat
 ```
 5. If you are using **MacOS** write:
 ```bash
-bash build_cpp.sh path/to/whisper all path/to/ndk/android.toolchain.cmake
+sh build_cpp_linux.sh path/to/whisper
 ```
-6. If build was successful compiled libraries should be automatically update package `Plugins` folder. 
+6. If you are using **Linux** write
+```bash
+sh build_cpp.sh path/to/whisper all path/to/ndk/android.toolchain.cmake
+```
+7. If build was successful compiled libraries should be automatically update package `Plugins` folder. 
  
-Windows will produce only Windows library. MacOS will produce MacOS, iOS and Android libraries.
+Windows will produce only Windows library, Linux will produce only Linux. MacOS will produce MacOS, iOS and Android libraries.
 
 MacOS build script was tested on Mac with ARM processor. For Intel processors you might need change some parameters.
 
