@@ -55,11 +55,11 @@ This project comes with prebuild libraries of whisper.cpp for all supported plat
 ```
 5. If you are using **MacOS** write:
 ```bash
-sh build_cpp_linux.sh path/to/whisper
+sh build_cpp.sh path/to/whisper all path/to/ndk/android.toolchain.cmake
 ```
 6. If you are using **Linux** write
 ```bash
-sh build_cpp.sh path/to/whisper all path/to/ndk/android.toolchain.cmake
+sh build_cpp_linux.sh path/to/whisper
 ```
 7. If build was successful compiled libraries should be automatically update package `Plugins` folder. 
  
