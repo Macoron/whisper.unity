@@ -20,13 +20,12 @@ jobs:
           - 2021.3.25f1
           - 2022.2.19f1
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: game-ci/unity-test-runner@v2
         id: tests
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
           testMode: playmode
           unityVersion: ${{ matrix.unityVersion }}
           checkName: ${{ matrix.unityVersion }} Test Results
