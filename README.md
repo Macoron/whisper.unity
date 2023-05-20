@@ -1,6 +1,8 @@
 # whisper.unity
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.2.1-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.2.1)
 
+[![Testing](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml/badge.svg)](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml)
+
 This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whisper.cpp). It provides high-performance inference of [OpenAI's Whisper](https://github.com/openai/whisper) automatic speech recognition (ASR) model running on your local machine.
 
 > This repository comes with "ggml-tiny.bin" model weights. This is the smallest and fastest version of whisper model, but it has worse quality comparing to other models. If you want better quality, check out [other models weights](#downloading-other-model-weights).
@@ -17,7 +19,7 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 - [x] MacOS (Intel and ARM)
 - [x] iOS (Device and Simulator)
 - [x] Android (ARM64)
-- [x] Linux (x86_64)
+- [x] Linux (x86_64, Ubuntu 18.04 and newer)
 - [ ] WebGL (see [this issue](https://github.com/Macoron/whisper.unity/issues/20))
 
 ## Samples
