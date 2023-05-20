@@ -1,0 +1,42 @@
+name: Testing
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  testAllModes:
+    name: Test in ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        unityVersion:
+          - 2019.4.40f1
+          - 2020.3.48f1
+          - 2021.3.25f1
+          - 2022.2.19f1
+    steps:
+      - uses: actions/checkout@v3
+      - uses: game-ci/unity-test-runner@v2
+        id: tests
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          testMode: playmode
+          unityVersion: ${{ matrix.unityVersion }}
+          checkName: ${{ matrix.unityVersion }} Test Results
+          coverageOptions: 'generateHtmlReport;assemblyFilters:+com.whisper.unity'
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Test results for ${{ matrix.unityVersion }}
+          path: ${{ steps.tests.outputs.artifactsPath }}
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Coverage results for ${{ matrix.unityVersion }}
+          path: ${{ steps.tests.outputs.coveragePath }}
