@@ -35,6 +35,11 @@ namespace Whisper
         
         [Tooltip("Output tokens with their confidence in each segment.")]
         public bool enableTokens;
+        
+        [Tooltip("Initial prompt as a string variable. " +
+                 "It should improve transcription quality or guide it to the right direction.")]
+        public string initialPrompt;
+        
 
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
@@ -152,6 +157,7 @@ namespace Whisper
             _params.AudioCtx = audioCtx;
             _params.EnableTokens = enableTokens;
             _params.TokenTimestamps = tokensTimestamps;
+            _params.InitialPrompt = initialPrompt;
         }
 
         private async Task<bool> CheckIfLoaded()

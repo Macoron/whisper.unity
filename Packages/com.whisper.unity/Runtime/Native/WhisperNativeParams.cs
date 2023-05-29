@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 
 using whisper_token_ptr = System.IntPtr;
 using whisper_context_ptr = System.IntPtr;
+using whisper_state_ptr = System.IntPtr;
 using whisper_token = System.Int32;
 
 namespace Whisper.Native
@@ -17,7 +18,7 @@ namespace Whisper.Native
     };
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, int n_new, System.IntPtr user_data);
+    public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, whisper_state_ptr state, int n_new, System.IntPtr user_data);
     
     /// <summary>
     /// This is direct copy of C++ struct.
@@ -81,6 +82,7 @@ namespace Whisper.Native
 
         // tokens to provide to the whisper decoder as initial prompt
         // these are prepended to any existing text context from a previous call
+        public byte* initial_prompt;
         whisper_token_ptr prompt_tokens;
         int prompt_n_tokens;
 
@@ -134,6 +136,10 @@ namespace Whisper.Native
         // called for every newly generated text segment
         public whisper_new_segment_callback new_segment_callback;
         public System.IntPtr new_segment_callback_user_data;
+
+        // called on each progress update
+        void* progress_callback;
+        void* progress_callback_user_data;
 
         // called each time before the encoder starts
         void* encoder_begin_callback;
