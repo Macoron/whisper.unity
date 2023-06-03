@@ -14,7 +14,6 @@ jobs:
   build-windows:
     name: Build for Windows (x86_64)
     runs-on: windows-latest
-    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -47,7 +46,6 @@ jobs:
     name: Build for Linux (Ubuntu 18.04 x86_64)
     runs-on: ubuntu-latest
     container: ubuntu:18.04
-    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -82,7 +80,6 @@ jobs:
   build-macos:
     name: Build for MacOS (ARM, x86_64)
     runs-on: macOS-latest
-    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -111,7 +108,6 @@ jobs:
   build-ios:
     name: Build for iOS
     runs-on: macOS-latest
-    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -176,6 +172,6 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v3
         with:
-          name: ios
+          name: android
           path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
           if-no-files-found: error
