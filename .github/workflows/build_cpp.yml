@@ -152,7 +152,7 @@ jobs:
         run: |
           sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.22.1"
-          sdkmanager --install "ndk;25.1.8937393"
+          sdkmanager --install "ndk;21.3.6528147"
           
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -169,7 +169,7 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ../whisper-cpp/ android $ANDROID_HOME/ndk/25.1.8937393/build/cmake/android.toolchain.cmake
+          sh build_cpp.sh ../whisper-cpp/ android $ANDROID_HOME/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
           
       - name: Upload results
         uses: actions/upload-artifact@v3
