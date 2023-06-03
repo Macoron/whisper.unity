@@ -133,5 +133,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ios
-          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/iOS/
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.dylib
           if-no-files-found: error
