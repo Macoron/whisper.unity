@@ -153,6 +153,7 @@ jobs:
       - name: Install Android NDK
         run: |
           sdkmanager --install "build-tools;31.0.0"
+          sdkmanager --install "cmake;3.22.1"
           sdkmanager --install "ndk;25.0.8775105"
           
       - name: Check 
