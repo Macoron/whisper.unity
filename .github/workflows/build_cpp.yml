@@ -12,8 +12,9 @@ on:
         default: 'v1.2.1'
 jobs:
   build-windows:
-    name: Build for Windows x64
+    name: Build for Windows x86_64
     runs-on: windows-latest
+    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -43,9 +44,10 @@ jobs:
           if-no-files-found: error
           
   build-linux:
-    name: Build for Linux x64 (Ubuntu 18.04)
+    name: Build for Linux x86_64 (Ubuntu 18.04)
     runs-on: ubuntu-latest
     container: ubuntu:18.04
+    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -75,4 +77,32 @@ jobs:
         with:
           name: linux
           path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/Linux/
+          if-no-files-found: error
+          
+  build-macos:
+    name: Build for MacOS (ARM, x86_64)
+    runs-on: macOS-latest
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp.sh ../whisper-cpp/ mac
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos
+          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/MacOS/
           if-no-files-found: error
