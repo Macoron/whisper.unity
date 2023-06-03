@@ -34,14 +34,14 @@ jobs:
         run: |
           cd whisper-unity
           .\build_cpp.bat ..\whisper-cpp\
-          cd ${{ github.workspace }}/whisper-cpp/build/Release
+          cd ${{ github.workspace }}\whisper-cpp\build\bin\Release
           ren whisper.dll libwhisper.dll
           
       - name: Upload results
         uses: actions/upload-artifact@v3
         with:
           name: windows
-          path: ${{ github.workspace }}/whisper-cpp/build/Release/libwhisper.dll
+          path: ${{ github.workspace }}/whisper-cpp/build/bin/Release/libwhisper.dll
           if-no-files-found: error
           
   build-linux:
