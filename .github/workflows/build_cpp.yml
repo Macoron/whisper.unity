@@ -1,0 +1,33 @@
+name: Build C++
+on:
+  workflow_dispatch: {}
+jobs:
+  build-windows:
+    name: Build for Windows x64
+    runs-on: windows-latest
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ggerganov/whisper.cpp
+          ref: v1.2.1
+          path: whisper-cpp
+          
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1
+        
+      - name: Run build script
+        run: >
+          cd whisper-unity
+          .\build_cpp.bat ..\whisper-cpp\
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows
+          path: $GITHUB_WORKSPACE/whisper-unity/Packages/com.whisper.unity/Plugins/Windows/
