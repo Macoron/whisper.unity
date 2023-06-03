@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows
-          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/Windows/
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.dll
           if-no-files-found: error
           
   build-linux:
@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: linux
-          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/Linux/
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.so
           if-no-files-found: error
           
   build-macos:
@@ -105,12 +105,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: macos
-          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/MacOS/
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.dylib
           if-no-files-found: error
           
   build-ios:
     name: Build for iOS
     runs-on: macOS-latest
+    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -135,3 +136,24 @@ jobs:
           name: ios
           path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
           if-no-files-found: error
+
+  build-android:
+    name: Build for Android (arm64-v8a)
+    runs-on: ubuntu-latest
+    steps:          
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 17
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager --install "build-tools;31.0.0"
+          sdkmanager --install "ndk;25.0.8775105"
+          
+      - name: Check 
+        run: echo $ANDROID_SDK_PATH      
