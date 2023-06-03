@@ -82,6 +82,7 @@ jobs:
   build-macos:
     name: Build for MacOS (ARM, x86_64)
     runs-on: macOS-latest
+    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -110,7 +111,6 @@ jobs:
   build-ios:
     name: Build for iOS
     runs-on: macOS-latest
-    if: false
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
