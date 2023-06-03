@@ -1,6 +1,15 @@
 name: Build C++
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      whisper_cpp_repo:
+        description: 'whisper.cpp repo link'
+        required: true
+        default: 'ggerganov/whisper.cpp'
+      whisper_cpp_repo_ref:
+        description: 'Tag, branch or commit'
+        required: true
+        default: 'v1.2.1'
 jobs:
   build-windows:
     name: Build for Windows x64
@@ -14,8 +23,8 @@ jobs:
       - name: Clone whisper.cpp
         uses: actions/checkout@v3
         with:
-          repository: ggerganov/whisper.cpp
-          ref: v1.2.1
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
           path: whisper-cpp
           
       - name: Add msbuild to PATH
@@ -34,7 +43,7 @@ jobs:
           if-no-files-found: error
           
   build-linux:
-    name: Build for Linux (Ubuntu 18.04)
+    name: Build for Linux x64 (Ubuntu 18.04)
     runs-on: ubuntu-latest
     container: ubuntu:18.04
     steps:
@@ -46,8 +55,8 @@ jobs:
       - name: Clone whisper.cpp
         uses: actions/checkout@v3
         with:
-          repository: ggerganov/whisper.cpp
-          ref: v1.2.1
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
           path: whisper-cpp
         
       - name: Dependencies
