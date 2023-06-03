@@ -22,7 +22,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1
         
       - name: Run build script
-        run: >
+        run: |
           cd whisper-unity
           .\build_cpp.bat ..\whisper-cpp\
           
