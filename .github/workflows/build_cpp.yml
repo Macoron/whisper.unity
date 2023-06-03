@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows
-          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.dll
+          path: ${{ github.workspace }}/whisper-cpp/build/Release/libwhisper.dll
           if-no-files-found: error
           
   build-linux:
