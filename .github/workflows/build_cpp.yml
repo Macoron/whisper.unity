@@ -30,4 +30,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows
-          path: $GITHUB_WORKSPACE/whisper-unity/Packages/com.whisper.unity/Plugins/Windows/
+          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/Windows/
+          if-no-files-found: error
