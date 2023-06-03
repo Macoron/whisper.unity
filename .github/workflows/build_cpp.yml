@@ -52,9 +52,9 @@ jobs:
         
       - name: Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install build-essential
-          sudo apt-get install cmake
+          apt-get update
+          apt-get install build-essential
+          apt-get install cmake
           
       - name: Run build script
         run: |
