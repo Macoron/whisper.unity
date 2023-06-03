@@ -137,7 +137,7 @@ jobs:
 
   build-android:
     name: Build for Android (arm64-v8a)
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     steps:          
       - name: Install Java
         uses: actions/setup-java@v3
