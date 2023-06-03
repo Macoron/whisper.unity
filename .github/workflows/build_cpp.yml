@@ -156,5 +156,26 @@ jobs:
           sdkmanager --install "cmake;3.22.1"
           sdkmanager --install "ndk;25.0.8775105"
           
-      - name: Check 
-        run: find $ANDROID_HOME/../ -type f -print      
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp.sh ../whisper-cpp/ android $ANDROID_HOME/ndk/25.0.8775105/build/cmake/android.toolchain.cmake
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
+          if-no-files-found: error
