@@ -32,3 +32,12 @@ jobs:
           name: windows
           path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/Windows/
           if-no-files-found: error
+  build-linux:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+    container: ubuntu:18.04
+    steps:
+      - name: Get glibc
+        run: ldd --version
+        
+          
