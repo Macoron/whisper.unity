@@ -156,4 +156,4 @@ jobs:
           sdkmanager --install "ndk;25.0.8775105"
           
       - name: Check 
-        run: find $ANDROID_SDK_PATH -type f -print      
+        run: find $ANDROID_HOME -type f -print      
