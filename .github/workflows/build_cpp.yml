@@ -53,8 +53,8 @@ jobs:
       - name: Dependencies
         run: |
           apt-get update
-          apt-get install build-essential
-          apt-get install cmake
+          apt-get install -y build-essential
+          apt-get install -y cmake
           
       - name: Run build script
         run: |
