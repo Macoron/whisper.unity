@@ -1,9 +1,18 @@
 name: Build C++
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      whisper_cpp_repo:
+        description: 'whisper.cpp repo link'
+        required: true
+        default: 'ggerganov/whisper.cpp'
+      whisper_cpp_repo_ref:
+        description: 'Tag, branch or commit'
+        required: true
+        default: 'v1.2.1'
 jobs:
   build-windows:
-    name: Build for Windows x64
+    name: Build for Windows (x86_64)
     runs-on: windows-latest
     steps:
       - name: Clone whisper.unity
@@ -14,20 +23,157 @@ jobs:
       - name: Clone whisper.cpp
         uses: actions/checkout@v3
         with:
-          repository: ggerganov/whisper.cpp
-          ref: v1.2.1
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
           path: whisper-cpp
           
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1
         
       - name: Run build script
-        run: >
+        run: |
           cd whisper-unity
           .\build_cpp.bat ..\whisper-cpp\
+          cd ${{ github.workspace }}\whisper-cpp\build\bin\Release
+          ren whisper.dll libwhisper.dll
           
       - name: Upload results
         uses: actions/upload-artifact@v3
         with:
           name: windows
-          path: $GITHUB_WORKSPACE/whisper-unity/Packages/com.whisper.unity/Plugins/Windows/
+          path: ${{ github.workspace }}/whisper-cpp/build/bin/Release/libwhisper.dll
+          if-no-files-found: error
+          
+  build-linux:
+    name: Build for Linux (Ubuntu 18.04 x86_64)
+    runs-on: ubuntu-latest
+    container: ubuntu:18.04
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+        
+      - name: Dependencies
+        run: |
+          apt-get update
+          apt-get install -y build-essential
+          apt-get install -y cmake
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp_linux.sh ../whisper-cpp/
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.so
+          if-no-files-found: error
+          
+  build-macos:
+    name: Build for MacOS (ARM, x86_64)
+    runs-on: macOS-latest
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp.sh ../whisper-cpp/ mac
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.dylib
+          if-no-files-found: error
+          
+  build-ios:
+    name: Build for iOS
+    runs-on: macOS-latest
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp.sh ../whisper-cpp/ ios
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
+          if-no-files-found: error
+
+  build-android:
+    name: Build for Android (arm64-v8a)
+    runs-on: ubuntu-latest
+    steps:          
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 17
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Install Android NDK
+        run: |
+          sdkmanager --install "build-tools;33.0.2"
+          sdkmanager --install "cmake;3.22.1"
+          sdkmanager --install "ndk;21.3.6528147"
+          
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp.sh ../whisper-cpp/ android $ANDROID_HOME/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: android
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
+          if-no-files-found: error
