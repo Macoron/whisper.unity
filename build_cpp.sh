@@ -16,7 +16,7 @@ build_mac() {
   clean_build
   echo "Starting building for Mac..."
 
-  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON ../
+  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ../
   make
 
   echo "Build for Mac complete!"
