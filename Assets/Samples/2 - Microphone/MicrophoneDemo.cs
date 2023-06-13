@@ -19,6 +19,7 @@ namespace Whisper.Samples
         public Text timeText;
         public Dropdown languageDropdown;
         public Toggle translateToggle;
+        public Toggle streamingToggle;
         
         private string _buffer;
 
@@ -33,8 +34,10 @@ namespace Whisper.Samples
             translateToggle.isOn = whisper.translateToEnglish;
             translateToggle.onValueChanged.AddListener(OnTranslateChanged);
 
+            streamingToggle.onValueChanged.AddListener(OnStreamingChanged);
+
             microphoneRecord.OnRecordStop += Transcribe;
-            
+
             if (streamSegments)
                 whisper.OnNewSegment += WhisperOnOnNewSegment;
         }
@@ -59,6 +62,11 @@ namespace Whisper.Samples
         private void OnTranslateChanged(bool translate)
         {
             whisper.translateToEnglish = translate;
+        }
+
+        private void OnStreamingChanged(bool stream){
+            microphoneRecord.streaming = stream;
+            button.interactable = !stream;
         }
 
         private async void Transcribe(float[] data, int frequency, int channels, float length)

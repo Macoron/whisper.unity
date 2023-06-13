@@ -38,6 +38,9 @@ namespace Whisper.Utils
 
         public IEnumerable<string> AvailableMicDevices => Microphone.devices;
 
+        public bool streaming;
+
+        private AudioClip cliptest;
         private void Awake()
         {
             if(microphoneDropdown != null)
@@ -50,16 +53,53 @@ namespace Whisper.Utils
                     .FindIndex(op => op.text == microphoneDefaultLabel);
                 microphoneDropdown.onValueChanged.AddListener(OnMicrophoneChanged);
             }
+            cliptest = Microphone.Start(RecordStartMicDevice, true, 4, frequency);
+
         }
 
         private void Update()
         {
-            if (!IsRecording)
-                return;
-
             var timePassed = Time.realtimeSinceStartup - _recordStart;
-            if (timePassed > maxLengthSec)
+            if (!IsRecording && streaming && VAD(cliptest)){
+                print("record");
+                Microphone.End(RecordStartMicDevice);
+                StartRecord();
+            }
+            else if (IsRecording && streaming && !VAD(_clip) && timePassed>2){
+                print("stopRecord");
                 StopRecord();
+                cliptest = Microphone.Start(RecordStartMicDevice, true, 4, frequency);
+            }
+
+            if (timePassed > maxLengthSec){
+                StopRecord();
+                cliptest = Microphone.Start(RecordStartMicDevice, true, 4, frequency);
+            }
+        }
+
+        private bool VAD(AudioClip vadClip){
+            float[] samples = new float[vadClip.samples * vadClip.channels];
+            vadClip.GetData(samples, 0);
+            
+            // high pass filter goes here
+            float energy_all = 0.0f;
+            float energy_last = 0.0f;
+
+            for (int i=0; i < samples.Length; i++){
+                energy_all += samples[i] * samples[i];
+            }
+            int j = Microphone.GetPosition(null);
+            for (int i=0; i < samples.Length/2; i++){
+                energy_last += samples[j] * samples[j];
+                j--;
+                if (j < 0){ j = samples.Length-1; }
+            }
+            energy_all /= samples.Length;
+            energy_last /= samples.Length/2;
+            if (energy_last > 1.5* energy_all && energy_last > 0.00005){
+                return true;
+            }
+            return false;
         }
 
         private void OnMicrophoneChanged(int ind)
@@ -69,14 +109,19 @@ namespace Whisper.Utils
             SelectedMicDevice = opt.text == microphoneDefaultLabel ? null : opt.text;
         }
 
-        public void StartRecord()
+        public void StartRecord(AudioClip startClip=null)
         {
             if (IsRecording)
                 return;
 
             _recordStart = Time.realtimeSinceStartup;
             RecordStartMicDevice = SelectedMicDevice;
-            _clip = Microphone.Start(RecordStartMicDevice, false, maxLengthSec, frequency);
+            if (startClip == null){
+                _clip = Microphone.Start(RecordStartMicDevice, false, maxLengthSec, frequency);
+            }
+            else{
+                _clip = AudioClip.Create("_clip", startClip.samples + Microphone.Start(RecordStartMicDevice, false, maxLengthSec, frequency).samples, startClip.channels, startClip.frequency, false);
+            }
             IsRecording = true;
         }
 
