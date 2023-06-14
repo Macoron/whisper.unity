@@ -9,7 +9,7 @@ on:
       whisper_cpp_repo_ref:
         description: 'Tag, branch or commit'
         required: true
-        default: 'v1.2.1'
+        default: 'v1.4.2'
 jobs:
   build-windows:
     name: Build for Windows (x86_64)
@@ -66,11 +66,17 @@ jobs:
           apt-get update
           apt-get install -y build-essential
           apt-get install -y cmake
+
+      - name: Change gcc and g++
+        run: apt-get install -y gcc-8 g++-8
           
       - name: Run build script
         run: |
           cd whisper-unity
           sh build_cpp_linux.sh ../whisper-cpp/
+        env:
+         CC:   gcc-8
+         CXX:  g++-8
           
       - name: Upload results
         uses: actions/upload-artifact@v3
