@@ -1,5 +1,5 @@
 # whisper.unity
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.2.1-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.2.1)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.4.2-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.4.2)
 
 [![Testing](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml/badge.svg)](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml)
 
@@ -47,9 +47,11 @@ You can download model weights [from here](https://huggingface.co/ggerganov/whis
 For more information about models differences and formats read [whisper.cpp readme](https://github.com/ggerganov/whisper.cpp#ggml-format) and [OpenAI readme](https://github.com/openai/whisper#available-models-and-languages).
 
 ## Compiling C++ libraries from source
-This project comes with prebuild libraries of whisper.cpp for all supported platforms. In case you want to build libraries yourself:
+This project comes with prebuild libraries of whisper.cpp for all supported platforms. You can rebuild them from source using Github Actions. To do that make fork of this repo and go into `Actions => Build C++ => Run workflow`.  After pipeline completed, download compiled libraries in artifacts tab.
+
+In case you want to build libraries on your machine:
 1. Clone the original [whisper.cpp](https://github.com/ggerganov/whisper.cpp) repository
-2. Checkout tag [v1.2.1](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.2.1). Other versions might not work with this Unity bindings.
+2. Checkout tag [v1.4.2](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.4.2). Other versions might not work with this Unity bindings.
 3. Open whisper.unity folder with command line
 4. If you are using **Windows** write:
 ```bash

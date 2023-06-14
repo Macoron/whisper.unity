@@ -18,7 +18,8 @@ namespace Whisper.Native
     };
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, whisper_state_ptr state, int n_new, System.IntPtr user_data);
+    public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, whisper_state_ptr state,
+        int n_new, System.IntPtr user_data);
     
     /// <summary>
     /// This is direct copy of C++ struct.

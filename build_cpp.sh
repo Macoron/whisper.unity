@@ -16,7 +16,8 @@ build_mac() {
   clean_build
   echo "Starting building for Mac..."
 
-  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ../
+  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF \
+   -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON -DWHISPER_NO_F16C=ON ../
   make
 
   echo "Build for Mac complete!"
@@ -33,8 +34,9 @@ build_ios() {
   echo "Starting building for ios..."
 
   cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_SYSTEM_NAME=iOS \
-  "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" \
-   -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_IOS_INSTALL_COMBINED=YES ../
+  -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+  -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_IOS_INSTALL_COMBINED=YES \
+  -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
   make
 
   echo "Build for ios complete!"
@@ -50,7 +52,8 @@ build_android() {
   clean_build
   echo "Starting building for Android..."
 
-  cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" -DANDROID_ABI=arm64-v8a -DBUILD_SHARED_LIBS=OFF ../
+  cmake -DCMAKE_TOOLCHAIN_FILE="$android_sdk_path" -DANDROID_ABI=arm64-v8a -DBUILD_SHARED_LIBS=OFF \
+  -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
   make
 
   echo "Build for Android complete!"
