@@ -68,7 +68,7 @@ jobs:
           apt-get install -y cmake
 
       - name: Change gcc and g++
-      - run: apt-get install -y gcc-8 g++-8
+        run: apt-get install -y gcc-8 g++-8
           
       - name: Run build script
         run: |
