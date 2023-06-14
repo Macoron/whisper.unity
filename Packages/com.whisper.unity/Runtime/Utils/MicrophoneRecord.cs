@@ -11,7 +11,9 @@ namespace Whisper.Utils
     {
         public int maxLengthSec = 30;
         public int frequency = 16000;
+        public float freq_thold  = 100.0f;
         public bool echo = true;
+        public int vadLengthSec = 4;
         
         [Header("Microphone selection (optional)")] 
         [CanBeNull] public Dropdown microphoneDropdown;
@@ -20,6 +22,7 @@ namespace Whisper.Utils
         private float _recordStart;
         private AudioClip _clip;
         private float _length;
+        private bool voiceDetected = false;
 
         private string _selectedMicDevice;
         public string SelectedMicDevice
@@ -34,13 +37,11 @@ namespace Whisper.Utils
         }
 
         public string RecordStartMicDevice { get; private set; }
+        public bool streaming;
         public bool IsRecording { get; private set; }
 
         public IEnumerable<string> AvailableMicDevices => Microphone.devices;
 
-        public bool streaming;
-
-        private AudioClip cliptest;
         private void Awake()
         {
             if(microphoneDropdown != null)
@@ -53,53 +54,80 @@ namespace Whisper.Utils
                     .FindIndex(op => op.text == microphoneDefaultLabel);
                 microphoneDropdown.onValueChanged.AddListener(OnMicrophoneChanged);
             }
-            cliptest = Microphone.Start(RecordStartMicDevice, true, 4, frequency);
-
+            _clip = Microphone.Start(RecordStartMicDevice, true, vadLengthSec, frequency);
+            InvokeRepeating("VAD", 0.5f, 0.5f);
         }
 
         private void Update()
         {
             var timePassed = Time.realtimeSinceStartup - _recordStart;
-            if (!IsRecording && streaming && VAD(cliptest)){
+            if (!IsRecording && streaming && voiceDetected){
                 print("record");
                 Microphone.End(RecordStartMicDevice);
                 StartRecord();
             }
-            else if (IsRecording && streaming && !VAD(_clip) && timePassed>2){
-                print("stopRecord");
+            else if (IsRecording && streaming && !voiceDetected && timePassed>2){
+                print("recordingStopped");
                 StopRecord();
-                cliptest = Microphone.Start(RecordStartMicDevice, true, 4, frequency);
+                _clip = Microphone.Start(RecordStartMicDevice, true, vadLengthSec, frequency);
             }
-
             if (timePassed > maxLengthSec){
                 StopRecord();
-                cliptest = Microphone.Start(RecordStartMicDevice, true, 4, frequency);
+                _clip = Microphone.Start(RecordStartMicDevice, true, vadLengthSec, frequency);
             }
         }
 
-        private bool VAD(AudioClip vadClip){
-            float[] samples = new float[vadClip.samples * vadClip.channels];
-            vadClip.GetData(samples, 0);
+        private void VAD(){
+            float[] samples = new float[_clip.samples * _clip.channels];
+            _clip.GetData(samples, 0);
             
-            // high pass filter goes here
+            HighPassFilter(samples, freq_thold, frequency);
             float energy_all = 0.0f;
             float energy_last = 0.0f;
+            int microphonePos = Microphone.GetPosition(null);
+            int vadSamplesLen = frequency * vadLengthSec;
 
-            for (int i=0; i < samples.Length; i++){
-                energy_all += samples[i] * samples[i];
+            //get energy all
+            int j = microphonePos;
+            for (int i=0; i < vadSamplesLen; i++){
+                energy_all += samples[j] * samples[j];
+                j--;
+                if (j < 0){ j = vadSamplesLen-1; }
             }
-            int j = Microphone.GetPosition(null);
-            for (int i=0; i < samples.Length/2; i++){
+            // get recent energy
+            j = microphonePos;
+            for (int i=0; i < vadSamplesLen/2; i++){
                 energy_last += samples[j] * samples[j];
                 j--;
-                if (j < 0){ j = samples.Length-1; }
+                if (j < 0){ j = vadSamplesLen-1; }
             }
-            energy_all /= samples.Length;
-            energy_last /= samples.Length/2;
-            if (energy_last > 1.5* energy_all && energy_last > 0.00005){
-                return true;
+            energy_all /= vadSamplesLen;
+            energy_last /= vadSamplesLen/2;
+
+            if (energy_last > 1.6*energy_all && !voiceDetected && energy_last>0.00000005){
+                print("last\nlast: " + energy_last + "\nall: " + energy_all + "\n" + voiceDetected);
+                voiceDetected = true;
+                return;
             }
-            return false;
+            else if (voiceDetected && energy_last*2 < energy_all){
+                print("all\nlast: " + energy_last + "\nall: " + energy_all + "\n" + voiceDetected);
+                voiceDetected = false;
+            }
+            if(energy_last==0){_clip = Microphone.Start(RecordStartMicDevice, true, vadLengthSec, frequency);}
+            return;
+        }
+
+        void HighPassFilter(float[] data, float cutoff, float sampleRate) 
+        {
+            float Rc = 1.0f / (2.0f * (float)Math.PI * cutoff);
+            float Dt = 1.0f / sampleRate;
+            float Alpha = Dt / (Rc + Dt);
+            float y = data[0];        
+            for (int i = 1; i < data.Length; i++)
+            {
+                y = Alpha * (y + data[i] - data[i - 1]);
+                data[i] = y;
+            }
         }
 
         private void OnMicrophoneChanged(int ind)
