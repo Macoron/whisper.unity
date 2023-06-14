@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
+// ReSharper disable ArrangeObjectCreationWhenTypeEvident - for Unity 2019/2020 support:
 
 namespace Whisper.Samples
 {
@@ -22,7 +22,7 @@ namespace Whisper.Samples
         public AudioClip clip;
         public bool echoSound = true;
 
-        public List<InitialPrompt> initialPrompts = new()
+        public List<InitialPrompt> initialPrompts = new List<InitialPrompt>
         {
             new InitialPrompt
             {
