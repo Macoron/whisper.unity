@@ -15,7 +15,8 @@ build_linux() {
   clean_build
   echo "Starting building for Linux..."
 
-  cmake -DCMAKE_BUILD_TYPE=Release ../
+  cmake -DCMAKE_BUILD_TYPE=Release \
+  -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
   make
 
   echo "Build for Linux complete!"
