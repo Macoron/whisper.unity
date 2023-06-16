@@ -38,6 +38,7 @@ namespace Whisper
         
         [Tooltip("Initial prompt as a string variable. " +
                  "It should improve transcription quality or guide it to the right direction.")]
+        [TextArea]
         public string initialPrompt;
         
 
