@@ -14,6 +14,8 @@ namespace Whisper
          private WhisperNativeParams _param;
          private string _languageManaged;
          private IntPtr _languagePtr = IntPtr.Zero;
+         private string _initialPromptManaged;
+         private IntPtr _initialPromptPtr = IntPtr.Zero;
          
          /// <summary>
          /// Native C++ struct parameters.
@@ -26,8 +28,12 @@ namespace Whisper
              _param = param;
      
              // copy language string to managed memory
-             var strPtr = new IntPtr(param.language);
-             _languageManaged = Marshal.PtrToStringAnsi(strPtr);
+             var languageStrPtr = new IntPtr(param.language);
+             _languageManaged = Marshal.PtrToStringAnsi(languageStrPtr);
+     
+             // copy initial_prompt string to managed memory
+             var initialPromptStrPtr = new IntPtr(param.initial_prompt);
+             _initialPromptManaged = Marshal.PtrToStringAnsi(initialPromptStrPtr);
              
              // reset callbacks
              _param.new_segment_callback = null;
@@ -37,6 +43,7 @@ namespace Whisper
          ~WhisperParams()
          {
              FreeLanguageString();
+             FreeInitialPromptString();
          }
 
          #region Basic Parameters
@@ -196,6 +203,32 @@ namespace Whisper
                  }
              }
          }
+
+         /// <summary>
+         /// initial prompt is converted to tokens and prepended to any existing text context from a previous call
+         /// <a href="https://github.com/ggerganov/whisper.cpp/discussions/348#discussioncomment-4559682">Using example</a>
+         /// </summary>
+         public string InitialPrompt
+         {
+             get => _initialPromptManaged;
+             set
+             {
+                 if (_initialPromptManaged == value)
+                     return;
+                 
+                 _initialPromptManaged = value;
+                 unsafe
+                 {
+                     // free previous string
+                     FreeInitialPromptString();
+                     
+                     // copies string in unmanaged memory to avoid GC
+                     if (_initialPromptManaged == null) return;
+                     _initialPromptPtr = Marshal.StringToHGlobalAnsi(_initialPromptManaged);
+                     _param.initial_prompt = (byte*)_initialPromptPtr;
+                 }
+             }
+         }
          
          #endregion
 
@@ -279,6 +312,16 @@ namespace Whisper
              if (_languagePtr != IntPtr.Zero)
                  Marshal.FreeHGlobal(_languagePtr);
              _languagePtr = IntPtr.Zero;
+         }
+         
+         private void FreeInitialPromptString()
+         {
+             // if C# allocated new string before - clear it
+             // but only clear C# string, not C++ literals
+             // this code assumes that whisper will not change initial prompt string in C++
+             if (_initialPromptPtr != IntPtr.Zero)
+                 Marshal.FreeHGlobal(_initialPromptPtr);
+             _initialPromptPtr = IntPtr.Zero;
          }
          
          public static WhisperParams GetDefaultParams(WhisperSamplingStrategy strategy =

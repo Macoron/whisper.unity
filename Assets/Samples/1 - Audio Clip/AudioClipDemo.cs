@@ -1,16 +1,50 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+// ReSharper disable ArrangeObjectCreationWhenTypeEvident - for Unity 2019/2020 support:
 
 namespace Whisper.Samples
 {
     public class AudioClipDemo : MonoBehaviour
     {
+        [Serializable]
+        public class InitialPrompt
+        {
+            public string name;
+            public string prompt;
+        }
+        
         public WhisperManager manager;
         public AudioClip clip;
         public bool echoSound = true;
+        
+        public List<InitialPrompt> initialPrompts = new List<InitialPrompt>
+        {
+            new InitialPrompt
+            {
+                name = "lowercase",
+                prompt = "hello how is it going always use lowercase no punctuation goodbye one two three start stop i you me they",
+            },
+            new InitialPrompt
+            {
+                name = "Start of the clip",
+                prompt = "And so my fellow Americans, ask not what your country can do for you",
+            },
+            new InitialPrompt
+            {
+                name = "UPPERCASE",
+                prompt = "HELLO HOW IS IT GOING ALWAYS USE UPPERCASE NO PUNCTUATION GOODBYE ONE TWO THREE START STOP I YOU ME THEY",
+            },
+            new InitialPrompt
+            {
+                name = "Custom",
+                prompt = "",
+            },
+        };
         
         [Header("Text Output")]
         public bool streamSegments = true;
@@ -21,6 +55,8 @@ namespace Whisper.Samples
         public Button button;
         public Text outputText;
         public Text timeText;
+        public Dropdown initialPromptDropdown;
+        public InputField selectedInitialPromptInput;
 
         private string _buffer;
 
@@ -29,6 +65,13 @@ namespace Whisper.Samples
             button.onClick.AddListener(ButtonPressed);
             if (streamSegments)
                 manager.OnNewSegment += OnNewSegmentHandler;
+            
+            initialPromptDropdown.options = initialPrompts
+                .Select(x => new Dropdown.OptionData(x.name))
+                .ToList();
+            initialPromptDropdown.onValueChanged.AddListener(OnInitialPromptChanged);
+            initialPromptDropdown.value = 0;
+            OnInitialPromptChanged(initialPromptDropdown.value);
         }
 
         private void OnDestroy()
@@ -37,12 +80,17 @@ namespace Whisper.Samples
                 manager.OnNewSegment -= OnNewSegmentHandler;
         }
 
+        private void OnInitialPromptChanged(int ind) => selectedInitialPromptInput.text = initialPrompts[ind].prompt;
+
         public async void ButtonPressed()
         {
             _buffer = "";
             if (echoSound)
                 AudioSource.PlayClipAtPoint(clip, Vector3.zero);
 
+            // set initial prompt in manager
+            manager.initialPrompt = selectedInitialPromptInput.text;
+            
             var sw = new Stopwatch();
             sw.Start();
             
