@@ -166,7 +166,7 @@ namespace Whisper
         {
             // get segment text and timestamps
             var textPtr = WhisperNative.whisper_full_get_segment_text(_whisperCtx, i);
-            var text = Marshal.PtrToStringAnsi(textPtr);
+            var text = TextUtils.StringFromNativeUtf8(textPtr);
             var start = WhisperNative.whisper_full_get_segment_t0(_whisperCtx, i);
             var end = WhisperNative.whisper_full_get_segment_t1(_whisperCtx, i);
             var segment = new WhisperSegment(i, text, start, end);
@@ -182,7 +182,7 @@ namespace Whisper
             {
                 var nativeToken = WhisperNative.whisper_full_get_token_data(_whisperCtx, i, j);
                 var textTokenPtr = WhisperNative.whisper_full_get_token_text(_whisperCtx, i, j);
-                var textToken = Marshal.PtrToStringAnsi(textTokenPtr);
+                var textToken = TextUtils.StringFromNativeUtf8(textTokenPtr);
                 var isSpecial = nativeToken.id >= WhisperNative.whisper_token_eot(_whisperCtx); 
                 var token = new WhisperTokenData(nativeToken, textToken, param.TokenTimestamps, isSpecial);
                 segment.Tokens[j] = token;
