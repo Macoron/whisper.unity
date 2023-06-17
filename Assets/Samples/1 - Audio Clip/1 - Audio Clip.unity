@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -920,7 +920,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 36
     m_FontStyle: 2
     m_BestFit: 0
     m_MinSize: 10
@@ -1866,6 +1866,8 @@ MonoBehaviour:
   clip: {fileID: 8300000, guid: 2f8a92ae57b4341c68e81202d049ca31, type: 3}
   echoSound: 1
   initialPrompts:
+  - name: Custom
+    prompt: 
   - name: lowercase
     prompt: hello how is it    going always use lowercase no punctuation goodbye
       one two three start stop i you me they
@@ -1874,8 +1876,6 @@ MonoBehaviour:
   - name: UPPERCASE
     prompt: HELLO HOW IS IT GOING ALWAYS USE UPPERCASE NO PUNCTUATION GOODBYE ONE
       TWO THREE START STOP I YOU ME THEY
-  - name: Custom
-    prompt: 
   streamSegments: 1
   printLanguage: 1
   showTimestamps: 0
@@ -2164,7 +2164,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: Prompt Preset
 --- !u!222 &1460358710
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2697,7 +2697,9 @@ MonoBehaviour:
   m_ItemImage: {fileID: 0}
   m_Value: 0
   m_Options:
-    m_Options: []
+    m_Options:
+    - m_Text: Prompt Preset
+      m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -2860,7 +2862,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1882481892}
   m_HandleRect: {fileID: 1882481891}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
