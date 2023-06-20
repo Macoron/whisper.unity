@@ -55,6 +55,7 @@ namespace Whisper
         public int audioCtx;
 
         public event OnNewSegmentDelegate OnNewSegment;
+        public event OnProgressDelegate OnProgress;
 
         private WhisperWrapper _whisper;
         private WhisperParams _params;
@@ -100,6 +101,7 @@ namespace Whisper
                 _whisper = await WhisperWrapper.InitFromFileAsync(path);
                 _params = WhisperParams.GetDefaultParams(strategy);
                 _whisper.OnNewSegment += OnNewSegmentHandler;
+                _whisper.OnProgress += OnProgressHandler;
             }
             catch (Exception e)
             {
@@ -107,7 +109,7 @@ namespace Whisper
             }
             IsLoading = false;
         }
-
+        
         public bool IsMultilingual()
         {
             if (!IsLoaded)
@@ -183,6 +185,14 @@ namespace Whisper
             _dispatcher.Execute(() =>
             {
                 OnNewSegment?.Invoke(segment);
+            });
+        }
+        
+        private void OnProgressHandler(int progress)
+        {
+            _dispatcher.Execute(() =>
+            {
+                OnProgress?.Invoke(progress);
             });
         }
     }

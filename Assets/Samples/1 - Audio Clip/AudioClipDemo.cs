@@ -65,6 +65,7 @@ namespace Whisper.Samples
             button.onClick.AddListener(ButtonPressed);
             if (streamSegments)
                 manager.OnNewSegment += OnNewSegmentHandler;
+            manager.OnProgress += OnProgressHandler;
             
             initialPromptDropdown.options = initialPrompts
                 .Select(x => new Dropdown.OptionData(x.name))
@@ -137,7 +138,11 @@ namespace Whisper.Samples
 
             return sb.ToString();
         }
-
+        
+        private void OnProgressHandler(int progress)
+        {
+            timeText.text = $"Progress: {progress}%";
+        }
     }
 }
 

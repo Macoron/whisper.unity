@@ -21,6 +21,10 @@ namespace Whisper.Native
     public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, whisper_state_ptr state,
         int n_new, System.IntPtr user_data);
     
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    public delegate void whisper_progress_callback(whisper_context_ptr ctx, whisper_state_ptr state,
+        int progress, System.IntPtr user_data);
+    
     /// <summary>
     /// This is direct copy of C++ struct.
     /// Do not change or add any fields without changing it in whisper.cpp.
@@ -139,8 +143,8 @@ namespace Whisper.Native
         public System.IntPtr new_segment_callback_user_data;
 
         // called on each progress update
-        void* progress_callback;
-        void* progress_callback_user_data;
+        public whisper_progress_callback progress_callback;
+        public System.IntPtr progress_callback_user_data;
 
         // called each time before the encoder starts
         void* encoder_begin_callback;
