@@ -93,23 +93,15 @@ namespace Whisper.Native
 
         // for auto-detection, set to nullptr, "" or "auto"
         public byte* language;
+        [MarshalAs(UnmanagedType.U1)] bool detect_language;
 
         // common decoding parameters:
-        [MarshalAs(UnmanagedType.U1)]
-        bool
-            suppress_blank; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L89
-
-        [MarshalAs(UnmanagedType.U1)]
-        bool
-            suppress_non_speech_tokens; // ref: https://github.com/openai/whisper/blob/7858aa9c08d98f75575035ecd6481f462d66ca27/whisper/tokenizer.py#L224-L253
+        [MarshalAs(UnmanagedType.U1)] bool suppress_blank; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L89
+        [MarshalAs(UnmanagedType.U1)] bool suppress_non_speech_tokens; // ref: https://github.com/openai/whisper/blob/7858aa9c08d98f75575035ecd6481f462d66ca27/whisper/tokenizer.py#L224-L253
 
         float temperature; // initial decoding temperature, ref: https://ai.stackexchange.com/a/32478
-
-        float
-            max_initial_ts; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L97
-
-        float
-            length_penalty; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L267
+        float max_initial_ts; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L97
+        float length_penalty; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L267
 
         // fallback parameters
         // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L274-L278
@@ -121,8 +113,7 @@ namespace Whisper.Native
         [StructLayout(LayoutKind.Sequential)]
         struct greedy_struct
         {
-            int
-                best_of; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L264
+            int best_of; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L264
         }
 
         greedy_struct greedy;
@@ -130,9 +121,7 @@ namespace Whisper.Native
         [StructLayout(LayoutKind.Sequential)]
         struct beam_search_struct
         {
-            int
-                beam_size; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L265
-
+            int beam_size; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L265
             float patience; // TODO: not implemented, ref: https://arxiv.org/pdf/2204.05424.pdf
         }
 
