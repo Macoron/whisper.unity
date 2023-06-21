@@ -37,6 +37,7 @@ namespace Whisper.Samples
             
             if (streamSegments)
                 whisper.OnNewSegment += WhisperOnOnNewSegment;
+            whisper.OnProgress += OnProgressHandler;
         }
 
         private void OnButtonPressed()
@@ -86,6 +87,11 @@ namespace Whisper.Samples
         {
             _buffer += segment.Text;
             outputText.text = _buffer + "...";
+        }
+        
+        private void OnProgressHandler(int progress)
+        {
+            timeText.text = $"Progress: {progress}%";
         }
     }
 }

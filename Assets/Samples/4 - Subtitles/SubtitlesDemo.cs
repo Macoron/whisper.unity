@@ -24,6 +24,7 @@ namespace Whisper.Samples
             // we need to force this settings for whisper
             whisper.enableTokens = true;
             whisper.tokensTimestamps = true;
+            whisper.OnProgress += OnProgressHandler;
             
             languageDropdown.value = languageDropdown.options
                 .FindIndex(op => op.text == whisper.language);
@@ -152,6 +153,11 @@ namespace Whisper.Samples
                 return "yellow";
             else
                 return "green";
+        }
+        
+        private void OnProgressHandler(int progress)
+        {
+            timeText.text = $"Progress: {progress}%";
         }
     }
 }
