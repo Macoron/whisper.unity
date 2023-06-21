@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using Whisper.Utils;
+
 // ReSharper disable ArrangeObjectCreationWhenTypeEvident - for Unity 2019/2020 support:
 
 namespace Whisper.Samples
@@ -57,6 +59,7 @@ namespace Whisper.Samples
         public Text timeText;
         public Dropdown initialPromptDropdown;
         public InputField selectedInitialPromptInput;
+        public ScrollRect scroll;
 
         private string _buffer;
 
@@ -65,6 +68,7 @@ namespace Whisper.Samples
             button.onClick.AddListener(ButtonPressed);
             if (streamSegments)
                 manager.OnNewSegment += OnNewSegmentHandler;
+            manager.OnProgress += OnProgressHandler;
             
             initialPromptDropdown.options = initialPrompts
                 .Select(x => new Dropdown.OptionData(x.name))
@@ -121,6 +125,8 @@ namespace Whisper.Samples
                 _buffer += $"<b>{segment.TimestampToString()}</b>{segment.Text}\n";
                 outputText.text = _buffer;
             }
+
+            UiUtils.ScrollDown(scroll);
         }
 
         private string GetFinalText(WhisperResult output)
@@ -137,7 +143,11 @@ namespace Whisper.Samples
 
             return sb.ToString();
         }
-
+        
+        private void OnProgressHandler(int progress)
+        {
+            timeText.text = $"Progress: {progress}%";
+        }
     }
 }
 

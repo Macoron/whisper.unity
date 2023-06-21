@@ -358,7 +358,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'Time: '
+  m_Text: 
 --- !u!222 &167558893
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -812,6 +812,7 @@ MonoBehaviour:
   noContext: 1
   singleSegment: 0
   enableTokens: 1
+  initialPrompt: 
   tokensTimestamps: 1
   speedUp: 0
   audioCtx: 0
@@ -1908,6 +1909,7 @@ MonoBehaviour:
   timeText: {fileID: 167558892}
   languageDropdown: {fileID: 1400360880}
   translateToggle: {fileID: 1425433665}
+  scroll: {fileID: 942089564}
 --- !u!1 &1345287211
 GameObject:
   m_ObjectHideFlags: 0

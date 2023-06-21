@@ -13,12 +13,14 @@ using Debug = UnityEngine.Debug;
 namespace Whisper
 {
     public delegate void OnNewSegmentDelegate(WhisperSegment text);
+    public delegate void OnProgressDelegate(int progress);
     
     public class WhisperWrapper
     {
         public const int WhisperSampleRate = 16000;
 
         public event OnNewSegmentDelegate OnNewSegment;
+        public event OnProgressDelegate OnProgress;
 
         private readonly IntPtr _whisperCtx;
         private readonly WhisperNativeParams _params;
@@ -91,6 +93,13 @@ namespace Whisper
                     nativeParams.new_segment_callback = NewSegmentCallbackStatic;
                     nativeParams.new_segment_callback_user_data = GCHandle.ToIntPtr(gch);
                 }
+                
+                if (nativeParams.progress_callback == null &&
+                    nativeParams.progress_callback_user_data == IntPtr.Zero)
+                {
+                    nativeParams.progress_callback = ProgressCallbackStatic;
+                    nativeParams.progress_callback_user_data = GCHandle.ToIntPtr(gch);
+                }
 
                 // start inference
                 if (!InferenceWhisper(readySamples, nativeParams))
@@ -160,6 +169,19 @@ namespace Whisper
                 var segment = GetSegment(i, param);
                 OnNewSegment?.Invoke(segment);
             }
+        }
+        
+        [MonoPInvokeCallback(typeof(whisper_progress_callback))]
+        private void ProgressCallbackStatic(IntPtr ctx, IntPtr state, int progress, IntPtr userDataPtr)
+        {
+            // relay this static function to wrapper instance
+            var userData = (WhisperUserData) GCHandle.FromIntPtr(userDataPtr).Target;
+            userData.Wrapper.ProgressCallback(progress);
+        }
+
+        private void ProgressCallback(int progress)
+        {
+            OnProgress?.Invoke(progress);
         }
 
         private WhisperSegment GetSegment(int i, WhisperParams param)

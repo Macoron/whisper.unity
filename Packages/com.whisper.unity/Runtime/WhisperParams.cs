@@ -284,10 +284,32 @@ namespace Whisper
          }
 
          /// <summary>
-         /// Pointer to data that you want to pass as a parameter for callback.
+         /// Pointer to data that you want to pass as a parameter for <see cref="NewSegmentCallback"/>.
          /// It will be relayed from whisper code without any changes.
          /// </summary>
-         public IntPtr NewSegmentCallbackUseData
+         public IntPtr NewSegmentCallbackUserData
+         {
+             get => _param.new_segment_callback_user_data;
+             set => _param.new_segment_callback_user_data = value;
+         }
+         
+         /// <summary>
+         /// Called on each progress update.
+         /// Because of IL2CPP, this should be a static function.
+         /// <see cref="WhisperWrapper"/> and <see cref="WhisperManager"/> will use it
+         /// to raise their custom event.
+         /// </summary>
+         public whisper_progress_callback ProgressCallback
+         {
+             get => _param.progress_callback;
+             set => _param.progress_callback = value;
+         }
+         
+         /// <summary>
+         /// Pointer to data that you want to pass as a parameter for <see cref="ProgressCallback"/>.
+         /// It will be relayed from whisper code without any changes.
+         /// </summary>
+         public IntPtr ProgressCallbackUserData
          {
              get => _param.new_segment_callback_user_data;
              set => _param.new_segment_callback_user_data = value;

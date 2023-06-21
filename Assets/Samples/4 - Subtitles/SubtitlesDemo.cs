@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using Whisper.Utils;
 
 namespace Whisper.Samples
 {
@@ -18,12 +19,14 @@ namespace Whisper.Samples
         public Text timeText;
         public Dropdown languageDropdown;
         public Toggle translateToggle;
+        public ScrollRect scroll;
 
         private void Awake()
         {
             // we need to force this settings for whisper
             whisper.enableTokens = true;
             whisper.tokensTimestamps = true;
+            whisper.OnProgress += OnProgressHandler;
             
             languageDropdown.value = languageDropdown.options
                 .FindIndex(op => op.text == whisper.language);
@@ -71,6 +74,7 @@ namespace Whisper.Samples
             {
                 var text = GetSubtitles(res, source.time);
                 outputText.text = text;
+                UiUtils.ScrollDown(scroll);
                 await Task.Yield();
 
                 // check that audio source still here and wasn't destroyed
@@ -152,6 +156,11 @@ namespace Whisper.Samples
                 return "yellow";
             else
                 return "green";
+        }
+        
+        private void OnProgressHandler(int progress)
+        {
+            timeText.text = $"Progress: {progress}%";
         }
     }
 }

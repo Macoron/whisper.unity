@@ -2,6 +2,8 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.UI;
 using Whisper.Utils;
+using Button = UnityEngine.UI.Button;
+using Toggle = UnityEngine.UI.Toggle;
 
 namespace Whisper.Samples
 {
@@ -19,7 +21,8 @@ namespace Whisper.Samples
         public Text timeText;
         public Dropdown languageDropdown;
         public Toggle translateToggle;
-        
+        public ScrollRect scroll;
+
         private string _buffer;
 
         private void Awake()
@@ -37,6 +40,7 @@ namespace Whisper.Samples
             
             if (streamSegments)
                 whisper.OnNewSegment += WhisperOnOnNewSegment;
+            whisper.OnProgress += OnProgressHandler;
         }
 
         private void OnButtonPressed()
@@ -86,6 +90,12 @@ namespace Whisper.Samples
         {
             _buffer += segment.Text;
             outputText.text = _buffer + "...";
+            UiUtils.ScrollDown(scroll);
+        }
+        
+        private void OnProgressHandler(int progress)
+        {
+            timeText.text = $"Progress: {progress}%";
         }
     }
 }
