@@ -10,8 +10,38 @@ namespace Whisper
     public class WhisperManager : MonoBehaviour
     {
         [SerializeField]
-        [Tooltip("Path to model weights file relative to StreamingAssets")]
+        [Tooltip("Path to model weights file")]
         private string modelPath = "Whisper/ggml-base.bin";
+        public string ModelPath
+        {
+            get => modelPath;
+            set
+            {
+                if (IsLoaded || IsLoading)
+                {
+                    throw new InvalidOperationException("Cannot change model path after loading the model");
+                }
+
+                modelPath = value;
+            }
+        }
+        
+        [SerializeField]
+        [Tooltip("Determines whether the StreamingAssets folder should be prepended to the model path")]
+        private bool isModelPathInStreamingAssets = true;
+        public bool IsModelPathInStreamingAssets
+        {
+            get => isModelPathInStreamingAssets;
+            set
+            {
+                if (IsLoaded || IsLoading)
+                {
+                    throw new InvalidOperationException("Cannot change model path after loading the model");
+                }
+
+                isModelPathInStreamingAssets = value;
+            }
+        }
         
         [SerializeField]
         [Tooltip("Should model weights be loaded on awake?")]
@@ -97,7 +127,9 @@ namespace Whisper
             IsLoading = true;
             try
             {
-                var path = Path.Combine(Application.streamingAssetsPath, modelPath);
+                var path = IsModelPathInStreamingAssets 
+                    ? Path.Combine(Application.streamingAssetsPath, modelPath)
+                    : modelPath;
                 _whisper = await WhisperWrapper.InitFromFileAsync(path);
                 _params = WhisperParams.GetDefaultParams(strategy);
                 _whisper.OnNewSegment += OnNewSegmentHandler;
@@ -197,4 +229,3 @@ namespace Whisper
         }
     }
 }
-
