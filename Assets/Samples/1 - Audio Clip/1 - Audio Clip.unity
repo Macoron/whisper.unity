@@ -1884,6 +1884,7 @@ MonoBehaviour:
   timeText: {fileID: 167558892}
   initialPromptDropdown: {fileID: 1902663392}
   selectedInitialPromptInput: {fileID: 247128853}
+  scroll: {fileID: 145324201}
 --- !u!1 &1370179832
 GameObject:
   m_ObjectHideFlags: 0
