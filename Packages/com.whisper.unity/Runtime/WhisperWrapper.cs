@@ -172,7 +172,7 @@ namespace Whisper
         }
         
         [MonoPInvokeCallback(typeof(whisper_progress_callback))]
-        private void ProgressCallbackStatic(IntPtr ctx, IntPtr state, int progress, IntPtr userDataPtr)
+        private static void ProgressCallbackStatic(IntPtr ctx, IntPtr state, int progress, IntPtr userDataPtr)
         {
             // relay this static function to wrapper instance
             var userData = (WhisperUserData) GCHandle.FromIntPtr(userDataPtr).Target;
