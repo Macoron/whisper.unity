@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -395,7 +395,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: 'Time: '
 --- !u!222 &167558893
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1020,7 +1020,6 @@ MonoBehaviour:
   noContext: 1
   singleSegment: 1
   enableTokens: 0
-  initialPrompt: 
   tokensTimestamps: 0
   speedUp: 0
   audioCtx: 0
@@ -2710,8 +2709,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1337591121}
-  - component: {fileID: 1337591122}
   - component: {fileID: 1337591123}
+  - component: {fileID: 1337591122}
   m_Layer: 0
   m_Name: Demo
   m_TagString: Untagged
@@ -2743,20 +2742,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1337591120}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c774d83cf4f4d45e29298522e8ba4923, type: 3}
+  m_Script: {fileID: 11500000, guid: f1a8edd53649db248945357666228a96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  whisper: {fileID: 587639199}
-  microphoneRecord: {fileID: 1337591123}
-  streamSegments: 1
-  printLanguage: 1
-  button: {fileID: 2099288375}
-  buttonText: {fileID: 1431014845}
-  outputText: {fileID: 1194114916}
-  timeText: {fileID: 167558892}
-  languageDropdown: {fileID: 1400360880}
-  translateToggle: {fileID: 1425433665}
-  scroll: {fileID: 942089564}
+  maxLengthSec: 30
+  frequency: 16000
+  freq_thold: 100
+  echo: 1
+  vadLengthSec: 4
+  microphoneDropdown: {fileID: 948466958}
+  microphoneDefaultLabel: Default microphone
+  streaming: 0
 --- !u!114 &1337591123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2766,14 +2762,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1337591120}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bc03a4c19604ea394e364f8fc632928, type: 3}
+  m_Script: {fileID: 11500000, guid: 90a71f3f68bac0a4fa7fae501f6ec4e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxLengthSec: 30
-  frequency: 16000
-  echo: 1
-  microphoneDropdown: {fileID: 948466958}
-  microphoneDefaultLabel: Default mic
+  whisper: {fileID: 587639199}
+  microphoneStream: {fileID: 1337591122}
+  streamSegments: 1
+  printLanguage: 1
+  button: {fileID: 2099288375}
+  buttonText: {fileID: 1431014845}
+  outputText: {fileID: 1194114916}
+  timeText: {fileID: 167558892}
+  languageDropdown: {fileID: 1400360880}
+  translateToggle: {fileID: 1425433665}
+  streamingToggle: {fileID: 0}
 --- !u!1 &1345287211
 GameObject:
   m_ObjectHideFlags: 0
@@ -2857,7 +2859,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 967652833}
   m_HandleRect: {fileID: 967652832}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3586,7 +3588,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Record
+  m_Text: Stream
 --- !u!222 &1431014846
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4030,7 +4032,7 @@ GameObject:
   - component: {fileID: 2099288376}
   - component: {fileID: 2099288375}
   m_Layer: 5
-  m_Name: RecordButton
+  m_Name: StreamButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
