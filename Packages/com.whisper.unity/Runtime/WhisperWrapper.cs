@@ -64,7 +64,7 @@ namespace Whisper
 
             var frequency = clip.frequency;
             var channels = clip.channels;
-            var asyncTask = Task.Factory.StartNew(() => GetText(samples, frequency, channels, param));
+            var asyncTask = Async(() => GetText(samples, frequency, channels, param));
             return await asyncTask;
             
         }
@@ -86,6 +86,7 @@ namespace Whisper
                 var gch = GCHandle.Alloc(userData);
                 var nativeParams = param.NativeParams;
                 
+
                 // add callback (if no custom callback set)
                 if (nativeParams.new_segment_callback == null &&
                     nativeParams.new_segment_callback_user_data == IntPtr.Zero)
@@ -127,7 +128,7 @@ namespace Whisper
 
         public async Task<WhisperResult> GetTextAsync(float[] samples, int frequency, int channels, WhisperParams param)
         {
-            var asyncTask = Task.Factory.StartNew(() => GetText(samples, frequency, channels, param));
+            var asyncTask = Async(() => GetText(samples, frequency, channels, param));
             return await asyncTask;
         }
 
@@ -215,12 +216,12 @@ namespace Whisper
         
         public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if (UNITY_ANDROID || UNITY_WEBGL) && !UNITY_EDITOR
             var buffer = await FileUtils.ReadFileAsync(modelPath);
             var res = await InitFromBufferAsync(buffer);
             return res;
 #else
-            var asyncTask = Task.Factory.StartNew(() => InitFromFile(modelPath));
+            var asyncTask = Async(() => InitFromFile(modelPath));
             return await asyncTask;          
 #endif
         }
@@ -302,10 +303,20 @@ namespace Whisper
         
         public static async Task<WhisperWrapper> InitFromBufferAsync(byte[] buffer)
         {
-            var asyncTask = Task.Factory.StartNew(() => InitFromBuffer(buffer));
+            var asyncTask = Async(() => InitFromBuffer(buffer));
             return await asyncTask;
         }
-        
+
+        private static async Task<T> Async<T>(Func<T> func)
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return func();
+#else
+            var asyncTask = Task.Factory.StartNew(func);
+            return await asyncTask;
+#endif
+        }
+
         private struct WhisperUserData
         {
             public WhisperWrapper Wrapper;

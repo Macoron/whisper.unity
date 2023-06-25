@@ -24,7 +24,7 @@ namespace Whisper.Utils
         /// </summary>
         public static async Task<byte[]> ReadFileAsync(string path)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if (UNITY_ANDROID || UNITY_WEBGL) && !UNITY_EDITOR
             return await ReadFileWebRequestAsync(path);
 #else
             return await ReadAllBytesAsync(path);
@@ -32,7 +32,7 @@ namespace Whisper.Utils
         }
 
         /// <summary>
-        /// Read Android file using "web-request".
+        /// Read Android or WebGL file using "web-request".
         /// </summary>
         public static byte[] ReadFileWebRequest(string path)
         {
@@ -53,7 +53,7 @@ namespace Whisper.Utils
         }
         
         /// <summary>
-        /// Async read Android file using "web-request".
+        /// Async read Android or WebGL file using "web-request".
         /// </summary>
         public static async Task<byte[]> ReadFileWebRequestAsync(string path)
         {

@@ -5,6 +5,8 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
+#if !UNITY_WEBGL || UNITY_EDITOR
+
 namespace Whisper.Utils
 {
     public class MicrophoneRecord : MonoBehaviour
@@ -122,3 +124,5 @@ namespace Whisper.Utils
         }
     }
 }
+
+#endif

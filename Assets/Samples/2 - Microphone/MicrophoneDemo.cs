@@ -9,6 +9,8 @@ namespace Whisper.Samples
 {
     public class MicrophoneDemo : MonoBehaviour
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
+        
         public WhisperManager whisper;
         public MicrophoneRecord microphoneRecord;
         public bool streamSegments = true;
@@ -97,5 +99,7 @@ namespace Whisper.Samples
         {
             timeText.text = $"Progress: {progress}%";
         }
+        
+#endif
     }
 }

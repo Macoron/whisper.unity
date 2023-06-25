@@ -13,7 +13,7 @@ namespace Whisper.Native
     public static unsafe class WhisperNative
     {
         
-#if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+#if (UNITY_IOS || UNITY_ANDROID || UNITY_WEBGL) && !UNITY_EDITOR
         private const string LibraryName = "__Internal";
 #else
         private const string LibraryName = "libwhisper";
