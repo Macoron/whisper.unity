@@ -227,5 +227,26 @@ namespace Whisper
                 OnProgress?.Invoke(progress);
             });
         }
+
+        private WhisperStream _stream;
+        public event OnResultUpdatedDelegate OnResultUpdated;
+
+        public void StartStream(int frequency, int channels)
+        {
+            var param = new WhisperStreamParams(WhisperStreamStrategy.Recurrent, 
+                _params, frequency, channels);
+            _stream = new WhisperStream(_whisper, param);
+            _stream.OnResultUpdated += (res) => OnResultUpdated?.Invoke(res);
+        }
+        
+        public void Stream(float[] toArray)
+        {
+            _stream.AppendBuffer(toArray);
+        }
+
+        public void FinishStream()
+        {
+            _stream.FinishStream();
+        }
     }
 }
