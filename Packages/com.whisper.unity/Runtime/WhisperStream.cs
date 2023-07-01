@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Whisper.Utils;
@@ -69,11 +70,18 @@ namespace Whisper
 
         public readonly int KeepSamples;
 
+        public readonly float LengthSec;
+        
+        public readonly int LengthSamples;
+
         public readonly bool UpdatePrompt;
+
+        public readonly int StepsCount;
 
         public WhisperStreamParams(WhisperStreamStrategy strategy, 
             WhisperParams inferenceParam, int frequency, int channels,
-            float stepSec = 3f, float keepSec = 0.2f, bool updatePrompt = true)
+            float stepSec = 3f, float keepSec = 0.2f, float lengthSec = 10f,
+            bool updatePrompt = true)
         {
             Strategy = strategy;
             InferenceParam = inferenceParam;
@@ -86,6 +94,11 @@ namespace Whisper
             KeepSec = keepSec;
             KeepSamples = (int) (keepSec * frequency * channels);
 
+            LengthSec = lengthSec;
+            LengthSamples = (int) (lengthSec * frequency * channels);
+
+            StepsCount = Math.Max(1, LengthSamples / StepSamples);
+            
             UpdatePrompt = updatePrompt;
         }
     }
@@ -105,8 +118,10 @@ namespace Whisper
         private int _pointer;
         private readonly List<float> _buffer = new List<float>();
         private Task<WhisperResult> _task;
-        private StringBuilder _builder = new StringBuilder();
-        
+        private string _output = "";
+        private string _currentSegment = "";
+        private int _step;
+
         public WhisperStream(WhisperWrapper wrapper, WhisperStreamParams param,
             MicrophoneRecord microphone = null)
         {
@@ -193,7 +208,8 @@ namespace Whisper
                 return;
 
             // get length of prev buffer
-            var prevBufferLen = Math.Min(_pointer, _param.KeepSamples);
+            var length = _buffer.Count % _param.LengthSamples;
+            var prevBufferLen = Math.Min(_pointer, _param.KeepSamples + length);
             var start = _pointer - prevBufferLen;
             var totalLength = size + prevBufferLen;
             
@@ -207,16 +223,24 @@ namespace Whisper
             
             // append transcription to previous result
             var res = await _task;
-            _builder.Append(res.Result);
+            _currentSegment = res.Result;
+            
+            // send update to user
+            OnResultUpdated?.Invoke(_output + _currentSegment);
 
+            _step++;
+            if (_step >= _param.StepsCount)
+            {
+                _output += _currentSegment;
+                _step = 0;
+            }
+            
             // update prompt with latest transcription
             if (_param.UpdatePrompt)
             {
-                _param.InferenceParam.InitialPrompt = _originalPrompt + _builder;
+                _param.InferenceParam.InitialPrompt = _originalPrompt + _output;
             }
 
-            // send update to user
-            OnResultUpdated?.Invoke(_builder.ToString());
 
             // reset if its last call
             if (lastCall)
@@ -225,9 +249,11 @@ namespace Whisper
 
         private void Reset()
         {
-            _builder.Clear();
+            _output = "";
+            _currentSegment = "";
             _buffer.Clear();
             _pointer = 0;
+            _step = 0;
         }
         
         private void MicrophoneOnChunkReady(AudioChunk chunk)

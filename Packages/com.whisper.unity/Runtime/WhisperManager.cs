@@ -78,6 +78,8 @@ namespace Whisper
         public float stepSec = 3f;
 
         public float keepSec = 0.2f;
+
+        public float lengthSec = 10f;
         
         public bool updatePrompt = true;
 
@@ -215,7 +217,7 @@ namespace Whisper
             }
 
             var param = new WhisperStreamParams(streamStrategy, _params,
-                frequency, channels, stepSec, keepSec, updatePrompt);
+                frequency, channels, stepSec, keepSec, lengthSec, updatePrompt);
             var stream = new WhisperStream(_whisper, param);
             return stream;
         }
@@ -234,7 +236,7 @@ namespace Whisper
             var channels = 1;
             var frequency = microphone.frequency;
             var param = new WhisperStreamParams(streamStrategy, _params,
-                frequency, channels, stepSec, keepSec, updatePrompt);
+                frequency, channels, stepSec, keepSec, lengthSec, updatePrompt);
             var stream = new WhisperStream(_whisper, param, microphone);
             return stream;
         }

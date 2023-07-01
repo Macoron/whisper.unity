@@ -13,10 +13,13 @@ public class StreamingSample : MonoBehaviour
     public Text text;
     private float[] _samples;
     private AudioSource _source;
+    
+    public ScrollRect scroll;
 
     private void OnStreamResultUpdated(string updatedResult)
     {
         text.text = updatedResult;
+        UiUtils.ScrollDown(scroll);
     }
 
     public async void OnAudioClipButtonPressed()
