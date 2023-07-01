@@ -1012,10 +1012,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9370225a2ca94276b870d5f87b0db55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modelPath: Whisper/ggml-tiny.bin
+  modelPath: Whisper/ggml-base.en.bin
   isModelPathInStreamingAssets: 1
   initOnAwake: 1
-  language: auto
+  language: en
   translateToEnglish: 0
   strategy: 0
   noContext: 1
@@ -1025,8 +1025,9 @@ MonoBehaviour:
   streamStrategy: 1
   stepSec: 3
   keepSec: 0.2
+  updatePrompt: 1
   tokensTimestamps: 0
-  speedUp: 1
+  speedUp: 0
   audioCtx: 0
 --- !u!1 &637716610
 GameObject:
@@ -2885,7 +2886,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bc03a4c19604ea394e364f8fc632928, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxLengthSec: 30
+  maxLengthSec: 240
   frequency: 16000
   chunksLengthSec: 0.5
   echo: 1
@@ -3839,7 +3840,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   whisper: {fileID: 587639199}
-  clip: {fileID: 8300000, guid: 2f8a92ae57b4341c68e81202d049ca31, type: 3}
+  clip: {fileID: 8300000, guid: c59944b0dd36d4dd499071478cdb2bfb, type: 3}
   text: {fileID: 1194114916}
 --- !u!4 &1489842592
 Transform:
