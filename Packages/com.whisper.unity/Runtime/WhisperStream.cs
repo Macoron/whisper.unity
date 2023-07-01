@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Whisper.Utils;
 
 namespace Whisper
 {
@@ -83,19 +84,39 @@ namespace Whisper
     {
         public event OnStreamResultUpdatedDelegate OnResultUpdated;
         
-        
         private readonly WhisperWrapper _wrapper;
+        private readonly WhisperStreamParams _param;
+        private readonly MicrophoneRecord _microphone;
+        
         private readonly List<float> _buffer = new List<float>();
 
         private int _header;
         private Task<WhisperResult> _task;
-        private readonly WhisperStreamParams _param;
+
         private int _pointer;
 
-        public WhisperStream(WhisperWrapper wrapper, WhisperStreamParams param)
+        public WhisperStream(WhisperWrapper wrapper, WhisperStreamParams param,
+            MicrophoneRecord microphone = null)
         {
             _wrapper = wrapper;
             _param = param;
+            
+            if (microphone != null)
+            {
+                _microphone = microphone;
+                _microphone.OnChunkReady += MicrophoneOnChunkReady;
+                _microphone.OnRecordStop += MicrophoneOnRecordStop;
+            }
+        }
+
+        private void MicrophoneOnChunkReady(AudioChunk chunk)
+        {
+            AddToStream(chunk.Data);
+        }
+        
+        private void MicrophoneOnRecordStop(float[] data, int frequency, int channels, float length)
+        {
+            StopStream();
         }
 
         public void AddToStream(float[] samples)
@@ -110,6 +131,7 @@ namespace Whisper
         public async Task StopStream()
         {
             FinishRecurrent();
+            _buffer.Clear();
         }
 
         private async void FinishRecurrent()

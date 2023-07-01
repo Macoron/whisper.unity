@@ -154,6 +154,8 @@ namespace Whisper
                     : modelPath;
                 _whisper = await WhisperWrapper.InitFromFileAsync(path);
                 _params = WhisperParams.GetDefaultParams(strategy);
+                UpdateParams();
+                
                 _whisper.OnNewSegment += OnNewSegmentHandler;
                 _whisper.OnProgress += OnProgressHandler;
             }
@@ -252,7 +254,19 @@ namespace Whisper
 
         public async Task<WhisperStream> CreateStream(MicrophoneRecord microphone)
         {
-            return await CreateStream(microphone.frequency, 1);
+            var isLoaded = await CheckIfLoaded();
+            if (!isLoaded)
+            {
+                Debug.LogError("Model weights aren't loaded! Load model first!");
+                return null;
+            }
+            
+            // unity support only single input channel for microphone
+            var frequency = microphone.frequency;
+            var param = new WhisperStreamParams(streamStrategy, _params,
+                frequency, 1, stepSec);
+            var stream = new WhisperStream(_whisper, param, microphone);
+            return stream;
         }
 
         /*public async Task PrepareStream(int frequency, int channels)

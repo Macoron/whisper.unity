@@ -1,20 +1,18 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using Whisper;
+using Whisper.Utils;
 
 public class StreamingSample : MonoBehaviour
 {
     public WhisperManager whisper;
     public AudioClip clip;
+
     public Text text;
     private float[] _samples;
     private AudioSource _source;
-    
 
     private void OnStreamResultUpdated(string updatedResult)
     {
