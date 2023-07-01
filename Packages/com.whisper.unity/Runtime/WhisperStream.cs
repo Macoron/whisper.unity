@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Whisper.Utils;
@@ -31,7 +32,7 @@ namespace Whisper
          SimpleVad
     }
     
-    public struct WhisperStreamParams
+    public class WhisperStreamParams
     {
         /// <summary>
         /// Algorithm used for audio stream transcription.
@@ -63,9 +64,15 @@ namespace Whisper
         /// </summary>
         public readonly int StepSamples;
 
+        public readonly float KeepSec;
+
+        public readonly int KeepSamples;
+
+        public readonly bool UpdatePrompt;
+
         public WhisperStreamParams(WhisperStreamStrategy strategy, 
             WhisperParams inferenceParam, int frequency, int channels,
-            float stepSec = 3f)
+            float stepSec = 3f, float keepSec = 0.2f, bool updatePrompt = true)
         {
             Strategy = strategy;
             InferenceParam = inferenceParam;
@@ -74,6 +81,11 @@ namespace Whisper
             
             StepSec = stepSec;
             StepSamples = (int) (stepSec * frequency * channels);
+
+            KeepSec = keepSec;
+            KeepSamples = (int) (keepSec * frequency * channels);
+
+            UpdatePrompt = updatePrompt;
         }
     }
     
@@ -86,21 +98,23 @@ namespace Whisper
         
         private readonly WhisperWrapper _wrapper;
         private readonly WhisperStreamParams _param;
+        private readonly string _originalPrompt;
         private readonly MicrophoneRecord _microphone;
         
-        private readonly List<float> _buffer = new List<float>();
-
-        private int _header;
-        private Task<WhisperResult> _task;
-
         private int _pointer;
-
+        private readonly List<float> _buffer = new List<float>();
+        private Task<WhisperResult> _task;
+        
+        private string _output = "";
+        
         public WhisperStream(WhisperWrapper wrapper, WhisperStreamParams param,
             MicrophoneRecord microphone = null)
         {
             _wrapper = wrapper;
             _param = param;
-            
+            _originalPrompt = _param.InferenceParam.InitialPrompt;
+
+            // if we set microphone - streaming works in auto mode
             if (microphone != null)
             {
                 _microphone = microphone;
@@ -108,44 +122,51 @@ namespace Whisper
                 _microphone.OnRecordStop += MicrophoneOnRecordStop;
             }
         }
-
-        private void MicrophoneOnChunkReady(AudioChunk chunk)
-        {
-            AddToStream(chunk.Data);
-        }
         
-        private void MicrophoneOnRecordStop(float[] data, int frequency, int channels, float length)
-        {
-            StopStream();
-        }
-
         public void AddToStream(float[] samples)
         {
             // add new samples to buffer
             _buffer.AddRange(samples);
             
-            // call update function
-            UpdateRecurrent();
-        }
-
-        public async Task StopStream()
-        {
-            FinishRecurrent();
-            _buffer.Clear();
-        }
-
-        private async void FinishRecurrent()
-        {
-            await _task;
-            UpdateRecurrent();
-        }
-        
-        private async void UpdateRecurrent()
-        {
             // check if task isn't busy
             if (_task != null && !_task.IsCompleted)
                 return;
+
+            // do actual strategy
+            switch (_param.Strategy)
+            {
+                case WhisperStreamStrategy.Recurrent:
+                    UpdateRecurrent();
+                    break;
+                case WhisperStreamStrategy.SlidingWindow:
+                    UpdateSlidingWindow();
+                    break;
+            }
+        }
+
+        public async void StopStream()
+        {
+            // first wait until last task complete
+            await _task;
             
+            // do actual strategy
+            switch (_param.Strategy)
+            {
+                case WhisperStreamStrategy.Recurrent:
+                    UpdateRecurrent(true);
+                    break;
+                case WhisperStreamStrategy.SlidingWindow:
+                    UpdateSlidingWindow(true);
+                    break;
+            }
+            
+            _buffer.Clear();
+            _pointer = 0;
+            _output = "";
+        }
+        
+        private async void UpdateRecurrent(bool untilEnd = false)
+        {
             // check if we have enough data to start transcribing
             var size = _buffer.Count - _pointer;
             if (size < _param.StepSamples)
@@ -160,5 +181,48 @@ namespace Whisper
             // send update to user
             OnResultUpdated?.Invoke(res.Result);
         }
+
+        private async void UpdateSlidingWindow(bool untilEnd = false)
+        {
+            // check if task isn't busy
+            if (_task != null && !_task.IsCompleted)
+                return;
+            
+            // check if we have enough data to start transcribing
+            var size = _buffer.Count - _pointer;
+            if (size < _param.StepSamples)
+                return;
+
+            // get length of prev buffer
+            var prevBufferLen = Math.Min(_pointer, _param.KeepSamples);
+            var start = _pointer - prevBufferLen;
+            var totalLength = size + prevBufferLen;
+            _pointer = _buffer.Count - 1;
+
+            // start transcribing window
+            var slice = new ArraySegment<float>(_buffer.ToArray(), start, totalLength);
+            _task = _wrapper.GetTextAsync(slice.ToArray(), _param.Frequency, 
+                _param.Channels, _param.InferenceParam);
+            var res = await _task;
+            _output += res.Result;
+
+            // update prompt with latest transcription
+            if (_param.UpdatePrompt)
+                _param.InferenceParam.InitialPrompt = _originalPrompt + _output;
+
+            // send update to user
+            OnResultUpdated?.Invoke(_output);
+        }
+        
+        private void MicrophoneOnChunkReady(AudioChunk chunk)
+        {
+            AddToStream(chunk.Data);
+        }
+        
+        private void MicrophoneOnRecordStop(float[] data, int frequency, int channels, float length)
+        {
+            StopStream();
+        }
+
     }
 }

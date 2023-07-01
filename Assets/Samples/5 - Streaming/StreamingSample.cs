@@ -51,6 +51,6 @@ public class StreamingSample : MonoBehaviour
         }
 
         // flush rest
-        await stream.StopStream();
+        stream.StopStream();
     }
 }

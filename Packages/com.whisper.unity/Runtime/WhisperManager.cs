@@ -77,6 +77,8 @@ namespace Whisper
         [Tooltip("Minimal portions of audio that will be processed by whisper stream in seconds.")]
         public float stepSec = 3f;
 
+        public float keepSec = 0.2f;
+
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
         public bool tokensTimestamps;
@@ -94,9 +96,6 @@ namespace Whisper
 
         private WhisperWrapper _whisper;
         private WhisperParams _params;
-        private WhisperStream _stream;
-        private WhisperStreamParams _streamParams;
-
         private readonly MainThreadDispatcher _dispatcher = new MainThreadDispatcher();
 
 
@@ -104,11 +103,6 @@ namespace Whisper
         /// Checks if whisper weights are loaded and ready to be used.
         /// </summary>
         public bool IsLoaded => _whisper != null;
-
-        /// <summary>
-        /// Checks if whisper streaming wrapper is ready.
-        /// </summary>
-        public bool IsStreamReady => _stream != null;
 
         /// <summary>
         /// Checks if whisper weights are still loading and not ready.
@@ -191,8 +185,7 @@ namespace Whisper
             var res = await _whisper.GetTextAsync(clip, _params);
             return res;
         }
-
-
+        
         /// <summary>
         /// Get transcription from audio buffer.
         /// </summary>
@@ -206,6 +199,44 @@ namespace Whisper
             var res = await _whisper.GetTextAsync(samples, frequency, channels, _params);
             return res;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public async Task<WhisperStream> CreateStream(int frequency, int channels)
+        {
+            var isLoaded = await CheckIfLoaded();
+            if (!isLoaded)
+            {
+                Debug.LogError("Model weights aren't loaded! Load model first!");
+                return null;
+            }
+
+            var param = new WhisperStreamParams(streamStrategy, _params,
+                frequency, channels, stepSec, keepSec);
+            var stream = new WhisperStream(_whisper, param);
+            return stream;
+        }
+
+        
+        public async Task<WhisperStream> CreateStream(MicrophoneRecord microphone)
+        {
+            var isLoaded = await CheckIfLoaded();
+            if (!isLoaded)
+            {
+                Debug.LogError("Model weights aren't loaded! Load model first!");
+                return null;
+            }
+            
+            // TODO: unity support only single input channel for microphone
+            var channels = 1;
+            var frequency = microphone.frequency;
+            var param = new WhisperStreamParams(streamStrategy, _params,
+                frequency, channels, stepSec, keepSec);
+            var stream = new WhisperStream(_whisper, param, microphone);
+            return stream;
+        }
+
 
         private void UpdateParams()
         {
@@ -236,86 +267,6 @@ namespace Whisper
 
             return IsLoaded;
         }
-
-        public async Task<WhisperStream> CreateStream(int frequency, int channels)
-        {
-            var isLoaded = await CheckIfLoaded();
-            if (!isLoaded)
-            {
-                Debug.LogError("Model weights aren't loaded! Load model first!");
-                return null;
-            }
-
-            var param = new WhisperStreamParams(streamStrategy, _params,
-                frequency, channels, stepSec);
-            var stream = new WhisperStream(_whisper, param);
-            return stream;
-        }
-
-        public async Task<WhisperStream> CreateStream(MicrophoneRecord microphone)
-        {
-            var isLoaded = await CheckIfLoaded();
-            if (!isLoaded)
-            {
-                Debug.LogError("Model weights aren't loaded! Load model first!");
-                return null;
-            }
-            
-            // unity support only single input channel for microphone
-            var frequency = microphone.frequency;
-            var param = new WhisperStreamParams(streamStrategy, _params,
-                frequency, 1, stepSec);
-            var stream = new WhisperStream(_whisper, param, microphone);
-            return stream;
-        }
-
-        /*public async Task PrepareStream(int frequency, int channels)
-        {
-            // check if whisper is loaded
-            var isLoaded = await CheckIfLoaded();
-            if (!isLoaded)
-            {
-                Debug.LogError("Model isn't loaded! Load model first!");
-                return;
-            }
-            
-            // remove previous stream handler
-            if (_stream != null)
-            {
-                await _stream.FinishStream();
-                _stream.OnResultUpdated -= OnStreamResultUpdatedHandler;
-                _stream = null;
-            }
-    
-            // create a new instance of stream handler
-            var param = new WhisperStreamParams(streamStrategy, _params,
-                frequency, channels, stepSec);
-            _stream = new WhisperStream(_whisper, param);
-            _stream.OnResultUpdated += OnStreamResultUpdatedHandler;
-        }
-    
-        public void AddToStream(float[] buffer)
-        {
-            if (!IsStreamReady)
-            {
-                Debug.LogError("Stream isn't ready! Did you call PrepareStream first?");
-                return;
-            }
-            
-            _stream.AppendBuffer(buffer);
-        }
-    
-        public async Task EndStream()
-        {
-            if (!IsStreamReady)
-            {
-                Debug.LogError("Stream isn't ready! Did you call PrepareStream first?");
-                return;
-            }
-            
-            await _stream.FinishStream();
-        }*/
-        
         
         private void OnNewSegmentHandler(WhisperSegment segment)
         {
