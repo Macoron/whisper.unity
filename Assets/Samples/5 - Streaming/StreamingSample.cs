@@ -14,8 +14,14 @@ public class StreamingSample : MonoBehaviour
     public Text text;
     private float[] _samples;
     private AudioSource _source;
+    
 
-    public async void OnSomeButtonPressed()
+    private void OnStreamResultUpdated(string updatedResult)
+    {
+        text.text = updatedResult;
+    }
+
+    public async void OnAudioClipButtonPressed()
     {
         // get data
         _samples = new float[clip.samples * clip.channels];
@@ -27,11 +33,9 @@ public class StreamingSample : MonoBehaviour
         _source.clip = clip;
         _source.Play();
         
-        whisper.StartStream(clip.frequency, clip.channels);
-        whisper.OnResultUpdated += result =>
-        {
-            text.text = result + "...";
-        };
+        // init stream mode
+        var stream = await whisper.CreateStream(clip.frequency, clip.channels);
+        stream.OnResultUpdated += OnStreamResultUpdated;
 
         // main loop
         var lastPos = 0;
@@ -41,13 +45,14 @@ public class StreamingSample : MonoBehaviour
             if (pos > lastPos)
             {
                 var slice = new ArraySegment<float>(_samples, lastPos, pos - lastPos).ToArray();
-                whisper.Stream(slice);
+                stream.AddToStream(slice);
                 lastPos = pos;
             }
             
             await Task.Yield();
         }
 
-        whisper.FinishStream();
+        // flush rest
+        await stream.StopStream();
     }
 }

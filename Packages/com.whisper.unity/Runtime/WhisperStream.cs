@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Whisper
 {
-    public delegate void OnResultUpdatedDelegate(string updatedResult);
+    public delegate void OnStreamResultUpdatedDelegate(string updatedResult);
 
     /// <summary>
     /// Algorithm used for audio stream transcription.
@@ -53,7 +53,7 @@ namespace Whisper
         public readonly int Channels;
         
         /// <summary>
-        /// Minimal portions of audio that will be processed by whisper in seconds.
+        /// Minimal portions of audio that will be processed by whisper stream in seconds.
         /// </summary>
         public readonly float StepSec;
         
@@ -81,7 +81,7 @@ namespace Whisper
     /// </summary>
     public class WhisperStream
     {
-        public event OnResultUpdatedDelegate OnResultUpdated;
+        public event OnStreamResultUpdatedDelegate OnResultUpdated;
         
         
         private readonly WhisperWrapper _wrapper;
@@ -98,7 +98,7 @@ namespace Whisper
             _param = param;
         }
 
-        public void AppendBuffer(float[] samples)
+        public void AddToStream(float[] samples)
         {
             // add new samples to buffer
             _buffer.AddRange(samples);
@@ -107,7 +107,7 @@ namespace Whisper
             UpdateRecurrent();
         }
 
-        public void FinishStream()
+        public async Task StopStream()
         {
             FinishRecurrent();
         }

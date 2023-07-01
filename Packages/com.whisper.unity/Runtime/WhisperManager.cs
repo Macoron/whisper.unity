@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using UnityEngine;
 using Whisper.Native;
 using Whisper.Utils;
@@ -9,9 +10,9 @@ namespace Whisper
 {
     public class WhisperManager : MonoBehaviour
     {
-        [SerializeField]
-        [Tooltip("Path to model weights file")]
+        [SerializeField] [Tooltip("Path to model weights file")]
         private string modelPath = "Whisper/ggml-base.bin";
+
         public string ModelPath
         {
             get => modelPath;
@@ -25,10 +26,11 @@ namespace Whisper
                 modelPath = value;
             }
         }
-        
+
         [SerializeField]
         [Tooltip("Determines whether the StreamingAssets folder should be prepended to the model path")]
         private bool isModelPathInStreamingAssets = true;
+
         public bool IsModelPathInStreamingAssets
         {
             get => isModelPathInStreamingAssets;
@@ -42,44 +44,47 @@ namespace Whisper
                 isModelPathInStreamingAssets = value;
             }
         }
-        
-        [SerializeField]
-        [Tooltip("Should model weights be loaded on awake?")]
+
+        [SerializeField] [Tooltip("Should model weights be loaded on awake?")]
         private bool initOnAwake = true;
-        
-        [Header("Language")]
-        [Tooltip("Output text language. Use empty or \"auto\" for auto-detection.")]
+
+        [Header("Language")] [Tooltip("Output text language. Use empty or \"auto\" for auto-detection.")]
         public string language = "en";
+
         [Tooltip("Force output text to English translation. Improves translation quality.")]
         public bool translateToEnglish;
-        
-        [Header("Advanced settings")]
-        [SerializeField]
+
+        [Header("Advanced settings")] [SerializeField]
         private WhisperSamplingStrategy strategy = WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY;
 
         [Tooltip("Do not use past transcription (if any) as initial prompt for the decoder.")]
         public bool noContext = true;
-        
+
         [Tooltip("Force single segment output (useful for streaming).")]
         public bool singleSegment;
-        
+
         [Tooltip("Output tokens with their confidence in each segment.")]
         public bool enableTokens;
-        
+
         [Tooltip("Initial prompt as a string variable. " +
                  "It should improve transcription quality or guide it to the right direction.")]
         [TextArea]
         public string initialPrompt;
-        
+
+        [Header("Streaming settings")] [Tooltip("Algorithm used for audio stream transcription.")]
+        public WhisperStreamStrategy streamStrategy;
+
+        [Tooltip("Minimal portions of audio that will be processed by whisper stream in seconds.")]
+        public float stepSec = 3f;
 
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
         public bool tokensTimestamps;
-        
+
         [Tooltip("[EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder. " +
                  "These can significantly reduce the quality of the output.")]
         public bool speedUp = false;
-        
+
         [Tooltip("[EXPERIMENTAL] Overwrite the audio context size (0 = use default). " +
                  "These can significantly reduce the quality of the output.")]
         public int audioCtx;
@@ -89,9 +94,25 @@ namespace Whisper
 
         private WhisperWrapper _whisper;
         private WhisperParams _params;
+        private WhisperStream _stream;
+        private WhisperStreamParams _streamParams;
+
         private readonly MainThreadDispatcher _dispatcher = new MainThreadDispatcher();
 
+
+        /// <summary>
+        /// Checks if whisper weights are loaded and ready to be used.
+        /// </summary>
         public bool IsLoaded => _whisper != null;
+
+        /// <summary>
+        /// Checks if whisper streaming wrapper is ready.
+        /// </summary>
+        public bool IsStreamReady => _stream != null;
+
+        /// <summary>
+        /// Checks if whisper weights are still loading and not ready.
+        /// </summary>
         public bool IsLoading { get; private set; }
 
         private async void Awake()
@@ -116,18 +137,19 @@ namespace Whisper
             {
                 Debug.LogWarning("Whisper model is already loaded and ready for use!");
                 return;
-            } 
+            }
+
             if (IsLoading)
             {
                 Debug.LogWarning("Whisper model is already loading!");
                 return;
             }
-            
+
             // load model and default params
             IsLoading = true;
             try
             {
-                var path = IsModelPathInStreamingAssets 
+                var path = IsModelPathInStreamingAssets
                     ? Path.Combine(Application.streamingAssetsPath, modelPath)
                     : modelPath;
                 _whisper = await WhisperWrapper.InitFromFileAsync(path);
@@ -139,9 +161,10 @@ namespace Whisper
             {
                 Debug.LogException(e);
             }
+
             IsLoading = false;
         }
-        
+
         public bool IsMultilingual()
         {
             if (!IsLoaded)
@@ -161,13 +184,13 @@ namespace Whisper
             var isLoaded = await CheckIfLoaded();
             if (!isLoaded)
                 return null;
-            
+
             UpdateParams();
             var res = await _whisper.GetTextAsync(clip, _params);
             return res;
         }
-        
-        
+
+
         /// <summary>
         /// Get transcription from audio buffer.
         /// </summary>
@@ -202,7 +225,7 @@ namespace Whisper
                 Debug.LogError("Whisper model isn't loaded! Init Whisper model first!");
                 return false;
             }
-            
+
             // wait while model still loading
             while (IsLoading)
             {
@@ -211,6 +234,74 @@ namespace Whisper
 
             return IsLoaded;
         }
+
+        public async Task<WhisperStream> CreateStream(int frequency, int channels)
+        {
+            var isLoaded = await CheckIfLoaded();
+            if (!isLoaded)
+            {
+                Debug.LogError("Model weights aren't loaded! Load model first!");
+                return null;
+            }
+
+            var param = new WhisperStreamParams(streamStrategy, _params,
+                frequency, channels, stepSec);
+            var stream = new WhisperStream(_whisper, param);
+            return stream;
+        }
+
+        public async Task<WhisperStream> CreateStream(MicrophoneRecord microphone)
+        {
+            return await CreateStream(microphone.frequency, 1);
+        }
+
+        /*public async Task PrepareStream(int frequency, int channels)
+        {
+            // check if whisper is loaded
+            var isLoaded = await CheckIfLoaded();
+            if (!isLoaded)
+            {
+                Debug.LogError("Model isn't loaded! Load model first!");
+                return;
+            }
+            
+            // remove previous stream handler
+            if (_stream != null)
+            {
+                await _stream.FinishStream();
+                _stream.OnResultUpdated -= OnStreamResultUpdatedHandler;
+                _stream = null;
+            }
+    
+            // create a new instance of stream handler
+            var param = new WhisperStreamParams(streamStrategy, _params,
+                frequency, channels, stepSec);
+            _stream = new WhisperStream(_whisper, param);
+            _stream.OnResultUpdated += OnStreamResultUpdatedHandler;
+        }
+    
+        public void AddToStream(float[] buffer)
+        {
+            if (!IsStreamReady)
+            {
+                Debug.LogError("Stream isn't ready! Did you call PrepareStream first?");
+                return;
+            }
+            
+            _stream.AppendBuffer(buffer);
+        }
+    
+        public async Task EndStream()
+        {
+            if (!IsStreamReady)
+            {
+                Debug.LogError("Stream isn't ready! Did you call PrepareStream first?");
+                return;
+            }
+            
+            await _stream.FinishStream();
+        }*/
+        
         
         private void OnNewSegmentHandler(WhisperSegment segment)
         {
@@ -226,27 +317,6 @@ namespace Whisper
             {
                 OnProgress?.Invoke(progress);
             });
-        }
-
-        private WhisperStream _stream;
-        public event OnResultUpdatedDelegate OnResultUpdated;
-
-        public void StartStream(int frequency, int channels)
-        {
-            var param = new WhisperStreamParams(WhisperStreamStrategy.Recurrent, 
-                _params, frequency, channels);
-            _stream = new WhisperStream(_whisper, param);
-            _stream.OnResultUpdated += (res) => OnResultUpdated?.Invoke(res);
-        }
-        
-        public void Stream(float[] toArray)
-        {
-            _stream.AppendBuffer(toArray);
-        }
-
-        public void FinishStream()
-        {
-            _stream.FinishStream();
         }
     }
 }
