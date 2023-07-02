@@ -215,8 +215,8 @@ namespace Whisper
                     _param.InferenceParam.InitialPrompt = _originalPrompt + _output;
 
                 // get
-                var updBufferLen = bufferLen - _param.KeepSamples;
-                if (updBufferLen < 0)
+                var updBufferLen = _param.KeepSamples;
+                if (updBufferLen > bufferLen)
                     updBufferLen = bufferLen;
                 
                 _oldBuffer.Clear();
