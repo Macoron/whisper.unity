@@ -1019,12 +1019,13 @@ MonoBehaviour:
   translateToEnglish: 0
   strategy: 0
   noContext: 1
-  singleSegment: 1
+  singleSegment: 0
   enableTokens: 0
   initialPrompt: 
-  streamStrategy: 1
-  stepSec: 3
-  keepSec: 0.2
+  streamStrategy: 0
+  stepSec: 0.5
+  keepSec: 0.5
+  lengthSec: 5
   updatePrompt: 1
   tokensTimestamps: 0
   speedUp: 0
@@ -2888,7 +2889,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxLengthSec: 240
   frequency: 16000
-  chunksLengthSec: 0.5
+  chunksLengthSec: 0.2
   echo: 1
   microphoneDropdown: {fileID: 948466958}
   microphoneDefaultLabel: Default mic
@@ -2992,7 +2993,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 967652833}
   m_HandleRect: {fileID: 967652832}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3840,8 +3841,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   whisper: {fileID: 587639199}
-  clip: {fileID: 8300000, guid: c59944b0dd36d4dd499071478cdb2bfb, type: 3}
+  clip: {fileID: 8300000, guid: 4447999d482ec4e7aa9be5fa251515ab, type: 3}
   text: {fileID: 1194114916}
+  scroll: {fileID: 942089564}
 --- !u!4 &1489842592
 Transform:
   m_ObjectHideFlags: 0

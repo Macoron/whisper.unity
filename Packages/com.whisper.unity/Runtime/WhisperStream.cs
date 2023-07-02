@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using Whisper.Utils;
 
 namespace Whisper
@@ -14,17 +15,9 @@ namespace Whisper
     /// </summary>
     public enum WhisperStreamStrategy
     {
-         /// <summary>
-         /// Repeatedly transcribe audio from beginning to end by adding new data.
-         /// Usable only for short audio and very fast inference.
-         /// In the end will result best transcription.
-         /// </summary>
-         Recurrent,
-         
-         /// <summary>
-         /// Transcribe audio by dividing it on chunks.
-         /// Minimal chunk length is StepSec + KeepSec.
-         /// Previous transcription added as a prompt for next chunks.
+        /// <summary>
+         /// Transcribe audio by dividing it into chunks.
+        /// Previous transcription added as a prompt for next chunks.
          /// </summary>
          SlidingWindow,
          
@@ -97,7 +90,7 @@ namespace Whisper
             LengthSec = lengthSec;
             LengthSamples = (int) (lengthSec * frequency * channels);
 
-            StepsCount = Math.Max(1, LengthSamples / StepSamples);
+            StepsCount = Math.Max(1, (int) (LengthSec / StepSec) - 1);
             
             UpdatePrompt = updatePrompt;
         }
@@ -115,12 +108,12 @@ namespace Whisper
         private readonly string _originalPrompt;
         private readonly MicrophoneRecord _microphone;
         
-        private int _pointer;
-        private readonly List<float> _buffer = new List<float>();
+        private readonly List<float> _newBuffer = new List<float>();
+        private readonly List<float> _oldBuffer = new List<float>();
+        private int _step;
+        
         private Task<WhisperResult> _task;
         private string _output = "";
-        private string _currentSegment = "";
-        private int _step;
 
         public WhisperStream(WhisperWrapper wrapper, WhisperStreamParams param,
             MicrophoneRecord microphone = null)
@@ -141,22 +134,10 @@ namespace Whisper
         public void AddToStream(float[] samples)
         {
             // add new samples to buffer
-            _buffer.AddRange(samples);
+            _newBuffer.AddRange(samples);
             
-            // check if task isn't busy
-            if (_task != null && !_task.IsCompleted)
-                return;
-
             // do actual strategy
-            switch (_param.Strategy)
-            {
-                case WhisperStreamStrategy.Recurrent:
-                    UpdateRecurrent();
-                    break;
-                case WhisperStreamStrategy.SlidingWindow:
-                    UpdateSlidingWindow();
-                    break;
-            }
+            UpdateSlidingWindow();
         }
 
         public async void StopStream()
@@ -165,34 +146,9 @@ namespace Whisper
             await _task;
             
             // do actual strategy
-            switch (_param.Strategy)
-            {
-                case WhisperStreamStrategy.Recurrent:
-                    UpdateRecurrent(true);
-                    break;
-                case WhisperStreamStrategy.SlidingWindow:
-                    UpdateSlidingWindow(true);
-                    break;
-            }
+            UpdateSlidingWindow(true);
         }
         
-        private async void UpdateRecurrent(bool untilEnd = false)
-        {
-            // check if we have enough data to start transcribing
-            var size = _buffer.Count - _pointer;
-            if (size < _param.StepSamples)
-                return;
-            _pointer = _buffer.Count - 1;
-            
-            // send a buffer for processing
-            var bufferArr = _buffer.ToArray();
-            _task = _wrapper.GetTextAsync(bufferArr, _param.Frequency, _param.Channels, _param.InferenceParam);
-            var res = await _task;
-            
-            // send update to user
-            OnResultUpdated?.Invoke(res.Result);
-        }
-
         private async void UpdateSlidingWindow(bool lastCall = false)
         {
             // check if task isn't busy
@@ -203,57 +159,81 @@ namespace Whisper
             
             // check if we have enough data to start transcribing
             // if it's last call - just grab all whats left
-            var size = _buffer.Count - _pointer;
-            if (!lastCall && size < _param.StepSamples)
+            var newBufferLen = _newBuffer.Count;
+            if (!lastCall && newBufferLen < _param.StepSamples)
                 return;
 
-            // get length of prev buffer
-            var length = _buffer.Count % _param.LengthSamples;
-            var prevBufferLen = Math.Min(_pointer, _param.KeepSamples + length);
-            var start = _pointer - prevBufferLen;
-            var totalLength = size + prevBufferLen;
+            // calculate how much we can get from _oldBuffer
+            // take up to _param.LengthSamples audio from previous iteration
+            var oldBufferLen = _oldBuffer.Count;
+            var nSamplesTake = Math.Min(oldBufferLen,
+                Math.Max(0, _param.KeepSamples + _param.LengthSamples - newBufferLen));
+            Debug.Log($"-STREAMING- nSamplesTake: {nSamplesTake} " +
+                      $"newBufferLen: {newBufferLen}, oldBufferLen: {oldBufferLen}");
+
+            // copy data from old buffer to temp inference one
+            var bufferLen = nSamplesTake + newBufferLen;
+            var buffer = new float[bufferLen];
+            var oldBufferStart = oldBufferLen - nSamplesTake;
+            _oldBuffer.CopyTo(oldBufferStart, buffer, 0, nSamplesTake);
+
             
-            // move pointer to the current end for next iterations
-            _pointer = _buffer.Count - 1;
+            // and now add data from new buffer
+            _newBuffer.CopyTo(0, buffer, nSamplesTake, newBufferLen);
+            
+            // save buffer for next iterations
+            _oldBuffer.Clear();
+            _oldBuffer.AddRange(buffer);
+            
+            // before we start - clear buffer for next audio data
+            // current data is already copied into local buffer
+            _newBuffer.Clear();
 
             // start transcribing sliding window content
-            var slice = new ArraySegment<float>(_buffer.ToArray(), start, totalLength);
-            _task = _wrapper.GetTextAsync(slice.ToArray(), _param.Frequency, 
+            _task = _wrapper.GetTextAsync(buffer, _param.Frequency, 
                 _param.Channels, _param.InferenceParam);
             
-            // append transcription to previous result
+            // append current transcription into temporary output
             var res = await _task;
-            _currentSegment = res.Result;
+            var currentSegment = res.Result;
+            var currentOutput = _output + currentSegment;
+            Debug.Log($"-STREAMING- {currentOutput}");
             
             // send update to user
-            OnResultUpdated?.Invoke(_output + _currentSegment);
+            OnResultUpdated?.Invoke(currentOutput);
 
+            // check if finished working on current "line"
             _step++;
-            if (_step >= _param.StepsCount)
+            if (_step % _param.StepsCount == 0)
             {
-                _output += _currentSegment;
-                _step = 0;
-            }
-            
-            // update prompt with latest transcription
-            if (_param.UpdatePrompt)
-            {
-                _param.InferenceParam.InitialPrompt = _originalPrompt + _output;
-            }
+                Debug.Log($"-STREAMING- CLICK");
+                
+                _output = currentOutput;
 
+                // update prompt with latest transcription
+                if (_param.UpdatePrompt)
+                    _param.InferenceParam.InitialPrompt = _originalPrompt + _output;
+
+                // get
+                var updBufferLen = bufferLen - _param.KeepSamples;
+                if (updBufferLen < 0)
+                    updBufferLen = bufferLen;
+                
+                _oldBuffer.Clear();
+                _oldBuffer.AddRange(new ArraySegment<float>(buffer, bufferLen - updBufferLen, updBufferLen));
+            }
 
             // reset if its last call
             if (lastCall)
                 Reset();
         }
 
-        private void Reset()
+        private async void Reset()
         {
             _output = "";
-            _currentSegment = "";
-            _buffer.Clear();
-            _pointer = 0;
             _step = 0;
+            _oldBuffer.Clear();
+            _newBuffer.Clear();
         }
         
         private void MicrophoneOnChunkReady(AudioChunk chunk)
