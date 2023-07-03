@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Whisper.Native;
 using Whisper.Utils;
 
@@ -83,7 +84,7 @@ namespace Whisper
         
         public bool updatePrompt = true;
 
-        public bool dropAudio = true;
+        public bool dropOldBuffer = true;
 
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
@@ -220,7 +221,7 @@ namespace Whisper
 
             var param = new WhisperStreamParams(streamStrategy, _params,
                 frequency, channels, stepSec, keepSec, lengthSec, updatePrompt,
-                dropAudio);
+                dropOldBuffer);
             var stream = new WhisperStream(_whisper, param);
             return stream;
         }
@@ -240,7 +241,7 @@ namespace Whisper
             var frequency = microphone.frequency;
             var param = new WhisperStreamParams(streamStrategy, _params,
                 frequency, channels, stepSec, keepSec, lengthSec, updatePrompt,
-                dropAudio);
+                dropOldBuffer);
             var stream = new WhisperStream(_whisper, param, microphone);
             return stream;
         }

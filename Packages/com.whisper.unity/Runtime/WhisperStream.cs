@@ -71,12 +71,12 @@ namespace Whisper
 
         public readonly int StepsCount;
 
-        public readonly bool DropAudio;
+        public readonly bool DropOldBuffer;
 
         public WhisperStreamParams(WhisperStreamStrategy strategy, 
             WhisperParams inferenceParam, int frequency, int channels,
             float stepSec = 3f, float keepSec = 0.2f, float lengthSec = 10f,
-            bool updatePrompt = true, bool dropAudio = false)
+            bool updatePrompt = true, bool dropOldBuffer = false)
         {
             Strategy = strategy;
             InferenceParam = inferenceParam;
@@ -95,7 +95,7 @@ namespace Whisper
             StepsCount = Math.Max(1, (int) (LengthSec / StepSec) - 1);
             
             UpdatePrompt = updatePrompt;
-            DropAudio = dropAudio;
+            DropOldBuffer = dropOldBuffer;
         }
     }
     
@@ -169,7 +169,7 @@ namespace Whisper
             // calculate how much we can get from _oldBuffer
             var oldBufferLen = _oldBuffer.Count;
             int nSamplesTake;
-            if (_param.DropAudio)
+            if (_param.DropOldBuffer)
             {
                 // original ggml implementation
                 // take up to _param.LengthSamples audio from previous iteration

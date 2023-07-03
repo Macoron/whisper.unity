@@ -1023,11 +1023,11 @@ MonoBehaviour:
   enableTokens: 0
   initialPrompt: 
   streamStrategy: 0
-  stepSec: 0.5
+  stepSec: 3
   keepSec: 0.2
-  lengthSec: 5
+  lengthSec: 10
   updatePrompt: 1
-  dropAudio: 1
+  dropOldBuffer: 1
   tokensTimestamps: 0
   speedUp: 0
   audioCtx: 0
