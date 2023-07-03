@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Whisper.Utils;
@@ -116,6 +114,7 @@ namespace Whisper
         private float[] _oldBuffer = Array.Empty<float>();
         private string _output = "";
         private int _step;
+        private bool _isStreaming;
         
         private Task<WhisperResult> _task;
 
@@ -125,18 +124,34 @@ namespace Whisper
             _wrapper = wrapper;
             _param = param;
             _originalPrompt = _param.InferenceParam.InitialPrompt;
+            _microphone = microphone;
+        }
 
-            // if we set microphone - streaming works in auto mode
-            if (microphone != null)
+        public void StartStream()
+        {
+            if (_isStreaming)
             {
-                _microphone = microphone;
+                Debug.LogWarning("Stream is already working!");
+                return;
+            }
+            _isStreaming = true;
+            
+            // if we set microphone - streaming works in auto mode
+            if (_microphone != null)
+            {
                 _microphone.OnChunkReady += MicrophoneOnChunkReady;
                 _microphone.OnRecordStop += MicrophoneOnRecordStop;
             }
         }
-        
+
         public void AddToStream(float[] samples)
         {
+            if (!_isStreaming)
+            {
+                Debug.LogWarning("Start streaming first!");
+                return;
+            }
+
             // add new samples to buffer
             _newBuffer.AddRange(samples);
             
@@ -146,6 +161,20 @@ namespace Whisper
 
         public async void StopStream()
         {
+            if (!_isStreaming)
+            {
+                Debug.LogWarning("Start streaming first!");
+                return;
+            }
+            _isStreaming = false;
+            
+            // unsubscribe from microphone events for now
+            if (_microphone != null)
+            {
+                _microphone.OnChunkReady -= MicrophoneOnChunkReady;
+                _microphone.OnRecordStop -= MicrophoneOnRecordStop;
+            }
+            
             // first wait until last task complete
             if (_task != null)
                 await _task;
@@ -217,6 +246,7 @@ namespace Whisper
             {
                 _output = currentOutput;
 
+                // TODO: don't use string prompt - use tokenized prompt_tokens
                 // update prompt with latest transcription
                 if (_param.UpdatePrompt)
                     _param.InferenceParam.InitialPrompt = _originalPrompt + _output;

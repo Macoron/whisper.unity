@@ -13,11 +13,12 @@ public class StreamingSampleMic : MonoBehaviour
     public Text buttonText;
     public Text text;
     public ScrollRect scroll;
-    
+    private WhisperStream _stream;
+
     private async void Start()
     {
-        var stream = await whisper.CreateStream(microphoneRecord);
-        stream.OnResultUpdated += OnResult;
+        _stream = await whisper.CreateStream(microphoneRecord);
+        _stream.OnResultUpdated += OnResult;
         
         microphoneRecord.OnRecordStop += OnRecordStop;
         button.onClick.AddListener(OnButtonPressed);
@@ -26,7 +27,10 @@ public class StreamingSampleMic : MonoBehaviour
     private void OnButtonPressed()
     {
         if (!microphoneRecord.IsRecording)
+        {
+            _stream.StartStream();
             microphoneRecord.StartRecord();
+        }
         else
             microphoneRecord.StopRecord();
         
