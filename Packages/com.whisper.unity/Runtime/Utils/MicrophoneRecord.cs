@@ -11,8 +11,9 @@ namespace Whisper.Utils
     {
         public int maxLengthSec = 30;
         public int frequency = 16000;
+        public float chunksLengthSec = 0.5f;
         public bool echo = true;
-        
+
         [Header("Microphone selection (optional)")] 
         [CanBeNull] public Dropdown microphoneDropdown;
         public string microphoneDefaultLabel = "Default microphone";
@@ -20,6 +21,8 @@ namespace Whisper.Utils
         private float _recordStart;
         private AudioClip _clip;
         private float _length;
+        private int _lastChunkPos;
+        private int _chunksLength;
 
         private string _selectedMicDevice;
         public string SelectedMicDevice
@@ -57,9 +60,50 @@ namespace Whisper.Utils
             if (!IsRecording)
                 return;
 
+            // check that recording reached max time
             var timePassed = Time.realtimeSinceStartup - _recordStart;
             if (timePassed > maxLengthSec)
+            {
                 StopRecord();
+                return;
+            }
+            
+            // still recording - update chunks
+            UpdateChunks();
+        }
+
+        private void UpdateChunks()
+        {
+            // is anyone even subscribe to do this?
+            if (OnChunkReady == null)
+                return;
+
+            // check if chunks length is valid
+            if (_chunksLength <= 0)
+                return;
+            
+            // get current chunk length
+            var samplesCount = Microphone.GetPosition(RecordStartMicDevice);
+            var chunk = samplesCount - _lastChunkPos;
+            
+            // send new chunks while there has valid size
+            while (chunk > _chunksLength)
+            {
+                var origData = new float[_chunksLength];
+                _clip.GetData(origData, _lastChunkPos);
+
+                var chunkStruct = new AudioChunk()
+                {
+                    Data = origData,
+                    Frequency = _clip.frequency,
+                    Channels = _clip.channels,
+                    Length = chunksLengthSec
+                };
+                OnChunkReady(chunkStruct);
+
+                _lastChunkPos += _chunksLength;
+                chunk = samplesCount - _lastChunkPos;
+            }
         }
 
         private void OnMicrophoneChanged(int ind)
@@ -78,6 +122,9 @@ namespace Whisper.Utils
             RecordStartMicDevice = SelectedMicDevice;
             _clip = Microphone.Start(RecordStartMicDevice, false, maxLengthSec, frequency);
             IsRecording = true;
+            
+            _lastChunkPos = 0;
+            _chunksLength = (int) (_clip.frequency * _clip.channels * chunksLengthSec);
         }
 
         public void StopRecord()
@@ -101,7 +148,9 @@ namespace Whisper.Utils
             OnRecordStop?.Invoke(data, _clip.frequency, _clip.channels, _length);
         }
         
+        public delegate void OnChunkReadyDelegate(AudioChunk chunk);
         public delegate void OnRecordStopDelegate(float[] data, int frequency, int channels, float length);
+        public event OnChunkReadyDelegate OnChunkReady;
         public event OnRecordStopDelegate OnRecordStop;
 
         private float[] GetTrimmedData()
@@ -120,5 +169,13 @@ namespace Whisper.Utils
             Array.Copy(origData, trimData, pos);
             return trimData;
         }
+    }
+
+    public struct AudioChunk
+    {
+        public float[] Data;
+        public int Frequency;
+        public int Channels;
+        public float Length;
     }
 }
