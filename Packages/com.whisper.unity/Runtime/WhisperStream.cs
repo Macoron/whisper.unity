@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using Whisper.Utils;
+using System.Linq;
 
 namespace Whisper
 {
