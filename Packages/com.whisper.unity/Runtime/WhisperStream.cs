@@ -71,10 +71,12 @@ namespace Whisper
 
         public readonly int StepsCount;
 
+        public readonly bool DropAudio;
+
         public WhisperStreamParams(WhisperStreamStrategy strategy, 
             WhisperParams inferenceParam, int frequency, int channels,
             float stepSec = 3f, float keepSec = 0.2f, float lengthSec = 10f,
-            bool updatePrompt = true)
+            bool updatePrompt = true, bool dropAudio = false)
         {
             Strategy = strategy;
             InferenceParam = inferenceParam;
@@ -93,6 +95,7 @@ namespace Whisper
             StepsCount = Math.Max(1, (int) (LengthSec / StepSec) - 1);
             
             UpdatePrompt = updatePrompt;
+            DropAudio = dropAudio;
         }
     }
     
@@ -164,19 +167,26 @@ namespace Whisper
                 return;
 
             // calculate how much we can get from _oldBuffer
-            // take up to _param.LengthSamples audio from previous iteration
             var oldBufferLen = _oldBuffer.Count;
-            var nSamplesTake = Math.Min(oldBufferLen,
-                Math.Max(0, _param.KeepSamples + _param.LengthSamples - newBufferLen));
-            Debug.Log($"-STREAMING- nSamplesTake: {nSamplesTake} " +
-                      $"newBufferLen: {newBufferLen}, oldBufferLen: {oldBufferLen}");
+            int nSamplesTake;
+            if (_param.DropAudio)
+            {
+                // original ggml implementation
+                // take up to _param.LengthSamples audio from previous iteration
+                nSamplesTake = Math.Min(oldBufferLen,
+                    Math.Max(0, _param.KeepSamples + _param.LengthSamples - newBufferLen));
+            }
+            else
+            {
+                // just take everything from _oldBuffer
+                nSamplesTake = oldBufferLen;
+            }
 
             // copy data from old buffer to temp inference one
             var bufferLen = nSamplesTake + newBufferLen;
             var buffer = new float[bufferLen];
             var oldBufferStart = oldBufferLen - nSamplesTake;
             _oldBuffer.CopyTo(oldBufferStart, buffer, 0, nSamplesTake);
-
             
             // and now add data from new buffer
             _newBuffer.CopyTo(0, buffer, nSamplesTake, newBufferLen);
@@ -228,7 +238,7 @@ namespace Whisper
                 Reset();
         }
 
-        private async void Reset()
+        private void Reset()
         {
             _output = "";
             _step = 0;

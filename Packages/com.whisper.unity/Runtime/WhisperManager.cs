@@ -83,6 +83,8 @@ namespace Whisper
         
         public bool updatePrompt = true;
 
+        public bool dropAudio = true;
+
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
         public bool tokensTimestamps;
@@ -217,7 +219,8 @@ namespace Whisper
             }
 
             var param = new WhisperStreamParams(streamStrategy, _params,
-                frequency, channels, stepSec, keepSec, lengthSec, updatePrompt);
+                frequency, channels, stepSec, keepSec, lengthSec, updatePrompt,
+                dropAudio);
             var stream = new WhisperStream(_whisper, param);
             return stream;
         }
@@ -236,7 +239,8 @@ namespace Whisper
             var channels = 1;
             var frequency = microphone.frequency;
             var param = new WhisperStreamParams(streamStrategy, _params,
-                frequency, channels, stepSec, keepSec, lengthSec, updatePrompt);
+                frequency, channels, stepSec, keepSec, lengthSec, updatePrompt,
+                dropAudio);
             var stream = new WhisperStream(_whisper, param, microphone);
             return stream;
         }
