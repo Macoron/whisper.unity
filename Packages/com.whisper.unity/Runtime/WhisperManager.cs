@@ -72,9 +72,7 @@ namespace Whisper
         [TextArea]
         public string initialPrompt;
 
-        [Header("Streaming settings")] [Tooltip("Algorithm used for audio stream transcription.")]
-        public WhisperStreamStrategy streamStrategy;
-
+        [Header("Streaming settings")] 
         [Tooltip("Minimal portions of audio that will be processed by whisper stream in seconds.")]
         public float stepSec = 3f;
 
@@ -84,7 +82,7 @@ namespace Whisper
         
         public bool updatePrompt = true;
 
-        public bool dropOldBuffer = true;
+        public bool dropOldBuffer;
 
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
@@ -219,7 +217,7 @@ namespace Whisper
                 return null;
             }
 
-            var param = new WhisperStreamParams(streamStrategy, _params,
+            var param = new WhisperStreamParams(_params,
                 frequency, channels, stepSec, keepSec, lengthSec, updatePrompt,
                 dropOldBuffer);
             var stream = new WhisperStream(_whisper, param);
@@ -239,7 +237,7 @@ namespace Whisper
             // TODO: unity support only single input channel for microphone
             var channels = 1;
             var frequency = microphone.frequency;
-            var param = new WhisperStreamParams(streamStrategy, _params,
+            var param = new WhisperStreamParams(_params,
                 frequency, channels, stepSec, keepSec, lengthSec, updatePrompt,
                 dropOldBuffer);
             var stream = new WhisperStream(_whisper, param, microphone);
