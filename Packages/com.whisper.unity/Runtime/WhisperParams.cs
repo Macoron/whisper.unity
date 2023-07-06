@@ -38,6 +38,8 @@ namespace Whisper
              // reset callbacks
              _param.new_segment_callback = null;
              _param.new_segment_callback_user_data = IntPtr.Zero;
+             _param.progress_callback = null;
+             _param.progress_callback_user_data = IntPtr.Zero;
          }
      
          ~WhisperParams()
