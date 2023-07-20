@@ -205,9 +205,6 @@ namespace Whisper
             return res;
         }
         
-        /// <summary>
-        /// 
-        /// </summary>
         public async Task<WhisperStream> CreateStream(int frequency, int channels)
         {
             var isLoaded = await CheckIfLoaded();
@@ -223,7 +220,6 @@ namespace Whisper
             var stream = new WhisperStream(_whisper, param);
             return stream;
         }
-
         
         public async Task<WhisperStream> CreateStream(MicrophoneRecord microphone)
         {
@@ -243,8 +239,7 @@ namespace Whisper
             var stream = new WhisperStream(_whisper, param, microphone);
             return stream;
         }
-
-
+        
         private void UpdateParams()
         {
             _params.Language = language;
