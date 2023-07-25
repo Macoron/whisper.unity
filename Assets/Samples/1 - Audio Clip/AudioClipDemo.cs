@@ -24,6 +24,8 @@ namespace Whisper.Samples
         public Dropdown languageDropdown;
         public Toggle translateToggle;
         
+        private string _buffer;
+        
         private void Awake()
         {
             manager.OnNewSegment += OnNewSegment;
@@ -40,8 +42,7 @@ namespace Whisper.Samples
 
         public async void ButtonPressed()
         {
-            outputText.text = "";
-            
+            _buffer = "";
             if (echoSound)
                 AudioSource.PlayClipAtPoint(clip, Vector3.zero);
 
@@ -87,7 +88,9 @@ namespace Whisper.Samples
             if (!streamSegments || !outputText)
                 return;
 
-            outputText.text += segment.Text;
+            _buffer += segment.Text;
+            outputText.text = _buffer + "...";
+            UiUtils.ScrollDown(scroll);
         }
     }
 }

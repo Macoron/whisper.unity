@@ -7,10 +7,14 @@ using Toggle = UnityEngine.UI.Toggle;
 
 namespace Whisper.Samples
 {
+    /// <summary>
+    /// Record audio clip from microphone and make a transcription.
+    /// </summary>
     public class MicrophoneDemo : MonoBehaviour
     {
         public WhisperManager whisper;
         public MicrophoneRecord microphoneRecord;
+        public bool echoSound = true;
         public bool streamSegments = true;
         public bool printLanguage = true;
 
@@ -22,36 +26,65 @@ namespace Whisper.Samples
         public Dropdown languageDropdown;
         public Toggle translateToggle;
         public ScrollRect scroll;
-
+        
         private string _buffer;
 
         private void Awake()
         {
+            whisper.OnNewSegment += OnNewSegment;
+            whisper.OnProgress += OnProgressHandler;
+            
+            microphoneRecord.OnRecordStop += OnRecordStop;
+            
             button.onClick.AddListener(OnButtonPressed);
-
             languageDropdown.value = languageDropdown.options
                 .FindIndex(op => op.text == whisper.language);
             languageDropdown.onValueChanged.AddListener(OnLanguageChanged);
 
             translateToggle.isOn = whisper.translateToEnglish;
             translateToggle.onValueChanged.AddListener(OnTranslateChanged);
-
-            microphoneRecord.OnRecordStop += Transcribe;
-            
-            if (streamSegments)
-                whisper.OnNewSegment += WhisperOnOnNewSegment;
-            whisper.OnProgress += OnProgressHandler;
         }
 
         private void OnButtonPressed()
         {
             if (!microphoneRecord.IsRecording)
+            {
                 microphoneRecord.StartRecord();
+                buttonText.text = "Stop";
+            }
             else
+            {
                 microphoneRecord.StopRecord();
+                buttonText.text = "Record";
+            }
+        }
+        
+        private async void OnRecordStop(float[] data, int frequency, int channels, float length)
+        {
+            _buffer = "";
+            if (echoSound)
+            {
+                var clip = AudioClip.Create("mic", data.Length, channels, frequency, false);
+                AudioSource.PlayClipAtPoint(clip, Vector3.zero);
+            }
+            
+            var sw = new Stopwatch();
+            sw.Start();
+            
+            var res = await whisper.GetTextAsync(data, frequency, channels);
+            if (res == null || !outputText) 
+                return;
 
-            if (buttonText)
-                buttonText.text = microphoneRecord.IsRecording ? "Stop" : "Record";
+            var time = sw.ElapsedMilliseconds;
+            var rate = length / (time * 0.001f);
+            timeText.text = $"Time: {time} ms\nRate: {rate:F1}x";
+
+            var text = res.Result;
+            if (printLanguage)
+                text += $"\n\nLanguage: {res.Language}";
+            
+            outputText.text = text;
+            UiUtils.ScrollDown(scroll);
         }
         
         private void OnLanguageChanged(int ind)
@@ -65,37 +98,21 @@ namespace Whisper.Samples
             whisper.translateToEnglish = translate;
         }
 
-        private async void Transcribe(float[] data, int frequency, int channels, float length)
+        private void OnProgressHandler(int progress)
         {
-            _buffer = "";
-            
-            var sw = new Stopwatch();
-            sw.Start();
-            
-            var res = await whisper.GetTextAsync(data, frequency, channels);
-
-            var time = sw.ElapsedMilliseconds;
-            var rate = length / (time * 0.001f);
-            timeText.text = $"Time: {time} ms\nRate: {rate:F1}x";
-            if (res == null)
+            if (!timeText)
                 return;
-
-            var text = res.Result;
-            if (printLanguage)
-                text += $"\n\nLanguage: {res.Language}";
-            outputText.text = text;
+            timeText.text = $"Progress: {progress}%";
         }
         
-        private void WhisperOnOnNewSegment(WhisperSegment segment)
+        private void OnNewSegment(WhisperSegment segment)
         {
+            if (!streamSegments || !outputText)
+                return;
+
             _buffer += segment.Text;
             outputText.text = _buffer + "...";
             UiUtils.ScrollDown(scroll);
-        }
-        
-        private void OnProgressHandler(int progress)
-        {
-            timeText.text = $"Progress: {progress}%";
         }
     }
 }
