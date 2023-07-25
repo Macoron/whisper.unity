@@ -1757,8 +1757,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1337591121}
-  - component: {fileID: 1337591123}
   - component: {fileID: 1337591124}
+  - component: {fileID: 1337591123}
   m_Layer: 0
   m_Name: DemoMic
   m_TagString: Untagged
