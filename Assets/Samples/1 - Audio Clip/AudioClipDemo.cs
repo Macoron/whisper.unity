@@ -6,12 +6,13 @@ using Whisper.Utils;
 namespace Whisper.Samples
 {
     /// <summary>
-    /// Takes audio clip and process it.
+    /// Takes audio clip and make a transcription.
     /// </summary>
     public class AudioClipDemo : MonoBehaviour
     {
         public WhisperManager manager;
         public AudioClip clip;
+        public bool streamSegments = true;
         public bool echoSound = true;
         public bool printLanguage = true;
 
@@ -25,6 +26,7 @@ namespace Whisper.Samples
         
         private void Awake()
         {
+            manager.OnNewSegment += OnNewSegment;
             manager.OnProgress += OnProgressHandler;
             
             button.onClick.AddListener(ButtonPressed);
@@ -35,9 +37,11 @@ namespace Whisper.Samples
             translateToggle.isOn = manager.translateToEnglish;
             translateToggle.onValueChanged.AddListener(OnTranslateChanged);
         }
-        
+
         public async void ButtonPressed()
         {
+            outputText.text = "";
+            
             if (echoSound)
                 AudioSource.PlayClipAtPoint(clip, Vector3.zero);
 
@@ -45,7 +49,7 @@ namespace Whisper.Samples
             sw.Start();
             
             var res = await manager.GetTextAsync(clip);
-            if (res == null) 
+            if (res == null || !outputText) 
                 return;
 
             var time = sw.ElapsedMilliseconds;
@@ -73,7 +77,17 @@ namespace Whisper.Samples
 
         private void OnProgressHandler(int progress)
         {
+            if (!timeText)
+                return;
             timeText.text = $"Progress: {progress}%";
+        }
+        
+        private void OnNewSegment(WhisperSegment segment)
+        {
+            if (!streamSegments || !outputText)
+                return;
+
+            outputText.text += segment.Text;
         }
     }
 }
