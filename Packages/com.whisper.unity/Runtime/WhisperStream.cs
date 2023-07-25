@@ -9,6 +9,8 @@ namespace Whisper
 {
     public delegate void OnStreamResultUpdatedDelegate(string updatedResult);
     
+    public delegate void OnStreamFinishedDelegate(string finalResult);
+    
     /// <summary>
     /// Parameters of whisper streaming processing.
     /// </summary>
@@ -105,6 +107,7 @@ namespace Whisper
     public class WhisperStream
     {
         public event OnStreamResultUpdatedDelegate OnResultUpdated;
+        public event OnStreamFinishedDelegate OnStreamFinished;
         
         private readonly WhisperWrapper _wrapper;
         private readonly WhisperStreamParams _param;
@@ -268,7 +271,10 @@ namespace Whisper
 
             // reset if its last call
             if (lastCall)
+            {
                 Reset();
+                OnStreamFinished?.Invoke(_output);
+            }
         }
 
         private void Reset()

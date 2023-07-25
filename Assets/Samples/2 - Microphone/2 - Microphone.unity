@@ -1013,14 +1013,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modelPath: Whisper/ggml-tiny.bin
+  isModelPathInStreamingAssets: 1
   initOnAwake: 1
   language: auto
   translateToEnglish: 0
   strategy: 0
   noContext: 1
-  singleSegment: 1
+  singleSegment: 0
   enableTokens: 0
   initialPrompt: 
+  stepSec: 3
+  keepSec: 0.2
+  lengthSec: 10
+  updatePrompt: 1
+  dropOldBuffer: 0
   tokensTimestamps: 0
   speedUp: 0
   audioCtx: 0
@@ -1709,7 +1715,9 @@ MonoBehaviour:
   m_ItemImage: {fileID: 0}
   m_Value: 0
   m_Options:
-    m_Options: []
+    m_Options:
+    - m_Text: Microphones
+      m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -2748,6 +2756,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   whisper: {fileID: 587639199}
   microphoneRecord: {fileID: 1337591123}
+  echoSound: 1
   streamSegments: 1
   printLanguage: 1
   button: {fileID: 2099288375}
@@ -2771,6 +2780,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxLengthSec: 30
   frequency: 16000
+  chunksLengthSec: 0.5
   echo: 1
   microphoneDropdown: {fileID: 948466958}
   microphoneDefaultLabel: Default mic
@@ -2972,7 +2982,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 
+  m_Text: Microphones
 --- !u!222 &1361419379
 CanvasRenderer:
   m_ObjectHideFlags: 0
