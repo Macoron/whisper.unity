@@ -2756,7 +2756,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   whisper: {fileID: 587639199}
   microphoneRecord: {fileID: 1337591123}
-  echoSound: 0
+  echoSound: 1
   streamSegments: 1
   printLanguage: 1
   button: {fileID: 2099288375}

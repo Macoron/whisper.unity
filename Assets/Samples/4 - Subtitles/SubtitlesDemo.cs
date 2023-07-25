@@ -8,6 +8,10 @@ using Whisper.Utils;
 
 namespace Whisper.Samples
 {
+    /// <summary>
+    /// Shows transcription in a subtitles style (synced with audio).
+    /// For each word show confidence level coded by color.
+    /// </summary>
     public class SubtitlesDemo : MonoBehaviour
     {
         public WhisperManager whisper;

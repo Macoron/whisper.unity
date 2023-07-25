@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace Whisper.Samples
 {
+    /// <summary>
+    /// Check if whisper model is multilingual and print all languages.
+    /// </summary>
     public class LanguagesDemo : MonoBehaviour
     {
         public WhisperManager whisper;
