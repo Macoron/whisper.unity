@@ -61,7 +61,9 @@ namespace Whisper.Samples
         
         private async void OnRecordStop(float[] data, int frequency, int channels, float length)
         {
+            buttonText.text = "Record";
             _buffer = "";
+            
             if (echoSound)
             {
                 var clip = AudioClip.Create("mic", data.Length, channels, frequency, false);
