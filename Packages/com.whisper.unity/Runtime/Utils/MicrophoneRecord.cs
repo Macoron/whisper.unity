@@ -13,11 +13,18 @@ namespace Whisper.Utils
         public int frequency = 16000;
         public float chunksLengthSec = 0.5f;
         public bool echo = true;
+        
+        [Header("Voice Activation Detection (VAD)")]
+        public bool useVad = true;
+        public float vadLastSec = 1.25f;
+        public float vadThd = 0.6f;
+        public float vadFreqThd = 100.0f;
+        [CanBeNull] public Image vadIndicatorImage;
 
         [Header("Microphone selection (optional)")] 
         [CanBeNull] public Dropdown microphoneDropdown;
         public string microphoneDefaultLabel = "Default microphone";
-        
+
         private float _recordStart;
         private AudioClip _clip;
         private float _length;
@@ -59,7 +66,7 @@ namespace Whisper.Utils
         {
             if (!IsRecording)
                 return;
-
+            
             // check that recording reached max time
             var timePassed = Time.realtimeSinceStartup - _recordStart;
             if (timePassed > maxLengthSec)
@@ -68,10 +75,11 @@ namespace Whisper.Utils
                 return;
             }
             
-            // still recording - update chunks
+            // still recording - update chunks and vad
             UpdateChunks();
+            UpdateVad();
         }
-
+        
         private void UpdateChunks()
         {
             // is anyone even subscribe to do this?
@@ -103,6 +111,26 @@ namespace Whisper.Utils
 
                 _lastChunkPos += _chunksLength;
                 chunk = samplesCount - _lastChunkPos;
+            }
+        }
+        
+        private void UpdateVad()
+        {
+            if (!useVad)
+                return;
+            
+            var samplesCount = Microphone.GetPosition(RecordStartMicDevice);
+            if (samplesCount > 0)
+            {
+                var origData = new float[samplesCount];
+                _clip.GetData(origData, 0);
+
+                var vad = AudioUtils.SimpleVad(origData, _clip.frequency, vadLastSec, vadThd, vadFreqThd);
+                if (vadIndicatorImage)
+                {
+                    var color = vad ? Color.green : Color.red;
+                    vadIndicatorImage.color = color;
+                }
             }
         }
 
