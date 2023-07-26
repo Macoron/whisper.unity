@@ -2783,13 +2783,14 @@ MonoBehaviour:
   frequency: 16000
   chunksLengthSec: 0.5
   echo: 1
-  microphoneDropdown: {fileID: 948466958}
-  microphoneDefaultLabel: Default mic
   useVad: 1
+  vadUpdateRateSec: 0.1
   vadLastSec: 1.25
   vadThd: 0.6
   vadFreqThd: 100
   vadIndicatorImage: {fileID: 1756544758}
+  microphoneDropdown: {fileID: 948466958}
+  microphoneDefaultLabel: Default mic
 --- !u!1 &1345287211
 GameObject:
   m_ObjectHideFlags: 0

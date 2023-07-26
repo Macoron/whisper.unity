@@ -16,6 +16,7 @@ namespace Whisper.Utils
         
         [Header("Voice Activation Detection (VAD)")]
         public bool useVad = true;
+        public float vadUpdateRateSec = 0.1f;
         public float vadLastSec = 1.25f;
         public float vadThd = 0.6f;
         public float vadFreqThd = 100.0f;
@@ -26,6 +27,7 @@ namespace Whisper.Utils
         public string microphoneDefaultLabel = "Default microphone";
 
         private float _recordStart;
+        private int _lastVadPos;
         private AudioClip _clip;
         private float _length;
         private int _lastChunkPos;
@@ -119,18 +121,27 @@ namespace Whisper.Utils
             if (!useVad)
                 return;
             
+            // get current position of microphone header
             var samplesCount = Microphone.GetPosition(RecordStartMicDevice);
-            if (samplesCount > 0)
-            {
-                var origData = new float[samplesCount];
-                _clip.GetData(origData, 0);
+            if (samplesCount <= 0)
+                return;
 
-                var vad = AudioUtils.SimpleVad(origData, _clip.frequency, vadLastSec, vadThd, vadFreqThd);
-                if (vadIndicatorImage)
-                {
-                    var color = vad ? Color.green : Color.red;
-                    vadIndicatorImage.color = color;
-                }
+            // check if it's time to update
+            var vadUpdateRateSamples = vadUpdateRateSec * _clip.frequency;
+            var dt = samplesCount - _lastVadPos;
+            if (dt < vadUpdateRateSamples)
+                return;
+            _lastVadPos = samplesCount;
+            
+            // try to get sample for voice detection
+            var origData = new float[samplesCount];
+            _clip.GetData(origData, 0);
+
+            var vad = AudioUtils.SimpleVad(origData, _clip.frequency, vadLastSec, vadThd, vadFreqThd);
+            if (vadIndicatorImage)
+            {
+                var color = vad ? Color.green : Color.red;
+                vadIndicatorImage.color = color;
             }
         }
 
@@ -152,6 +163,7 @@ namespace Whisper.Utils
             IsRecording = true;
             
             _lastChunkPos = 0;
+            _lastVadPos = 0;
             _chunksLength = (int) (_clip.frequency * _clip.channels * chunksLengthSec);
         }
 
