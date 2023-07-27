@@ -79,21 +79,19 @@ namespace Whisper.Utils
                 // not enough samples - assume no speech
                 return false;
             }
-
-            var filterData = data;
-            if (freqThd > 0.0f) {
-                filterData = HighPassFilter(data, freqThd, sampleRate);
-            }
+            
+            if (freqThd > 0.0f) 
+                HighPassFilter(data, freqThd, sampleRate);
             
             var energyAll = 0.0f;
             var energyLast = 0.0f;
             
             for (var i = 0; i < nSamples; i++) 
             {
-                energyAll += Mathf.Abs(filterData[i]);
+                energyAll += Mathf.Abs(data[i]);
 
                 if (i >= nSamples - nSamplesLast) 
-                    energyLast += Mathf.Abs(filterData[i]);
+                    energyLast += Mathf.Abs(data[i]);
             }
             
             energyAll /= nSamples;
@@ -105,28 +103,22 @@ namespace Whisper.Utils
         /// <summary>
         /// Return a copy of array after high pass filter.
         /// </summary>
-        public static float[] HighPassFilter(float[] data, float cutoff, int sampleRate)
+        public static void HighPassFilter(float[] data, float cutoff, int sampleRate)
         {
             // https://github.com/ggerganov/whisper.cpp/blob/a792c4079ce61358134da4c9bc589c15a03b04ad/examples/common.cpp#L684
-            var len = data.Length;
-            var ret = new float[len];
             if (data.Length == 0)
-                return ret;
+                return;
 
             var rc = 1.0f / (2.0f * Mathf.PI * cutoff); 
             var dt = 1.0f / sampleRate;
             var alpha = dt / (rc + dt);
             
             var y = data[0];
-            ret[0] = y;
-            
-            for (var i = 1; i < len; i++) 
+            for (var i = 1; i < data.Length; i++) 
             {
                 y = alpha * (y + data[i] - data[i - 1]);
-                ret[i] = y;
+                data[i] = y;
             }
-            
-            return ret;
         }
 
     }

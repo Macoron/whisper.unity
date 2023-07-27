@@ -138,9 +138,7 @@ namespace Whisper.Utils
             var vadContextSamples = (int) (_clip.frequency * vadContextSec);
             var dataLength = Math.Min(vadContextSamples, samplesCount); 
             var offset = Math.Max(samplesCount - vadContextSamples, 0);
-            
-            print($"DataLength: {dataLength}, Offset: {offset}");
-            
+
             var data = new float[dataLength];
             _clip.GetData(data, offset);
 
