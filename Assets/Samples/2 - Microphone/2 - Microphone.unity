@@ -1095,11 +1095,11 @@ MonoBehaviour:
   modelPath: Whisper/ggml-tiny.bin
   isModelPathInStreamingAssets: 1
   initOnAwake: 1
-  language: auto
+  language: en
   translateToEnglish: 0
   strategy: 0
   noContext: 1
-  singleSegment: 0
+  singleSegment: 1
   enableTokens: 0
   initialPrompt: 
   stepSec: 3
@@ -3078,7 +3078,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   whisper: {fileID: 587639199}
   microphoneRecord: {fileID: 1337591123}
-  echoSound: 1
   streamSegments: 1
   printLanguage: 1
   button: {fileID: 2099288375}
@@ -3104,7 +3103,7 @@ MonoBehaviour:
   maxLengthSec: 30
   frequency: 16000
   chunksLengthSec: 0.5
-  echo: 1
+  echo: 0
   useVad: 1
   vadUpdateRateSec: 0.1
   vadContextSec: 10
@@ -3113,6 +3112,7 @@ MonoBehaviour:
   vadFreqThd: 100
   vadIndicatorImage: {fileID: 1756544758}
   vadStop: 0
+  dropVadPart: 1
   vadStopTime: 1.5
   microphoneDropdown: {fileID: 948466958}
   microphoneDefaultLabel: Default mic

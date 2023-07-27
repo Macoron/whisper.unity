@@ -36,7 +36,8 @@ namespace Whisper.Utils
         [CanBeNull] public Image vadIndicatorImage;
         
         [Header("VAD Stop")] 
-        public bool vadStop = true;
+        public bool vadStop;
+        public bool dropVadPart = true;
         public float vadStopTime = 3f;
 
         [Header("Microphone selection (optional)")] 
@@ -188,7 +189,10 @@ namespace Whisper.Utils
 
             var passedTime = Time.realtimeSinceStartup - _vadStopBegin;
             if (passedTime > vadStopTime)
-                StopRecord(vadStopTime);
+            {
+                var dropTime = dropVadPart ? vadStopTime : 0f;
+                StopRecord(dropTime);
+            }
         }
 
         private void OnMicrophoneChanged(int ind)

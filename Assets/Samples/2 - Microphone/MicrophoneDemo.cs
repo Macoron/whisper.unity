@@ -14,7 +14,6 @@ namespace Whisper.Samples
     {
         public WhisperManager whisper;
         public MicrophoneRecord microphoneRecord;
-        public bool echoSound = true;
         public bool streamSegments = true;
         public bool printLanguage = true;
 
@@ -72,13 +71,7 @@ namespace Whisper.Samples
         {
             buttonText.text = "Record";
             _buffer = "";
-            
-            if (echoSound)
-            {
-                var clip = AudioClip.Create("mic", data.Length, channels, frequency, false);
-                AudioSource.PlayClipAtPoint(clip, Vector3.zero);
-            }
-            
+
             var sw = new Stopwatch();
             sw.Start();
             
