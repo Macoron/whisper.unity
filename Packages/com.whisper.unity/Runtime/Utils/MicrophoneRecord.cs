@@ -17,6 +17,7 @@ namespace Whisper.Utils
         [Header("Voice Activation Detection (VAD)")]
         public bool useVad = true;
         public float vadUpdateRateSec = 0.1f;
+        public float vadContextSec = 5f;
         public float vadLastSec = 1.25f;
         public float vadThd = 0.6f;
         public float vadFreqThd = 100.0f;
@@ -134,10 +135,16 @@ namespace Whisper.Utils
             _lastVadPos = samplesCount;
             
             // try to get sample for voice detection
-            var origData = new float[samplesCount];
-            _clip.GetData(origData, 0);
+            var vadContextSamples = (int) (_clip.frequency * vadContextSec);
+            var dataLength = Math.Min(vadContextSamples, samplesCount); 
+            var offset = Math.Max(samplesCount - vadContextSamples, 0);
+            
+            print($"DataLength: {dataLength}, Offset: {offset}");
+            
+            var data = new float[dataLength];
+            _clip.GetData(data, offset);
 
-            var vad = AudioUtils.SimpleVad(origData, _clip.frequency, vadLastSec, vadThd, vadFreqThd);
+            var vad = AudioUtils.SimpleVad(data, _clip.frequency, vadLastSec, vadThd, vadFreqThd);
             if (vadIndicatorImage)
             {
                 var color = vad ? Color.green : Color.red;
