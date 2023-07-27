@@ -174,7 +174,7 @@ namespace Whisper.Utils
 
             if (vad != IsVoiceDetected)
             {
-                _vadStopBegin = !vad ? Time.realtimeSinceStartup : null;
+                _vadStopBegin = !vad ? Time.realtimeSinceStartup : (float?) null;
                 IsVoiceDetected = vad;
                 OnVadChanged?.Invoke(vad);   
             }
