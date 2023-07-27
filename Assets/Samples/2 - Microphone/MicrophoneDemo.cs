@@ -14,7 +14,6 @@ namespace Whisper.Samples
     {
         public WhisperManager whisper;
         public MicrophoneRecord microphoneRecord;
-        public bool echoSound = true;
         public bool streamSegments = true;
         public bool printLanguage = true;
 
@@ -25,6 +24,7 @@ namespace Whisper.Samples
         public Text timeText;
         public Dropdown languageDropdown;
         public Toggle translateToggle;
+        public Toggle vadToggle;
         public ScrollRect scroll;
         
         private string _buffer;
@@ -43,6 +43,14 @@ namespace Whisper.Samples
 
             translateToggle.isOn = whisper.translateToEnglish;
             translateToggle.onValueChanged.AddListener(OnTranslateChanged);
+
+            vadToggle.isOn = microphoneRecord.vadStop;
+            vadToggle.onValueChanged.AddListener(OnVadChanged);
+        }
+
+        private void OnVadChanged(bool vadStop)
+        {
+            microphoneRecord.vadStop = vadStop;
         }
 
         private void OnButtonPressed()
@@ -63,13 +71,7 @@ namespace Whisper.Samples
         {
             buttonText.text = "Record";
             _buffer = "";
-            
-            if (echoSound)
-            {
-                var clip = AudioClip.Create("mic", data.Length, channels, frequency, false);
-                AudioSource.PlayClipAtPoint(clip, Vector3.zero);
-            }
-            
+
             var sw = new Stopwatch();
             sw.Start();
             
