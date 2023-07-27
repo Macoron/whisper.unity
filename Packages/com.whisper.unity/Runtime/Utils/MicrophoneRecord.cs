@@ -7,6 +7,18 @@ using UnityEngine.UI;
 
 namespace Whisper.Utils
 {
+    public struct AudioChunk
+    {
+        public float[] Data;
+        public int Frequency;
+        public int Channels;
+        public float Length;
+    }
+    
+    public delegate void OnVadChangedDelegate(bool isSpeechDetected);
+    public delegate void OnChunkReadyDelegate(AudioChunk chunk);
+    public delegate void OnRecordStopDelegate(float[] data, int frequency, int channels, float length);
+    
     public class MicrophoneRecord : MonoBehaviour
     {
         public int maxLengthSec = 30;
@@ -27,13 +39,17 @@ namespace Whisper.Utils
         [CanBeNull] public Dropdown microphoneDropdown;
         public string microphoneDefaultLabel = "Default microphone";
 
+        public event OnVadChangedDelegate OnVadChanged;
+        public event OnChunkReadyDelegate OnChunkReady;
+        public event OnRecordStopDelegate OnRecordStop;
+
         private float _recordStart;
         private int _lastVadPos;
         private AudioClip _clip;
         private float _length;
         private int _lastChunkPos;
         private int _chunksLength;
-
+        
         private string _selectedMicDevice;
         public string SelectedMicDevice
         {
@@ -48,6 +64,7 @@ namespace Whisper.Utils
 
         public string RecordStartMicDevice { get; private set; }
         public bool IsRecording { get; private set; }
+        public bool IsVoiceDetected { get; private set; }
 
         public IEnumerable<string> AvailableMicDevices => Microphone.devices;
 
@@ -148,6 +165,12 @@ namespace Whisper.Utils
                 var color = vad ? Color.green : Color.red;
                 vadIndicatorImage.color = color;
             }
+
+            if (vad != IsVoiceDetected)
+            {
+                IsVoiceDetected = vad;
+                OnVadChanged?.Invoke(vad);   
+            }
         }
 
         private void OnMicrophoneChanged(int ind)
@@ -189,14 +212,15 @@ namespace Whisper.Utils
             Microphone.End(RecordStartMicDevice);
             IsRecording = false;
             _length = Time.realtimeSinceStartup - _recordStart;
+            
+            if (IsVoiceDetected)
+            {
+                IsVoiceDetected = false;
+                OnVadChanged?.Invoke(false);   
+            }
 
             OnRecordStop?.Invoke(data, _clip.frequency, _clip.channels, _length);
         }
-        
-        public delegate void OnChunkReadyDelegate(AudioChunk chunk);
-        public delegate void OnRecordStopDelegate(float[] data, int frequency, int channels, float length);
-        public event OnChunkReadyDelegate OnChunkReady;
-        public event OnRecordStopDelegate OnRecordStop;
 
         private float[] GetTrimmedData()
         {
@@ -214,13 +238,5 @@ namespace Whisper.Utils
             Array.Copy(origData, trimData, pos);
             return trimData;
         }
-    }
-
-    public struct AudioChunk
-    {
-        public float[] Data;
-        public int Frequency;
-        public int Channels;
-        public float Length;
     }
 }
