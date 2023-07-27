@@ -29,7 +29,7 @@ namespace Whisper.Utils
         [Header("Voice Activation Detection (VAD)")]
         public bool useVad = true;
         public float vadUpdateRateSec = 0.1f;
-        public float vadContextSec = 5f;
+        public float vadContextSec = 10f;
         public float vadLastSec = 1.25f;
         public float vadThd = 0.6f;
         public float vadFreqThd = 100.0f;
