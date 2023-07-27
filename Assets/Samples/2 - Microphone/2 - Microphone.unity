@@ -3081,14 +3081,13 @@ MonoBehaviour:
   echoSound: 1
   streamSegments: 1
   printLanguage: 1
-  vadStop: 1
-  vadStopTime: 3
   button: {fileID: 2099288375}
   buttonText: {fileID: 1431014845}
   outputText: {fileID: 1194114916}
   timeText: {fileID: 167558892}
   languageDropdown: {fileID: 1400360880}
   translateToggle: {fileID: 1425433665}
+  vadToggle: {fileID: 1279549933}
   scroll: {fileID: 942089564}
 --- !u!114 &1337591123
 MonoBehaviour:
@@ -3113,6 +3112,8 @@ MonoBehaviour:
   vadThd: 0.6
   vadFreqThd: 100
   vadIndicatorImage: {fileID: 1756544758}
+  vadStop: 0
+  vadStopTime: 1.5
   microphoneDropdown: {fileID: 948466958}
   microphoneDefaultLabel: Default mic
 --- !u!1 &1345287211

@@ -25,6 +25,7 @@ namespace Whisper.Samples
         public Text timeText;
         public Dropdown languageDropdown;
         public Toggle translateToggle;
+        public Toggle vadToggle;
         public ScrollRect scroll;
         
         private string _buffer;
@@ -43,6 +44,14 @@ namespace Whisper.Samples
 
             translateToggle.isOn = whisper.translateToEnglish;
             translateToggle.onValueChanged.AddListener(OnTranslateChanged);
+
+            vadToggle.isOn = microphoneRecord.vadStop;
+            vadToggle.onValueChanged.AddListener(OnVadChanged);
+        }
+
+        private void OnVadChanged(bool vadStop)
+        {
+            microphoneRecord.vadStop = vadStop;
         }
 
         private void OnButtonPressed()

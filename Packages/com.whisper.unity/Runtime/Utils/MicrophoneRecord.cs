@@ -34,6 +34,10 @@ namespace Whisper.Utils
         public float vadThd = 0.6f;
         public float vadFreqThd = 100.0f;
         [CanBeNull] public Image vadIndicatorImage;
+        
+        [Header("VAD Stop")] 
+        public bool vadStop = true;
+        public float vadStopTime = 3f;
 
         [Header("Microphone selection (optional)")] 
         [CanBeNull] public Dropdown microphoneDropdown;
@@ -49,6 +53,7 @@ namespace Whisper.Utils
         private float _length;
         private int _lastChunkPos;
         private int _chunksLength;
+        private float? _vadStopBegin;
         
         private string _selectedMicDevice;
         public string SelectedMicDevice
@@ -168,9 +173,22 @@ namespace Whisper.Utils
 
             if (vad != IsVoiceDetected)
             {
+                _vadStopBegin = !vad ? Time.realtimeSinceStartup : null;
                 IsVoiceDetected = vad;
                 OnVadChanged?.Invoke(vad);   
             }
+
+            UpdateVadStop();
+        }
+        
+        private void UpdateVadStop()
+        {
+            if (!vadStop || _vadStopBegin == null)
+                return;
+
+            var passedTime = Time.realtimeSinceStartup - _vadStopBegin;
+            if (passedTime > vadStopTime)
+                StopRecord(vadStopTime);
         }
 
         private void OnMicrophoneChanged(int ind)
@@ -192,15 +210,16 @@ namespace Whisper.Utils
             
             _lastChunkPos = 0;
             _lastVadPos = 0;
+            _vadStopBegin = null;
             _chunksLength = (int) (_clip.frequency * _clip.channels * chunksLengthSec);
         }
 
-        public void StopRecord()
+        public void StopRecord(float dropTimeSec = 0f)
         {
             if (!IsRecording)
                 return;
 
-            var data = GetTrimmedData();
+            var data = GetTrimmedData(dropTimeSec);
             if (echo)
             {
                 var echoClip = AudioClip.Create("echo", data.Length,
@@ -222,21 +241,17 @@ namespace Whisper.Utils
             OnRecordStop?.Invoke(data, _clip.frequency, _clip.channels, _length);
         }
 
-        private float[] GetTrimmedData()
+        private float[] GetTrimmedData(float dropTimeSec = 0f)
         {
             // get microphone samples and current position
             var pos = Microphone.GetPosition(RecordStartMicDevice);
-            var origData = new float[_clip.samples * _clip.channels];
-            _clip.GetData(origData, 0);
-
-            // check if mic just reached audio buffer end
-            if (pos == 0)
-                return origData;
-
-            // looks like we need to trim it by pos
-            var trimData = new float[pos];
-            Array.Copy(origData, trimData, pos);
-            return trimData;
+            var len = pos == 0 ? _clip.samples * _clip.channels : pos;
+            var dropTimeSamples = (int) (_clip.frequency * _clip.channels * dropTimeSec);
+            len = Math.Max(0, len - dropTimeSamples);
+            
+            var data = new float[len];
+            _clip.GetData(data, 0);
+            return data;
         }
     }
 }
