@@ -66,7 +66,7 @@ namespace Whisper.Utils
         }
 
         /// <summary>
-        /// Naive energy based Voice Activation Detection (VAD). Returns true if lastSec contains speech.
+        /// Naive energy based Voice Activity Detection (VAD). Returns true if lastSec contains speech.
         /// </summary>
         public static bool SimpleVad(float[] data, int sampleRate, float lastSec, float vadThd, float freqThd)
         {

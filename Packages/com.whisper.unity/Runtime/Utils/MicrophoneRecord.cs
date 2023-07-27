@@ -26,7 +26,7 @@ namespace Whisper.Utils
         public float chunksLengthSec = 0.5f;
         public bool echo = true;
         
-        [Header("Voice Activation Detection (VAD)")]
+        [Header("Voice Activity Detection (VAD)")]
         public bool useVad = true;
         public float vadUpdateRateSec = 0.1f;
         public float vadContextSec = 10f;
