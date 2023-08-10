@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Whisper.Utils;
+// ReSharper disable once RedundantUsingDirective
+using System.Linq;
 
 namespace Whisper
 {
