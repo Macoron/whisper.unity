@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 using Whisper.Utils;
-using System.Linq;
 
 namespace Whisper
 {
@@ -135,7 +133,7 @@ namespace Whisper
         {
             if (_isStreaming)
             {
-                Debug.LogWarning("Stream is already working!");
+                LogUtils.Warning("Stream is already working!");
                 return;
             }
             _isStreaming = true;
@@ -152,7 +150,7 @@ namespace Whisper
         {
             if (!_isStreaming)
             {
-                Debug.LogWarning("Start streaming first!");
+                LogUtils.Warning("Start streaming first!");
                 return;
             }
 
@@ -167,7 +165,7 @@ namespace Whisper
         {
             if (!_isStreaming)
             {
-                Debug.LogWarning("Start streaming first!");
+                LogUtils.Warning("Start streaming first!");
                 return;
             }
             _isStreaming = false;

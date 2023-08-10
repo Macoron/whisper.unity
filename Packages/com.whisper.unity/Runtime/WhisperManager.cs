@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Whisper.Native;
 using Whisper.Utils;
 
@@ -11,8 +9,13 @@ namespace Whisper
 {
     public class WhisperManager : MonoBehaviour
     {
-        [SerializeField] [Tooltip("Path to model weights file")]
-        private string modelPath = "Whisper/ggml-base.bin";
+        [Tooltip("Log level for whisper loading and inference")]
+        public LogLevel logLevel = LogLevel.Log;
+        
+        [Header("Model")]
+        [SerializeField] 
+        [Tooltip("Path to model weights file")]
+        private string modelPath = "Whisper/ggml-tiny.bin";
 
         public string ModelPath
         {
@@ -90,7 +93,7 @@ namespace Whisper
 
         [Tooltip("[EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder. " +
                  "These can significantly reduce the quality of the output.")]
-        public bool speedUp = false;
+        public bool speedUp;
 
         [Tooltip("[EXPERIMENTAL] Overwrite the audio context size (0 = use default). " +
                  "These can significantly reduce the quality of the output.")]
@@ -116,9 +119,16 @@ namespace Whisper
 
         private async void Awake()
         {
+            LogUtils.Level = logLevel;
+            
             if (!initOnAwake)
                 return;
             await InitModel();
+        }
+
+        private void OnValidate()
+        {
+            LogUtils.Level = logLevel;
         }
 
         private void Update()
@@ -134,13 +144,13 @@ namespace Whisper
             // check if model is already loaded or actively loading
             if (IsLoaded)
             {
-                Debug.LogWarning("Whisper model is already loaded and ready for use!");
+                LogUtils.Warning("Whisper model is already loaded and ready for use!");
                 return;
             }
 
             if (IsLoading)
             {
-                Debug.LogWarning("Whisper model is already loading!");
+                LogUtils.Warning("Whisper model is already loading!");
                 return;
             }
 
@@ -160,7 +170,7 @@ namespace Whisper
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
+                LogUtils.Exception(e);
             }
 
             IsLoading = false;
@@ -170,7 +180,7 @@ namespace Whisper
         {
             if (!IsLoaded)
             {
-                Debug.LogError("Whisper model isn't loaded! Init Whisper model first!");
+                LogUtils.Error("Whisper model isn't loaded! Init Whisper model first!");
                 return false;
             }
 
@@ -210,7 +220,7 @@ namespace Whisper
             var isLoaded = await CheckIfLoaded();
             if (!isLoaded)
             {
-                Debug.LogError("Model weights aren't loaded! Load model first!");
+                LogUtils.Error("Model weights aren't loaded! Load model first!");
                 return null;
             }
 
@@ -226,7 +236,7 @@ namespace Whisper
             var isLoaded = await CheckIfLoaded();
             if (!isLoaded)
             {
-                Debug.LogError("Model weights aren't loaded! Load model first!");
+                LogUtils.Error("Model weights aren't loaded! Load model first!");
                 return null;
             }
             
@@ -257,7 +267,7 @@ namespace Whisper
         {
             if (!IsLoaded && !IsLoading)
             {
-                Debug.LogError("Whisper model isn't loaded! Init Whisper model first!");
+                LogUtils.Error("Whisper model isn't loaded! Init Whisper model first!");
                 return false;
             }
 

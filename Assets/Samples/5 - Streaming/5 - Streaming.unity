@@ -546,6 +546,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9370225a2ca94276b870d5f87b0db55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  LogLevel: 1
   modelPath: Whisper/ggml-tiny.bin
   isModelPathInStreamingAssets: 1
   initOnAwake: 1
@@ -553,7 +554,7 @@ MonoBehaviour:
   translateToEnglish: 0
   strategy: 0
   noContext: 1
-  singleSegment: 0
+  singleSegment: 1
   enableTokens: 0
   initialPrompt: 
   stepSec: 3
@@ -1799,6 +1800,16 @@ MonoBehaviour:
   frequency: 16000
   chunksLengthSec: 0.2
   echo: 1
+  useVad: 1
+  vadUpdateRateSec: 0.1
+  vadContextSec: 10
+  vadLastSec: 1.25
+  vadThd: 0.6
+  vadFreqThd: 100
+  vadIndicatorImage: {fileID: 0}
+  vadStop: 0
+  dropVadPart: 1
+  vadStopTime: 3
   microphoneDropdown: {fileID: 948466958}
   microphoneDefaultLabel: Default mic
 --- !u!114 &1337591124

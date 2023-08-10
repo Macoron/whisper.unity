@@ -8,7 +8,6 @@ using AOT;
 using UnityEngine;
 using Whisper.Native;
 using Whisper.Utils;
-using Debug = UnityEngine.Debug;
 
 namespace Whisper
 {
@@ -46,7 +45,7 @@ namespace Whisper
             var samples = new float[clip.samples * clip.channels];
             if (!clip.GetData(samples, 0))
             {
-                Debug.LogError("Failed to load audio!");
+                LogUtils.Error($"Failed to get audio data from clip {clip.name}!");
                 return null;
             }
             
@@ -58,7 +57,7 @@ namespace Whisper
             var samples = new float[clip.samples * clip.channels];
             if (!clip.GetData(samples, 0))
             {
-                Debug.LogError("Failed to load audio!");
+                LogUtils.Error($"Failed to get audio data from clip {clip.name}!");
                 return null;
             }
 
@@ -74,13 +73,13 @@ namespace Whisper
             lock (_lock)
             {
                 // preprocess data if necessary
-                Debug.Log("Preprocessing audio data...");
+                LogUtils.Verbose("Preprocessing audio data...");
                 var sw = new Stopwatch();
                 sw.Start();
             
                 var readySamples = AudioUtils.Preprocess(samples,frequency, channels, WhisperSampleRate);
             
-                Debug.Log($"Audio data is preprocessed, total time: {sw.ElapsedMilliseconds} ms.");
+                LogUtils.Verbose($"Audio data is preprocessed, total time: {sw.ElapsedMilliseconds} ms.");
 
                 var userData = new WhisperUserData(this, param);
                 var gch = GCHandle.Alloc(userData);
@@ -107,9 +106,9 @@ namespace Whisper
             
                 gch.Free();
 
-                Debug.Log("Trying to get number of text segments...");
+                LogUtils.Verbose("Trying to get number of text segments...");
                 var n = WhisperNative.whisper_full_n_segments(_whisperCtx);
-                Debug.Log($"Number of text segments: {n}");
+                LogUtils.Verbose($"Number of text segments: {n}");
 
                 var list = new List<WhisperSegment>();
                 for (var i = 0; i < n; ++i)
@@ -120,7 +119,7 @@ namespace Whisper
 
                 var langId = WhisperNative.whisper_full_lang_id(_whisperCtx);
                 var res = new WhisperResult(list, langId);
-                Debug.Log($"Final text: {res.Result}");
+                LogUtils.Log($"Final text: {res.Result}");
                 return res;
             }
         }
@@ -133,7 +132,7 @@ namespace Whisper
 
         private unsafe bool InferenceWhisper(float[] samples, WhisperNativeParams param)
         {
-            Debug.Log("Inference Whisper on input data...");
+            LogUtils.Log("Inference Whisper on input data...");
                 
             var sw = new Stopwatch();
             sw.Start();
@@ -142,12 +141,12 @@ namespace Whisper
                 var code = WhisperNative.whisper_full(_whisperCtx, param, samplesPtr, samples.Length);
                 if (code != 0)
                 {
-                    Debug.LogError($"Whisper failed to process data! Error code: {code}.");
+                    LogUtils.Error($"Whisper failed to process data! Error code: {code}.");
                     return false;
                 }
             }
 
-            Debug.Log($"Whisper inference finished, total time: {sw.ElapsedMilliseconds} ms.");
+            LogUtils.Log($"Whisper inference finished, total time: {sw.ElapsedMilliseconds} ms.");
             return true;
         }
 
@@ -233,17 +232,17 @@ namespace Whisper
             return res;
 #else
             // load model weights
-            Debug.Log($"Trying to load Whisper model from {modelPath}...");
+            LogUtils.Log($"Trying to load Whisper model from {modelPath}...");
         
             // some sanity checks
             if (string.IsNullOrEmpty(modelPath))
             {
-                Debug.LogError("Whisper model path is null or empty!");
+                LogUtils.Error("Whisper model path is null or empty!");
                 return null;
             }
             if (!File.Exists(modelPath))
             {
-                Debug.LogError($"Whisper model path {modelPath} doesn't exist!");
+                LogUtils.Error($"Whisper model path {modelPath} doesn't exist!");
                 return null;
             }
         
@@ -254,10 +253,10 @@ namespace Whisper
             var ctx = WhisperNative.whisper_init_from_file(modelPath);
             if (ctx == IntPtr.Zero)
             {
-                Debug.LogError("Failed to load Whisper model!");
+                LogUtils.Error("Failed to load Whisper model!");
                 return null;
             }
-            Debug.Log($"Whisper model is loaded, total time: {sw.ElapsedMilliseconds} ms.");
+            LogUtils.Log($"Whisper model is loaded, total time: {sw.ElapsedMilliseconds} ms.");
             
             return new WhisperWrapper(ctx);
 #endif
@@ -265,10 +264,10 @@ namespace Whisper
 
         public static WhisperWrapper InitFromBuffer(byte[] buffer)
         {
-            Debug.Log($"Trying to load Whisper model from buffer...");
+            LogUtils.Log($"Trying to load Whisper model from buffer...");
             if (buffer == null || buffer.Length == 0)
             {
-                Debug.LogError("Whisper model buffer is null or empty!");
+                LogUtils.Error("Whisper model buffer is null or empty!");
                 return null;
             }
             
@@ -292,10 +291,10 @@ namespace Whisper
             
             if (ctx == IntPtr.Zero)
             {
-                Debug.LogError("Failed to load Whisper model!");
+                LogUtils.Error("Failed to load Whisper model!");
                 return null;
             }
-            Debug.Log($"Whisper model is loaded, total time: {sw.ElapsedMilliseconds} ms.");
+            LogUtils.Log($"Whisper model is loaded, total time: {sw.ElapsedMilliseconds} ms.");
             
             return new WhisperWrapper(ctx);
         }
@@ -308,8 +307,8 @@ namespace Whisper
         
         private struct WhisperUserData
         {
-            public WhisperWrapper Wrapper;
-            public WhisperParams Param;
+            public readonly WhisperWrapper Wrapper;
+            public readonly WhisperParams Param;
             
             public WhisperUserData(WhisperWrapper wrapper, WhisperParams param)
             {
