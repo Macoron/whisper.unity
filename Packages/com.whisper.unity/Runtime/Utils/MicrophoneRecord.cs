@@ -13,6 +13,7 @@ namespace Whisper.Utils
         public int Frequency;
         public int Channels;
         public float Length;
+        public bool IsVoiceDetected;
     }
     
     public delegate void OnVadChangedDelegate(bool isSpeechDetected);
@@ -131,7 +132,8 @@ namespace Whisper.Utils
                     Data = origData,
                     Frequency = _clip.frequency,
                     Channels = _clip.channels,
-                    Length = chunksLengthSec
+                    Length = chunksLengthSec,
+                    IsVoiceDetected = IsVoiceDetected
                 };
                 OnChunkReady(chunkStruct);
 
