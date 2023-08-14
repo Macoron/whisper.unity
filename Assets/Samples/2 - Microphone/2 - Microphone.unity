@@ -1092,6 +1092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9370225a2ca94276b870d5f87b0db55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  logLevel: 1
   modelPath: Whisper/ggml-tiny.bin
   isModelPathInStreamingAssets: 1
   initOnAwake: 1
@@ -1107,6 +1108,7 @@ MonoBehaviour:
   lengthSec: 10
   updatePrompt: 1
   dropOldBuffer: 0
+  useVad: 1
   tokensTimestamps: 0
   speedUp: 0
   audioCtx: 0
@@ -3106,7 +3108,7 @@ MonoBehaviour:
   echo: 0
   useVad: 1
   vadUpdateRateSec: 0.1
-  vadContextSec: 10
+  vadContextSec: 30
   vadLastSec: 1.25
   vadThd: 0.6
   vadFreqThd: 100
@@ -3199,7 +3201,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 967652833}
   m_HandleRect: {fileID: 967652832}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
