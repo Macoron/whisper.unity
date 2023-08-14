@@ -271,8 +271,9 @@ namespace Whisper
             OnResultUpdated?.Invoke(currentOutput);
             
             // check if finished working on current chunk
+            // TODO: when VAD active divide only by silence?
             _step++;
-            if (forceSegmentEnd || (!_param.UseVad && _step >= _param.StepsCount))
+            if (forceSegmentEnd || _step >= _param.StepsCount)
             {
                 LogUtils.Verbose($"Stream finished an old segment with total steps of {_step}");
                 _output = currentOutput;
