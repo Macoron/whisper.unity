@@ -42,7 +42,7 @@ namespace Whisper
         public readonly int StepSamples;
 
         /// <summary>
-        /// How many seconds of previous audio chunk will be used for current chunk.
+        /// How many seconds of previous segment will be used for current segment.
         /// </summary>
         public readonly float KeepSec;
 
@@ -72,7 +72,7 @@ namespace Whisper
         public readonly int StepsCount;
 
         /// <summary>
-        /// If false - stream will use all information from previous iteration.
+        /// If false stream will use all information from previous iteration.
         /// </summary>
         public readonly bool DropOldBuffer;
 
