@@ -173,7 +173,10 @@ namespace Whisper
                 else
                 {
                     if (_step <= 0)
+                    {
+                        _oldBuffer = chunk.Data;
                         return;
+                    }
 
                     _newBuffer.AddRange(chunk.Data);
                     await UpdateSlidingWindow(true);
