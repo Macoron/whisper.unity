@@ -79,13 +79,20 @@ namespace Whisper
         [Tooltip("Minimal portions of audio that will be processed by whisper stream in seconds.")]
         public float stepSec = 3f;
 
+        [Tooltip("How many seconds of previous segment will be used for current segment.")]
         public float keepSec = 0.2f;
 
+        [Tooltip("How many seconds of audio will be recurrently transcribe until context update.")]
         public float lengthSec = 10f;
         
+        [Tooltip("Should stream modify whisper prompt for better context handling?")]
         public bool updatePrompt = true;
 
+        [Tooltip("If false stream will use all information from previous iteration.")]
         public bool dropOldBuffer;
+
+        [Tooltip("If true stream will ignore audio chunks with no detected speech.")]
+        public bool useVad = true;
 
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
@@ -226,7 +233,7 @@ namespace Whisper
 
             var param = new WhisperStreamParams(_params,
                 frequency, channels, stepSec, keepSec, lengthSec, updatePrompt,
-                dropOldBuffer);
+                dropOldBuffer, useVad);
             var stream = new WhisperStream(_whisper, param);
             return stream;
         }
@@ -245,7 +252,7 @@ namespace Whisper
             var frequency = microphone.frequency;
             var param = new WhisperStreamParams(_params,
                 frequency, channels, stepSec, keepSec, lengthSec, updatePrompt,
-                dropOldBuffer);
+                dropOldBuffer, useVad);
             var stream = new WhisperStream(_whisper, param, microphone);
             return stream;
         }

@@ -42,7 +42,7 @@ namespace Whisper
         public readonly int StepSamples;
 
         /// <summary>
-        /// How many seconds of previous audio chunk will be used for current chunk.
+        /// How many seconds of previous segment will be used for current segment.
         /// </summary>
         public readonly float KeepSec;
 
@@ -72,14 +72,20 @@ namespace Whisper
         public readonly int StepsCount;
 
         /// <summary>
-        /// If false - stream will use all information from previous iteration.
+        /// If false stream will use all information from previous iteration.
         /// </summary>
         public readonly bool DropOldBuffer;
+
+        /// <summary>
+        /// If true stream will ignore audio chunks with no detected speech.
+        /// </summary>
+        public readonly bool UseVad;
 
         public WhisperStreamParams(WhisperParams inferenceParam,
             int frequency, int channels,
             float stepSec = 3f, float keepSec = 0.2f, float lengthSec = 10f,
-            bool updatePrompt = true, bool dropOldBuffer = false)
+            bool updatePrompt = true, bool dropOldBuffer = false,
+            bool useVad = false)
         {
             InferenceParam = inferenceParam;
             Frequency = frequency;
@@ -98,6 +104,7 @@ namespace Whisper
             
             UpdatePrompt = updatePrompt;
             DropOldBuffer = dropOldBuffer;
+            UseVad = useVad;
         }
     }
     
@@ -148,7 +155,7 @@ namespace Whisper
             }
         }
 
-        public void AddToStream(float[] samples)
+        public async void AddToStream(AudioChunk chunk)
         {
             if (!_isStreaming)
             {
@@ -156,11 +163,30 @@ namespace Whisper
                 return;
             }
 
-            // add new samples to buffer
-            _newBuffer.AddRange(samples);
-            
-            // do actual strategy
-            UpdateSlidingWindow();
+            if (_param.UseVad)
+            {
+                if (chunk.IsVoiceDetected)
+                {
+                    _newBuffer.AddRange(chunk.Data);
+                    await UpdateSlidingWindow();
+                }
+                else
+                {
+                    if (_step <= 0)
+                    {
+                        _oldBuffer = chunk.Data;
+                        return;
+                    }
+
+                    _newBuffer.AddRange(chunk.Data);
+                    await UpdateSlidingWindow(true);
+                }
+            }
+            else
+            {
+                _newBuffer.AddRange(chunk.Data);
+                await UpdateSlidingWindow();
+            }
         }
 
         public async void StopStream()
@@ -184,10 +210,14 @@ namespace Whisper
                 await _task;
             
             // finish last part
-            UpdateSlidingWindow(true);
+            await UpdateSlidingWindow(true);
+            OnStreamFinished?.Invoke(_output);
+            
+            // reset stream and drop audio buffer
+            Reset();
         }
         
-        private async void UpdateSlidingWindow(bool lastCall = false)
+        private async Task UpdateSlidingWindow(bool forceSegmentEnd = false)
         {
             // check if task isn't busy
             // if it's still transcribing - just skip it
@@ -196,9 +226,9 @@ namespace Whisper
                 return;
             
             // check if we have enough data to start transcribing
-            // if it's last call - just grab all whats left
+            // if we need to finish segment now - just grab all whats left
             var newBufferLen = _newBuffer.Count;
-            if (!lastCall && newBufferLen < _param.StepSamples)
+            if (!forceSegmentEnd && newBufferLen < _param.StepSamples)
                 return;
 
             // calculate how much we can get from _oldBuffer
@@ -242,12 +272,13 @@ namespace Whisper
 
             // send update to user
             OnResultUpdated?.Invoke(currentOutput);
-
-            // TODO: implement VAD
+            
             // check if finished working on current chunk
+            // TODO: when VAD active divide only by silence?
             _step++;
-            if (_step % _param.StepsCount == 0)
+            if (forceSegmentEnd || _step >= _param.StepsCount)
             {
+                LogUtils.Verbose($"Stream finished an old segment with total steps of {_step}");
                 _output = currentOutput;
 
                 // TODO: don't use string prompt - use tokenized prompt_tokens
@@ -262,18 +293,14 @@ namespace Whisper
 
                 var segment = new ArraySegment<float>(buffer, bufferLen - updBufferLen, updBufferLen);
                 _oldBuffer = segment.ToArray();
+
+                _step = 0;
             }
             else
             {
+                LogUtils.Verbose("Stream continues current segment");
                 // swap buffers
                 _oldBuffer = buffer;
-            }
-
-            // reset if its last call
-            if (lastCall)
-            {
-                Reset();
-                OnStreamFinished?.Invoke(_output);
             }
         }
 
@@ -287,7 +314,7 @@ namespace Whisper
         
         private void MicrophoneOnChunkReady(AudioChunk chunk)
         {
-            AddToStream(chunk.Data);
+            AddToStream(chunk);
         }
         
         private void MicrophoneOnRecordStop(float[] data, int frequency, int channels, float length)
