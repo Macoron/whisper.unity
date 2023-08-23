@@ -304,7 +304,7 @@ namespace Whisper
             }
         }
 
-        private void Reset()
+        public void Reset()
         {
             _output = "";
             _step = 0;
