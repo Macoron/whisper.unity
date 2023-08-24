@@ -13,12 +13,25 @@ namespace Whisper
 {
     public delegate void OnNewSegmentDelegate(WhisperSegment text);
     public delegate void OnProgressDelegate(int progress);
-    
+
+    /// <summary>
+    /// Wrapper for loaded whisper model.
+    /// </summary>
     public class WhisperWrapper
     {
         public const int WhisperSampleRate = 16000;
 
+        /// <summary>
+        /// Invokes when whisper transcribed a new text segment from audio. 
+        /// </summary>
+        /// <remarks>Use <see cref="MainThreadDispatcher"/> for handling event in Unity main thread.</remarks>
         public event OnNewSegmentDelegate OnNewSegment;
+        
+        /// <summary>
+        /// Invokes when whisper made some progress in transcribing audio.
+        /// Progress changes from 0 to 100 included.
+        /// </summary>
+        /// <remarks>Use <see cref="MainThreadDispatcher"/> for handling event in Unity main thread.</remarks>
         public event OnProgressDelegate OnProgress;
 
         private readonly IntPtr _whisperCtx;
@@ -37,8 +50,15 @@ namespace Whisper
             WhisperNative.whisper_free(_whisperCtx);
         }
 
+        /// <summary>
+        /// Checks if currently loaded whisper model supports multilingual transcription.
+        /// </summary>
         public bool IsMultilingual => WhisperNative.whisper_is_multilingual(_whisperCtx) != 0;
 
+        /// <summary>
+        /// Transcribes audio clip. Will block thread until transcription complete.
+        /// </summary>
+        /// <returns>Full transcription. Null if transcription failed.</returns>
         public WhisperResult GetText(AudioClip clip, WhisperParams param)
         {
             // try to load data
@@ -52,6 +72,10 @@ namespace Whisper
             return GetText(samples, clip.frequency, clip.channels, param);
         }
         
+        /// <summary>
+        /// Start async transcription of audio clip.
+        /// </summary>
+        /// <returns>Full transcription. Null if transcription failed.</returns>
         public async Task<WhisperResult> GetTextAsync(AudioClip clip, WhisperParams param)
         {
             var samples = new float[clip.samples * clip.channels];
@@ -68,6 +92,14 @@ namespace Whisper
             
         }
 
+        /// <summary>
+        /// Transcribe audio buffer. Will block thread until transcription complete.
+        /// </summary>
+        /// <param name="samples">Raw audio buffer.</param>
+        /// <param name="frequency">Audio sample rate.</param>
+        /// <param name="channels">Audio channels count.</param>
+        /// <param name="param">Whisper inference parameters.</param>
+        /// <returns>Full transcription. Null if transcription failed.</returns>
         public WhisperResult GetText(float[] samples, int frequency, int channels, WhisperParams param)
         {
             lock (_lock)
@@ -124,6 +156,14 @@ namespace Whisper
             }
         }
 
+        /// <summary>
+        /// Start async transcription of audio buffer.
+        /// </summary>
+        /// <param name="samples">Raw audio buffer.</param>
+        /// <param name="frequency">Audio sample rate.</param>
+        /// <param name="channels">Audio channels count.</param>
+        /// <param name="param">Whisper inference parameters.</param>
+        /// <returns>Full transcription. Null if transcription failed.</returns>
         public async Task<WhisperResult> GetTextAsync(float[] samples, int frequency, int channels, WhisperParams param)
         {
             var asyncTask = Task.Factory.StartNew(() => GetText(samples, frequency, channels, param));
@@ -212,18 +252,11 @@ namespace Whisper
             return segment;
         }
         
-        public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath)
-        {
-#if UNITY_ANDROID && !UNITY_EDITOR
-            var buffer = await FileUtils.ReadFileAsync(modelPath);
-            var res = await InitFromBufferAsync(buffer);
-            return res;
-#else
-            var asyncTask = Task.Factory.StartNew(() => InitFromFile(modelPath));
-            return await asyncTask;          
-#endif
-        }
-        
+        /// <summary>
+        /// Loads whisper model from file path.
+        /// </summary>
+        /// <param name="modelPath">Absolute file path to model weights.</param>
+        /// <returns>Loaded whisper model. Null if loading failed.</returns>
         public static WhisperWrapper InitFromFile(string modelPath)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -262,6 +295,27 @@ namespace Whisper
 #endif
         }
 
+        /// <summary>
+        /// Start async loading of whisper model from file path.
+        /// </summary>
+        /// <param name="modelPath">Absolute file path to model weights.</param>
+        /// <returns>Loaded whisper model. Null if loading failed.</returns>
+        public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            var buffer = await FileUtils.ReadFileAsync(modelPath);
+            var res = await InitFromBufferAsync(buffer);
+            return res;
+#else
+            var asyncTask = Task.Factory.StartNew(() => InitFromFile(modelPath));
+            return await asyncTask;          
+#endif
+        }
+        
+        /// <summary>
+        /// Loads whisper model from byte buffer.
+        /// </summary>
+        /// <returns>Loaded whisper model. Null if loading failed.</returns>
         public static WhisperWrapper InitFromBuffer(byte[] buffer)
         {
             LogUtils.Log($"Trying to load Whisper model from buffer...");
@@ -299,6 +353,10 @@ namespace Whisper
             return new WhisperWrapper(ctx);
         }
         
+        /// <summary>
+        /// Start async loading of whisper model from byte buffer.
+        /// </summary>
+        /// <returns>Loaded whisper model. Null if loading failed.</returns>
         public static async Task<WhisperWrapper> InitFromBufferAsync(byte[] buffer)
         {
             var asyncTask = Task.Factory.StartNew(() => InitFromBuffer(buffer));
