@@ -8,7 +8,7 @@ using System.Linq;
 namespace Whisper
 {
     public delegate void OnStreamResultUpdatedDelegate(string updatedResult);
-    
+    public delegate void OnStreamSegmentFinishedDelegate(WhisperResult segment);   
     public delegate void OnStreamFinishedDelegate(string finalResult);
     
     /// <summary>
@@ -114,6 +114,7 @@ namespace Whisper
     public class WhisperStream
     {
         public event OnStreamResultUpdatedDelegate OnResultUpdated;
+        public event OnStreamSegmentFinishedDelegate OnSegmentFinished;
         public event OnStreamFinishedDelegate OnStreamFinished;
         
         private readonly WhisperWrapper _wrapper;
@@ -293,8 +294,9 @@ namespace Whisper
 
                 var segment = new ArraySegment<float>(buffer, bufferLen - updBufferLen, updBufferLen);
                 _oldBuffer = segment.ToArray();
-
                 _step = 0;
+                
+                OnSegmentFinished?.Invoke(res);
             }
             else
             {

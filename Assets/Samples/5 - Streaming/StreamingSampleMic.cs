@@ -23,8 +23,9 @@ namespace Whisper.Samples
         {
             _stream = await whisper.CreateStream(microphoneRecord);
             _stream.OnResultUpdated += OnResult;
+            _stream.OnSegmentFinished += OnSegmentFinished;
             _stream.OnStreamFinished += OnFinished;
-        
+
             microphoneRecord.OnRecordStop += OnRecordStop;
             button.onClick.AddListener(OnButtonPressed);
         }
@@ -51,6 +52,11 @@ namespace Whisper.Samples
         {
             text.text = result;
             UiUtils.ScrollDown(scroll);
+        }
+        
+        private void OnSegmentFinished(WhisperResult segment)
+        {
+            print($"Segment finished: {segment.Result}");
         }
         
         private void OnFinished(string finalResult)
