@@ -8,6 +8,7 @@ using System.Linq;
 namespace Whisper
 {
     public delegate void OnStreamResultUpdatedDelegate(string updatedResult);
+    public delegate void OnStreamSegmentUpdatedDelegate(WhisperResult segment);   
     public delegate void OnStreamSegmentFinishedDelegate(WhisperResult segment);   
     public delegate void OnStreamFinishedDelegate(string finalResult);
     
@@ -113,8 +114,22 @@ namespace Whisper
     /// </summary>
     public class WhisperStream
     {
+        /// <summary>
+        /// Raised when whisper updated stream transcription.
+        /// Result contains a full stream transcript from the stream beginning.
+        /// </summary>
         public event OnStreamResultUpdatedDelegate OnResultUpdated;
+        /// <summary>
+        /// Raised when whisper updated current segment transcript.
+        /// </summary>
+        public event OnStreamSegmentUpdatedDelegate OnSegmentUpdated;
+        /// <summary>
+        /// Raised when whisper finished current segment transcript. 
+        /// </summary>
         public event OnStreamSegmentFinishedDelegate OnSegmentFinished;
+        /// <summary>
+        /// Raised when whisper finished stream transcription and can start another one.
+        /// </summary>
         public event OnStreamFinishedDelegate OnStreamFinished;
         
         private readonly WhisperWrapper _wrapper;
@@ -272,6 +287,7 @@ namespace Whisper
             var currentOutput = _output + currentSegment;
 
             // send update to user
+            OnSegmentUpdated?.Invoke(res);
             OnResultUpdated?.Invoke(currentOutput);
             
             // check if finished working on current chunk

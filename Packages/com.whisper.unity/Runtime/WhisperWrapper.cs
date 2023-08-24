@@ -22,13 +22,13 @@ namespace Whisper
         public const int WhisperSampleRate = 16000;
 
         /// <summary>
-        /// Invokes when whisper transcribed a new text segment from audio. 
+        /// Raised when whisper transcribed a new text segment from audio. 
         /// </summary>
         /// <remarks>Use <see cref="MainThreadDispatcher"/> for handling event in Unity main thread.</remarks>
         public event OnNewSegmentDelegate OnNewSegment;
         
         /// <summary>
-        /// Invokes when whisper made some progress in transcribing audio.
+        /// Raised when whisper made some progress in transcribing audio.
         /// Progress changes from 0 to 100 included.
         /// </summary>
         /// <remarks>Use <see cref="MainThreadDispatcher"/> for handling event in Unity main thread.</remarks>
@@ -58,7 +58,7 @@ namespace Whisper
         /// <summary>
         /// Transcribes audio clip. Will block thread until transcription complete.
         /// </summary>
-        /// <returns>Full transcription. Null if transcription failed.</returns>
+        /// <returns>Full audio transcript. Null if transcription failed.</returns>
         public WhisperResult GetText(AudioClip clip, WhisperParams param)
         {
             // try to load data
@@ -75,7 +75,7 @@ namespace Whisper
         /// <summary>
         /// Start async transcription of audio clip.
         /// </summary>
-        /// <returns>Full transcription. Null if transcription failed.</returns>
+        /// <returns>Full audio transcript. Null if transcription failed.</returns>
         public async Task<WhisperResult> GetTextAsync(AudioClip clip, WhisperParams param)
         {
             var samples = new float[clip.samples * clip.channels];
@@ -99,7 +99,7 @@ namespace Whisper
         /// <param name="frequency">Audio sample rate.</param>
         /// <param name="channels">Audio channels count.</param>
         /// <param name="param">Whisper inference parameters.</param>
-        /// <returns>Full transcription. Null if transcription failed.</returns>
+        /// <returns>Full audio transcript. Null if transcription failed.</returns>
         public WhisperResult GetText(float[] samples, int frequency, int channels, WhisperParams param)
         {
             lock (_lock)
@@ -163,7 +163,7 @@ namespace Whisper
         /// <param name="frequency">Audio sample rate.</param>
         /// <param name="channels">Audio channels count.</param>
         /// <param name="param">Whisper inference parameters.</param>
-        /// <returns>Full transcription. Null if transcription failed.</returns>
+        /// <returns>Full audio transcript. Null if transcription failed.</returns>
         public async Task<WhisperResult> GetTextAsync(float[] samples, int frequency, int channels, WhisperParams param)
         {
             var asyncTask = Task.Factory.StartNew(() => GetText(samples, frequency, channels, param));
