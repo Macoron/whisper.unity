@@ -145,6 +145,12 @@ namespace Whisper
         
         private Task<WhisperResult> _task;
 
+        /// <summary>
+        /// Create a new instance of Whisper streaming transcription.
+        /// </summary>
+        /// <param name="wrapper">Loaded whisper model which will be used for transcription.</param>
+        /// <param name="param">Whisper streaming parameters.</param>
+        /// <param name="microphone">Optional microphone input for stream.</param>
         public WhisperStream(WhisperWrapper wrapper, WhisperStreamParams param,
             MicrophoneRecord microphone = null)
         {
@@ -153,7 +159,7 @@ namespace Whisper
             _originalPrompt = _param.InferenceParam.InitialPrompt;
             _microphone = microphone;
         }
-
+        
         public void StartStream()
         {
             if (_isStreaming)
