@@ -5,7 +5,7 @@ using Whisper.Utils;
 namespace Whisper.Samples
 {
     /// <summary>
-    /// 
+    /// Stream transcription from microphone input.
     /// </summary>
     public class StreamingSampleMic : MonoBehaviour
     {
