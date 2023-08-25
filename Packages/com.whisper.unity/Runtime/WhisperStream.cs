@@ -148,7 +148,7 @@ namespace Whisper
         /// <summary>
         /// Create a new instance of Whisper streaming transcription.
         /// </summary>
-        /// <param name="wrapper">Loaded whisper model which will be used for transcription.</param>
+        /// <param name="wrapper">Loaded Whisper model which will be used for transcription.</param>
         /// <param name="param">Whisper streaming parameters.</param>
         /// <param name="microphone">Optional microphone input for stream.</param>
         public WhisperStream(WhisperWrapper wrapper, WhisperStreamParams param,
@@ -160,6 +160,15 @@ namespace Whisper
             _microphone = microphone;
         }
         
+        /// <summary>
+        /// Start a new streaming transcription. Must be called before
+        /// you start adding new audio chunks.
+        /// </summary>
+        /// <remarks>
+        /// If you set microphone into constructor, it will start listening to it.
+        /// Make sure you started microphone by <see cref="MicrophoneRecord.StartRecord"/>.
+        /// There is no need to add audio chunks manually using <see cref="AddToStream"/>.
+        /// </remarks>
         public void StartStream()
         {
             if (_isStreaming)
@@ -177,6 +186,13 @@ namespace Whisper
             }
         }
 
+        /// <summary>
+        /// Manually add a new chunk of audio to streaming.
+        /// Make sure to call <see cref="StartStream"/> first.
+        /// </summary>
+        /// <remarks>
+        /// If you set microphone into constructor, it will be called automatically.
+        /// </remarks>
         public async void AddToStream(AudioChunk chunk)
         {
             if (!_isStreaming)
@@ -211,6 +227,10 @@ namespace Whisper
             }
         }
 
+        /// <summary>
+        /// Stop current streaming transcription. It will process last
+        /// audio chunks and raise <see cref="OnStreamFinished"/> when it's done.
+        /// </summary>
         public async void StopStream()
         {
             if (!_isStreaming)
