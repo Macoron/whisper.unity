@@ -8,7 +8,7 @@ using Whisper.Utils;
 namespace Whisper
 {
     /// <summary>
-    /// Manages Whisper model in Unity scene.
+    /// Manages Whisper model lifecycle in Unity scene.
     /// </summary>
     public class WhisperManager : MonoBehaviour
     {
