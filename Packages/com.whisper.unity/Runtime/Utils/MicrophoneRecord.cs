@@ -4,9 +4,13 @@ using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
+// ReSharper disable RedundantCast
 
 namespace Whisper.Utils
 {
+    /// <summary>
+    /// Small portion of recorded audio.
+    /// </summary>
     public struct AudioChunk
     {
         public float[] Data;
@@ -20,33 +24,61 @@ namespace Whisper.Utils
     public delegate void OnChunkReadyDelegate(AudioChunk chunk);
     public delegate void OnRecordStopDelegate(float[] data, int frequency, int channels, float length);
     
+    /// <summary>
+    /// Controls microphone input settings and recording. 
+    /// </summary>
     public class MicrophoneRecord : MonoBehaviour
     {
+        [Tooltip("Max length of recorded audio from microphone in seconds")]
         public int maxLengthSec = 30;
+        [Tooltip("Microphone sample rate")]
         public int frequency = 16000;
+        [Tooltip("Length of audio chunks in seconds, useful for streaming")]
         public float chunksLengthSec = 0.5f;
+        [Tooltip("Should microphone play echo when recording is complete?")]
         public bool echo = true;
         
         [Header("Voice Activity Detection (VAD)")]
+        [Tooltip("Should microphone check if audio input has speech?")]
         public bool useVad = true;
+        [Tooltip("How often VAD checks if current audio chunk has speech")]
         public float vadUpdateRateSec = 0.1f;
+        [Tooltip("Seconds of audio record that VAD uses to check if chunk has speech")]
         public float vadContextSec = 30f;
+        [Tooltip("Window size where VAD tries to detect speech")]
         public float vadLastSec = 1.25f;
+        [Tooltip("Threshold of VAD energy activation")]
         public float vadThd = 0.6f;
+        [Tooltip("Threshold of VAD filter frequency")]
         public float vadFreqThd = 100.0f;
+        [Tooltip("Optional indicator that changes color when speech detected")]
         [CanBeNull] public Image vadIndicatorImage;
         
-        [Header("VAD Stop")] 
+        [Header("VAD Stop")]
+        [Tooltip("If true microphone will stop record when no speech detected")]
         public bool vadStop;
+        [Tooltip("If true whisper transcription will drop last audio where silence was detected")]
         public bool dropVadPart = true;
+        [Tooltip("After how many seconds of silence microphone will stop record")]
         public float vadStopTime = 3f;
 
         [Header("Microphone selection (optional)")] 
+        [Tooltip("Optional UI dropdown with all available microphone inputs")]
         [CanBeNull] public Dropdown microphoneDropdown;
+        [Tooltip("The label of default microphone input in dropdown")]
         public string microphoneDefaultLabel = "Default microphone";
 
+        /// <summary>
+        /// Raised when VAD status changed.
+        /// </summary>
         public event OnVadChangedDelegate OnVadChanged;
+        /// <summary>
+        /// Raised when new audio chunk from microphone is ready.
+        /// </summary>
         public event OnChunkReadyDelegate OnChunkReady;
+        /// <summary>
+        /// Raised when microphone record stopped.
+        /// </summary>
         public event OnRecordStopDelegate OnRecordStop;
 
         private float _recordStart;
