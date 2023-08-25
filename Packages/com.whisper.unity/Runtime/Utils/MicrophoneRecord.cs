@@ -29,7 +29,7 @@ namespace Whisper.Utils
     /// </summary>
     public class MicrophoneRecord : MonoBehaviour
     {
-        [Tooltip("Max length of recorded audio from microphone")]
+        [Tooltip("Max length of recorded audio from microphone in seconds")]
         public int maxLengthSec = 30;
         [Tooltip("Microphone sample rate")]
         public int frequency = 16000;
@@ -63,9 +63,9 @@ namespace Whisper.Utils
         public float vadStopTime = 3f;
 
         [Header("Microphone selection (optional)")] 
-        [Tooltip("Optional UI dropdown with all available microphones")]
+        [Tooltip("Optional UI dropdown with all available microphone inputs")]
         [CanBeNull] public Dropdown microphoneDropdown;
-        [Tooltip("The label of default microphone in dropdown")]
+        [Tooltip("The label of default microphone input in dropdown")]
         public string microphoneDefaultLabel = "Default microphone";
 
         /// <summary>
