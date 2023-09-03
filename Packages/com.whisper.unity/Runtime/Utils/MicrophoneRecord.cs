@@ -29,6 +29,7 @@ namespace Whisper.Utils
     /// </summary>
     public class MicrophoneRecord : MonoBehaviour
     {
+        public bool loop;
         [Tooltip("Max length of recorded audio from microphone in seconds")]
         public int maxLengthSec = 30;
         [Tooltip("Microphone sample rate")]
@@ -88,8 +89,11 @@ namespace Whisper.Utils
         private int _lastChunkPos;
         private int _chunksLength;
         private float? _vadStopBegin;
-        
+        private int _lastMicPos;
+        private bool _madeLoopLap;
+
         private string _selectedMicDevice;
+
         public string SelectedMicDevice
         {
             get => _selectedMicDevice;
@@ -126,17 +130,30 @@ namespace Whisper.Utils
             if (!IsRecording)
                 return;
             
-            // check that recording reached max time
-            var timePassed = Time.realtimeSinceStartup - _recordStart;
-            if (timePassed > maxLengthSec)
+            // we are recording with our mic
+            // lets check current mic position time
+            var micPos = Microphone.GetPosition(RecordStartMicDevice);
+            if (micPos < _lastMicPos)
             {
-                StopRecord();
-                return;
+                // looks like mic started recording in loop
+                // lets check if we even allow do that?
+                _madeLoopLap = true;
+                if (!loop)
+                {
+                    LogUtils.Verbose($"Stop recording, mic pos returned back to {micPos}");
+                    StopRecord();
+                    return;
+                }
+                
+                // all cool, we can work in loop
+                // lets update loop counter
+                LogUtils.Verbose($"Mic made a new loop lap, continue recording.");
             }
-            
+            _lastMicPos = micPos;
+
             // still recording - update chunks and vad
-            UpdateChunks();
-            UpdateVad();
+            //UpdateChunks();
+            //UpdateVad();
         }
         
         private void UpdateChunks()
@@ -150,8 +167,8 @@ namespace Whisper.Utils
                 return;
             
             // get current chunk length
-            var samplesCount = Microphone.GetPosition(RecordStartMicDevice);
-            var chunk = samplesCount - _lastChunkPos;
+            var micPos = Microphone.GetPosition(RecordStartMicDevice);
+            var chunk = micPos - _lastChunkPos;
             
             // send new chunks while there has valid size
             while (chunk > _chunksLength)
@@ -170,7 +187,7 @@ namespace Whisper.Utils
                 OnChunkReady(chunkStruct);
 
                 _lastChunkPos += _chunksLength;
-                chunk = samplesCount - _lastChunkPos;
+                chunk = micPos - _lastChunkPos;
             }
         }
         
@@ -243,9 +260,11 @@ namespace Whisper.Utils
 
             _recordStart = Time.realtimeSinceStartup;
             RecordStartMicDevice = SelectedMicDevice;
-            _clip = Microphone.Start(RecordStartMicDevice, false, maxLengthSec, frequency);
+            _clip = Microphone.Start(RecordStartMicDevice, loop, maxLengthSec, frequency);
             IsRecording = true;
-            
+
+            _lastMicPos = 0;
+            _madeLoopLap = false;
             _lastChunkPos = 0;
             _lastVadPos = 0;
             _vadStopBegin = null;
@@ -257,7 +276,7 @@ namespace Whisper.Utils
             if (!IsRecording)
                 return;
 
-            var data = GetTrimmedData(dropTimeSec);
+            var data = GetMicBuffer(dropTimeSec);
             if (echo)
             {
                 var echoClip = AudioClip.Create("echo", data.Length,
@@ -279,16 +298,25 @@ namespace Whisper.Utils
             OnRecordStop?.Invoke(data, _clip.frequency, _clip.channels, _length);
         }
 
-        private float[] GetTrimmedData(float dropTimeSec = 0f)
+        private float[] GetMicBuffer(float dropTimeSec = 0f)
         {
-            // get microphone samples and current position
             var pos = Microphone.GetPosition(RecordStartMicDevice);
-            var len = pos == 0 ? _clip.samples * _clip.channels : pos;
+            
+            // looks like we just started recording and drop it immediately
+            // nothing was actually recorded
+            if (pos == 0 && !_madeLoopLap)
+                return Array.Empty<float>();
+            
+            // get length of the mic buffer that we want to return
+            // this need to account circular loop buffer and drop time
+            var len = pos == 0 || _madeLoopLap ? _clip.samples * _clip.channels : pos;
             var dropTimeSamples = (int) (_clip.frequency * _clip.channels * dropTimeSec);
             len = Math.Max(0, len - dropTimeSamples);
             
+            // get actual float buffer from circular buffer audio clip
             var data = new float[len];
-            _clip.GetData(data, 0);
+            var offset = _madeLoopLap ? pos : 0;
+            _clip.GetData(data, offset);
             return data;
         }
     }
