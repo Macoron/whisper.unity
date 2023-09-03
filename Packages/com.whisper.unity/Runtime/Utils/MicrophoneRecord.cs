@@ -277,6 +277,7 @@ namespace Whisper.Utils
             if (!IsRecording)
                 return;
             
+            // get all data from mic audio clip
             var data = GetMicBuffer(dropTimeSec);
             var finalAudio = new AudioChunk()
             {
@@ -287,10 +288,10 @@ namespace Whisper.Utils
                 Length = (float) data.Length / (_clip.frequency * _clip.channels)
             };
             
+            // stop mic audio recording
             Microphone.End(RecordStartMicDevice);
             IsRecording = false;
             Destroy(_clip);
-            
             LogUtils.Verbose($"Stopped microphone recording. Final audio length " +
                              $"{finalAudio.Length} ({finalAudio.Data.Length} samples)");
 
@@ -307,10 +308,10 @@ namespace Whisper.Utils
                 var echoClip = AudioClip.Create("echo", data.Length,
                     _clip.channels, _clip.frequency, false);
                 echoClip.SetData(data, 0);
-                AudioSource.PlayClipAtPoint(echoClip, Vector3.zero);
+                PlayAudioAndDestroy.Play(echoClip, Vector3.zero);
             }
 
-            
+            // finally, fire event
             OnRecordStop?.Invoke(finalAudio);
         }
 
