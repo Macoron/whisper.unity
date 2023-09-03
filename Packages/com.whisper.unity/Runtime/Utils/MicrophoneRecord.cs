@@ -9,7 +9,7 @@ using UnityEngine.UI;
 namespace Whisper.Utils
 {
     /// <summary>
-    /// Small portion of recorded audio.
+    /// Portion of recorded audio clip.
     /// </summary>
     public struct AudioChunk
     {
@@ -22,7 +22,7 @@ namespace Whisper.Utils
     
     public delegate void OnVadChangedDelegate(bool isSpeechDetected);
     public delegate void OnChunkReadyDelegate(AudioChunk chunk);
-    public delegate void OnRecordStopDelegate(float[] data, int frequency, int channels, float length);
+    public delegate void OnRecordStopDelegate(AudioChunk recordedAudio);
     
     /// <summary>
     /// Controls microphone input settings and recording. 
@@ -79,6 +79,7 @@ namespace Whisper.Utils
         public event OnChunkReadyDelegate OnChunkReady;
         /// <summary>
         /// Raised when microphone record stopped.
+        /// Returns <see cref="maxLengthSec"/> or less of recorded audio.
         /// </summary>
         public event OnRecordStopDelegate OnRecordStop;
 
@@ -140,7 +141,7 @@ namespace Whisper.Utils
                 _madeLoopLap = true;
                 if (!loop)
                 {
-                    LogUtils.Verbose($"Stop recording, mic pos returned back to {micPos}");
+                    LogUtils.Verbose($"Stopping recording, mic pos returned back to {micPos}");
                     StopRecord();
                     return;
                 }
@@ -275,8 +276,32 @@ namespace Whisper.Utils
         {
             if (!IsRecording)
                 return;
-
+            
             var data = GetMicBuffer(dropTimeSec);
+            var finalAudio = new AudioChunk()
+            {
+                Data = data,
+                Channels = _clip.channels,
+                Frequency = _clip.frequency,
+                IsVoiceDetected = IsVoiceDetected,
+                Length = (float) data.Length / (_clip.frequency * _clip.channels)
+            };
+            
+            Microphone.End(RecordStartMicDevice);
+            IsRecording = false;
+            Destroy(_clip);
+            
+            LogUtils.Verbose($"Stopped microphone recording. Final audio length " +
+                             $"{finalAudio.Length} ({finalAudio.Data.Length} samples)");
+
+            // update VAD, no speech with disabled mic
+            if (IsVoiceDetected)
+            {
+                IsVoiceDetected = false;
+                OnVadChanged?.Invoke(false);   
+            }
+            
+            // play echo sound
             if (echo)
             {
                 var echoClip = AudioClip.Create("echo", data.Length,
@@ -285,17 +310,8 @@ namespace Whisper.Utils
                 AudioSource.PlayClipAtPoint(echoClip, Vector3.zero);
             }
 
-            Microphone.End(RecordStartMicDevice);
-            IsRecording = false;
-            _length = Time.realtimeSinceStartup - _recordStart;
             
-            if (IsVoiceDetected)
-            {
-                IsVoiceDetected = false;
-                OnVadChanged?.Invoke(false);   
-            }
-
-            OnRecordStop?.Invoke(data, _clip.frequency, _clip.channels, _length);
+            OnRecordStop?.Invoke(finalAudio);
         }
 
         private float[] GetMicBuffer(float dropTimeSec = 0f)

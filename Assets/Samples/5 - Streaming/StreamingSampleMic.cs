@@ -44,7 +44,7 @@ namespace Whisper.Samples
             buttonText.text = microphoneRecord.IsRecording ? "Stop" : "Record";
         }
     
-        private void OnRecordStop(float[] data, int frequency, int channels, float length)
+        private void OnRecordStop(AudioChunk recordedAudio)
         {
             buttonText.text = "Record";
         }
