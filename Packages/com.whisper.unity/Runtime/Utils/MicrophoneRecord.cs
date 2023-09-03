@@ -272,6 +272,10 @@ namespace Whisper.Utils
             _chunksLength = (int) (_clip.frequency * _clip.channels * chunksLengthSec);
         }
 
+        /// <summary>
+        /// Stop microphone record.
+        /// </summary>
+        /// <param name="dropTimeSec">How many last recording seconds to drop.</param>
         public void StopRecord(float dropTimeSec = 0f)
         {
             if (!IsRecording)
@@ -319,7 +323,7 @@ namespace Whisper.Utils
         {
             var pos = Microphone.GetPosition(RecordStartMicDevice);
             
-            // looks like we just started recording and drop it immediately
+            // looks like we just started recording and stopped it immediately
             // nothing was actually recorded
             if (pos == 0 && !_madeLoopLap)
                 return Array.Empty<float>();
@@ -330,7 +334,8 @@ namespace Whisper.Utils
             var dropTimeSamples = (int) (_clip.frequency * _clip.channels * dropTimeSec);
             len = Math.Max(0, len - dropTimeSamples);
             
-            // get actual float buffer from circular buffer audio clip
+            // get last len samples from recorded audio
+            // offset used to get audio from previous circular buffer lap
             var data = new float[len];
             var offset = _madeLoopLap ? pos : 0;
             _clip.GetData(data, offset);
