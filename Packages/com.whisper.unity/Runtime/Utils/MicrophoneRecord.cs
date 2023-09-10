@@ -82,8 +82,7 @@ namespace Whisper.Utils
         /// Returns <see cref="maxLengthSec"/> or less of recorded audio.
         /// </summary>
         public event OnRecordStopDelegate OnRecordStop;
-
-        private float _recordStart;
+        
         private int _lastVadPos;
         private AudioClip _clip;
         private float _length;
@@ -105,6 +104,8 @@ namespace Whisper.Utils
                 _selectedMicDevice = value;
             }
         }
+
+        public int ClipSamples => _clip.samples * _clip.channels;
 
         public string RecordStartMicDevice { get; private set; }
         public bool IsRecording { get; private set; }
@@ -131,7 +132,6 @@ namespace Whisper.Utils
             if (!IsRecording)
                 return;
             
-            // we are recording with our mic
             // lets check current mic position time
             var micPos = Microphone.GetPosition(RecordStartMicDevice);
             if (micPos < _lastMicPos)
@@ -147,14 +147,14 @@ namespace Whisper.Utils
                 }
                 
                 // all cool, we can work in loop
-                // lets update loop counter
                 LogUtils.Verbose($"Mic made a new loop lap, continue recording.");
             }
             _lastMicPos = micPos;
 
             // still recording - update chunks and vad
+            var buffer = GetMicBuffer();
             //UpdateChunks();
-            //UpdateVad();
+            UpdateVad(micPos);
         }
         
         private void UpdateChunks()
@@ -192,31 +192,25 @@ namespace Whisper.Utils
             }
         }
         
-        private void UpdateVad()
+        private void UpdateVad(int micPos)
         {
             if (!useVad)
                 return;
             
-            // get current position of microphone header
-            var samplesCount = Microphone.GetPosition(RecordStartMicDevice);
+            // get current recorded clip length
+            var samplesCount = GetMicBufferLength(micPos);
             if (samplesCount <= 0)
                 return;
 
             // check if it's time to update
             var vadUpdateRateSamples = vadUpdateRateSec * _clip.frequency;
-            var dt = samplesCount - _lastVadPos;
+            var dt = GetMicPosDist(_lastVadPos, micPos);
             if (dt < vadUpdateRateSamples)
                 return;
             _lastVadPos = samplesCount;
             
             // try to get sample for voice detection
-            var vadContextSamples = (int) (_clip.frequency * vadContextSec);
-            var dataLength = Math.Min(vadContextSamples, samplesCount); 
-            var offset = Math.Max(samplesCount - vadContextSamples, 0);
-
-            var data = new float[dataLength];
-            _clip.GetData(data, offset);
-
+            var data = GetMicBufferLast(micPos, vadContextSec);
             var vad = AudioUtils.SimpleVad(data, _clip.frequency, vadLastSec, vadThd, vadFreqThd);
             if (vadIndicatorImage)
             {
@@ -254,12 +248,14 @@ namespace Whisper.Utils
             SelectedMicDevice = opt.text == microphoneDefaultLabel ? null : opt.text;
         }
 
+        /// <summary>
+        /// Start microphone recording
+        /// </summary>
         public void StartRecord()
         {
             if (IsRecording)
                 return;
-
-            _recordStart = Time.realtimeSinceStartup;
+            
             RecordStartMicDevice = SelectedMicDevice;
             _clip = Microphone.Start(RecordStartMicDevice, loop, maxLengthSec, frequency);
             IsRecording = true;
@@ -321,25 +317,67 @@ namespace Whisper.Utils
 
         private float[] GetMicBuffer(float dropTimeSec = 0f)
         {
-            var pos = Microphone.GetPosition(RecordStartMicDevice);
+            var micPos = Microphone.GetPosition(RecordStartMicDevice);
+            var len = GetMicBufferLength(micPos);
+            if (len == 0) return Array.Empty<float>();
             
-            // looks like we just started recording and stopped it immediately
-            // nothing was actually recorded
-            if (pos == 0 && !_madeLoopLap)
-                return Array.Empty<float>();
-            
-            // get length of the mic buffer that we want to return
-            // this need to account circular loop buffer and drop time
-            var len = pos == 0 || _madeLoopLap ? _clip.samples * _clip.channels : pos;
-            var dropTimeSamples = (int) (_clip.frequency * _clip.channels * dropTimeSec);
+            // drop last samples from length if necessary
+            var dropTimeSamples = (int) (_clip.frequency * dropTimeSec);
             len = Math.Max(0, len - dropTimeSamples);
             
             // get last len samples from recorded audio
             // offset used to get audio from previous circular buffer lap
             var data = new float[len];
-            var offset = _madeLoopLap ? pos : 0;
+            var offset = _madeLoopLap ? micPos : 0;
+            _clip.GetData(data, offset);
+            
+            return data;
+        }
+
+        /// <summary>
+        /// Get last sec of recorded mic buffer.
+        /// </summary>
+        private float[] GetMicBufferLast(int micPos, float lastSec)
+        {
+            var len = GetMicBufferLength(micPos);
+            if (len == 0) return Array.Empty<float>();
+            
+            var lastSamples = (int) (_clip.frequency * lastSec);
+            var dataLength = Math.Min(lastSamples, len);
+            var offset = micPos - dataLength;
+            if (offset < 0) offset = len + offset;
+
+            var data = new float[dataLength];
             _clip.GetData(data, offset);
             return data;
+        }
+
+        /// <summary>
+        /// Get mic buffer length that was actually recorded.
+        /// </summary>
+        private int GetMicBufferLength(int micPos)
+        {
+            // looks like we just started recording and stopped it immediately
+            // nothing was actually recorded
+            if (micPos == 0 && !_madeLoopLap) return 0;
+            
+            // get length of the mic buffer that we want to return
+            // this need to account circular loop buffer
+            var len = micPos == 0 || _madeLoopLap ? ClipSamples : micPos;
+            return len;
+        }
+
+        /// <summary>
+        /// Calculate distance between two mic positions
+        /// with respect to circular buffer.
+        /// </summary>
+        private int GetMicPosDist(int prevPos, int newPos)
+        {
+            if (newPos >= prevPos)
+                return newPos - prevPos;
+
+            // circular buffer case
+            return ClipSamples - prevPos + newPos;
         }
     }
 }
