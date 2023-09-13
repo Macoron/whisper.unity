@@ -31,7 +31,7 @@ namespace Whisper.Utils
     {
         public bool loop;
         [Tooltip("Max length of recorded audio from microphone in seconds")]
-        public int maxLengthSec = 30;
+        public int maxLengthSec = 60;
         [Tooltip("Microphone sample rate")]
         public int frequency = 16000;
         [Tooltip("Length of audio chunks in seconds, useful for streaming")]
@@ -49,7 +49,7 @@ namespace Whisper.Utils
         [Tooltip("Window size where VAD tries to detect speech")]
         public float vadLastSec = 1.25f;
         [Tooltip("Threshold of VAD energy activation")]
-        public float vadThd = 0.6f;
+        public float vadThd = 1.2f;
         [Tooltip("Threshold of VAD filter frequency")]
         public float vadFreqThd = 100.0f;
         [Tooltip("Optional indicator that changes color when speech detected")]
@@ -212,17 +212,20 @@ namespace Whisper.Utils
             // try to get sample for voice detection
             var data = GetMicBufferLast(micPos, vadContextSec);
             var vad = AudioUtils.SimpleVad(data, _clip.frequency, vadLastSec, vadThd, vadFreqThd);
-            if (vadIndicatorImage)
-            {
-                var color = vad ? Color.green : Color.red;
-                vadIndicatorImage.color = color;
-            }
 
+            // raise event if vad has changed
             if (vad != IsVoiceDetected)
             {
                 _vadStopBegin = !vad ? Time.realtimeSinceStartup : (float?) null;
                 IsVoiceDetected = vad;
                 OnVadChanged?.Invoke(vad);   
+            }
+            
+            // update vad indicator
+            if (vadIndicatorImage)
+            {
+                var color = vad ? Color.green : Color.red;
+                vadIndicatorImage.color = color;
             }
 
             UpdateVadStop();
@@ -315,6 +318,9 @@ namespace Whisper.Utils
             OnRecordStop?.Invoke(finalAudio);
         }
 
+        /// <summary>
+        /// Get all recorded mic buffer.
+        /// </summary>
         private float[] GetMicBuffer(float dropTimeSec = 0f)
         {
             var micPos = Microphone.GetPosition(RecordStartMicDevice);
@@ -340,7 +346,8 @@ namespace Whisper.Utils
         private float[] GetMicBufferLast(int micPos, float lastSec)
         {
             var len = GetMicBufferLength(micPos);
-            if (len == 0) return Array.Empty<float>();
+            if (len == 0) 
+                return Array.Empty<float>();
             
             var lastSamples = (int) (_clip.frequency * lastSec);
             var dataLength = Math.Min(lastSamples, len);
@@ -359,17 +366,18 @@ namespace Whisper.Utils
         {
             // looks like we just started recording and stopped it immediately
             // nothing was actually recorded
-            if (micPos == 0 && !_madeLoopLap) return 0;
+            if (micPos == 0 && !_madeLoopLap) 
+                return 0;
             
             // get length of the mic buffer that we want to return
             // this need to account circular loop buffer
-            var len = micPos == 0 || _madeLoopLap ? ClipSamples : micPos;
+            var len = _madeLoopLap ? ClipSamples : micPos;
             return len;
         }
 
         /// <summary>
-        /// Calculate distance between two mic positions
-        /// with respect to circular buffer.
+        /// Calculate distance between two mic positions.
+        /// It takes circular buffer into account.
         /// </summary>
         private int GetMicPosDist(int prevPos, int newPos)
         {
