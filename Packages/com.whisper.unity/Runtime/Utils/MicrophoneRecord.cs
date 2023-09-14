@@ -29,9 +29,10 @@ namespace Whisper.Utils
     /// </summary>
     public class MicrophoneRecord : MonoBehaviour
     {
-        public bool loop;
         [Tooltip("Max length of recorded audio from microphone in seconds")]
         public int maxLengthSec = 60;
+        [Tooltip("After reaching max length microphone record will continue")]
+        public bool loop;
         [Tooltip("Microphone sample rate")]
         public int frequency = 16000;
         [Tooltip("Length of audio chunks in seconds, useful for streaming")]
@@ -49,7 +50,7 @@ namespace Whisper.Utils
         [Tooltip("Window size where VAD tries to detect speech")]
         public float vadLastSec = 1.25f;
         [Tooltip("Threshold of VAD energy activation")]
-        public float vadThd = 1.2f;
+        public float vadThd = 1.0f;
         [Tooltip("Threshold of VAD filter frequency")]
         public float vadFreqThd = 100.0f;
         [Tooltip("Optional indicator that changes color when speech detected")]

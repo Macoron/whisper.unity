@@ -1092,7 +1092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9370225a2ca94276b870d5f87b0db55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  logLevel: 0
+  logLevel: 1
   modelPath: Whisper/ggml-tiny.bin
   isModelPathInStreamingAssets: 1
   initOnAwake: 1
@@ -3111,7 +3111,7 @@ MonoBehaviour:
   vadUpdateRateSec: 0.1
   vadContextSec: 30
   vadLastSec: 1.25
-  vadThd: 1.2
+  vadThd: 1
   vadFreqThd: 100
   vadIndicatorImage: {fileID: 1756544758}
   vadStop: 0
