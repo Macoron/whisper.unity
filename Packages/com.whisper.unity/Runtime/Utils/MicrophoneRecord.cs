@@ -152,12 +152,11 @@ namespace Whisper.Utils
             _lastMicPos = micPos;
 
             // still recording - update chunks and vad
-            var buffer = GetMicBuffer();
-            //UpdateChunks();
+            UpdateChunks(micPos);
             UpdateVad(micPos);
         }
         
-        private void UpdateChunks()
+        private void UpdateChunks(int micPos)
         {
             // is anyone even subscribe to do this?
             if (OnChunkReady == null)
@@ -168,8 +167,7 @@ namespace Whisper.Utils
                 return;
             
             // get current chunk length
-            var micPos = Microphone.GetPosition(RecordStartMicDevice);
-            var chunk = micPos - _lastChunkPos;
+            var chunk = GetMicPosDist(_lastChunkPos, micPos);
             
             // send new chunks while there has valid size
             while (chunk > _chunksLength)
@@ -187,8 +185,8 @@ namespace Whisper.Utils
                 };
                 OnChunkReady(chunkStruct);
 
-                _lastChunkPos += _chunksLength;
-                chunk = micPos - _lastChunkPos;
+                _lastChunkPos = (_lastChunkPos + _chunksLength) % ClipSamples;
+                chunk = GetMicPosDist(_lastChunkPos, micPos);
             }
         }
         
