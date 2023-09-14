@@ -361,7 +361,7 @@ namespace Whisper
             AddToStream(chunk);
         }
         
-        private void MicrophoneOnRecordStop(float[] data, int frequency, int channels, float length)
+        private void MicrophoneOnRecordStop(AudioChunk recordedAudio)
         {
             StopStream();
         }

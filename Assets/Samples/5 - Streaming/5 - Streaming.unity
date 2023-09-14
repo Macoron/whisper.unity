@@ -1874,22 +1874,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bc03a4c19604ea394e364f8fc632928, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxLengthSec: 240
+  maxLengthSec: 60
+  loop: 1
   frequency: 16000
-  chunksLengthSec: 0.2
-  echo: 1
+  chunksLengthSec: 0.5
+  echo: 0
   useVad: 1
   vadUpdateRateSec: 0.1
   vadContextSec: 30
   vadLastSec: 1.25
-  vadThd: 0.6
+  vadThd: 1
   vadFreqThd: 100
   vadIndicatorImage: {fileID: 1303962929}
   vadStop: 0
   dropVadPart: 1
   vadStopTime: 3
   microphoneDropdown: {fileID: 948466958}
-  microphoneDefaultLabel: Default mic
+  microphoneDefaultLabel: Default microphone
 --- !u!114 &1337591124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1991,7 +1992,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 967652833}
   m_HandleRect: {fileID: 967652832}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
