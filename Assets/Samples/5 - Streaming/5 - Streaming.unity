@@ -1880,7 +1880,7 @@ MonoBehaviour:
   useVad: 1
   vadUpdateRateSec: 0.1
   vadContextSec: 30
-  vadLastSec: 0.5
+  vadLastSec: 0.25
   vadThd: 0.6
   vadFreqThd: 100
   vadIndicatorImage: {fileID: 1303962929}
