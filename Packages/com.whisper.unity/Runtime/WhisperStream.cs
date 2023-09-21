@@ -10,7 +10,11 @@ namespace Whisper
     public delegate void OnStreamResultUpdatedDelegate(string updatedResult);
     
     public delegate void OnStreamFinishedDelegate(string finalResult);
-    
+
+    public delegate void OnStreamSegmentProcessingStartedDelegate();
+
+    public delegate void OnStreamSegmentProcessedFinishedDelegate();
+
     /// <summary>
     /// Parameters of whisper streaming processing.
     /// </summary>
@@ -115,6 +119,8 @@ namespace Whisper
     {
         public event OnStreamResultUpdatedDelegate OnResultUpdated;
         public event OnStreamFinishedDelegate OnStreamFinished;
+        public event OnStreamSegmentProcessingStartedDelegate OnStreamSegmentProcessingStarted;
+        public event OnStreamSegmentProcessedFinishedDelegate OnStreamSegmentProcessingFinished;
         
         private readonly WhisperWrapper _wrapper;
         private readonly WhisperStreamParams _param;
@@ -261,6 +267,9 @@ namespace Whisper
             // current data is already copied into local buffer
             _newBuffer.Clear();
 
+            // start transcribing segments
+            OnStreamSegmentProcessingStarted?.Invoke();
+
             // start transcribing sliding window content
             _task = _wrapper.GetTextAsync(buffer, _param.Frequency, 
                 _param.Channels, _param.InferenceParam);
@@ -278,6 +287,9 @@ namespace Whisper
             _step++;
             if (forceSegmentEnd || _step >= _param.StepsCount)
             {
+                // finished transcribing segments
+                OnStreamSegmentProcessingFinished?.Invoke();
+
                 LogUtils.Verbose($"Stream finished an old segment with total steps of {_step}");
                 _output = currentOutput;
 
