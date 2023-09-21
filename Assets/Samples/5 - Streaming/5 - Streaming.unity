@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1881,7 +1880,7 @@ MonoBehaviour:
   useVad: 1
   vadUpdateRateSec: 0.1
   vadContextSec: 30
-  vadLastSec: 1.25
+  vadLastSec: 0.25
   vadThd: 0.6
   vadFreqThd: 100
   vadIndicatorImage: {fileID: 1303962929}
