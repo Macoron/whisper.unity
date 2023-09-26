@@ -1360,7 +1360,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &720715772
@@ -3102,22 +3102,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bc03a4c19604ea394e364f8fc632928, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxLengthSec: 30
+  loop: 1
+  maxLengthSec: 60
   frequency: 16000
   chunksLengthSec: 0.5
-  echo: 0
+  echo: 1
   useVad: 1
   vadUpdateRateSec: 0.1
   vadContextSec: 30
   vadLastSec: 1.25
-  vadThd: 0.6
+  vadThd: 1
   vadFreqThd: 100
   vadIndicatorImage: {fileID: 1756544758}
   vadStop: 0
   dropVadPart: 1
-  vadStopTime: 1.5
+  vadStopTime: 3
   microphoneDropdown: {fileID: 948466958}
-  microphoneDefaultLabel: Default mic
+  microphoneDefaultLabel: Default microphone
 --- !u!1 &1345287211
 GameObject:
   m_ObjectHideFlags: 0
@@ -3201,7 +3202,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 967652833}
   m_HandleRect: {fileID: 967652832}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4167,7 +4168,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1603953686
@@ -4253,7 +4254,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00012207031, y: 0}
+  m_AnchoredPosition: {x: -0.00024414062, y: 0}
   m_SizeDelta: {x: 55.6282, y: 55.6282}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1756544758

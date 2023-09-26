@@ -8,7 +8,8 @@ using System.Linq;
 namespace Whisper
 {
     public delegate void OnStreamResultUpdatedDelegate(string updatedResult);
-    
+    public delegate void OnStreamSegmentUpdatedDelegate(WhisperResult segment);   
+    public delegate void OnStreamSegmentFinishedDelegate(WhisperResult segment);   
     public delegate void OnStreamFinishedDelegate(string finalResult);
     
     /// <summary>
@@ -113,7 +114,22 @@ namespace Whisper
     /// </summary>
     public class WhisperStream
     {
+        /// <summary>
+        /// Raised when whisper updated stream transcription.
+        /// Result contains a full stream transcript from the stream beginning.
+        /// </summary>
         public event OnStreamResultUpdatedDelegate OnResultUpdated;
+        /// <summary>
+        /// Raised when whisper updated current segment transcript.
+        /// </summary>
+        public event OnStreamSegmentUpdatedDelegate OnSegmentUpdated;
+        /// <summary>
+        /// Raised when whisper finished current segment transcript. 
+        /// </summary>
+        public event OnStreamSegmentFinishedDelegate OnSegmentFinished;
+        /// <summary>
+        /// Raised when whisper finished stream transcription and can start another one.
+        /// </summary>
         public event OnStreamFinishedDelegate OnStreamFinished;
         
         private readonly WhisperWrapper _wrapper;
@@ -129,6 +145,12 @@ namespace Whisper
         
         private Task<WhisperResult> _task;
 
+        /// <summary>
+        /// Create a new instance of Whisper streaming transcription.
+        /// </summary>
+        /// <param name="wrapper">Loaded Whisper model which will be used for transcription.</param>
+        /// <param name="param">Whisper streaming parameters.</param>
+        /// <param name="microphone">Optional microphone input for stream.</param>
         public WhisperStream(WhisperWrapper wrapper, WhisperStreamParams param,
             MicrophoneRecord microphone = null)
         {
@@ -137,7 +159,16 @@ namespace Whisper
             _originalPrompt = _param.InferenceParam.InitialPrompt;
             _microphone = microphone;
         }
-
+        
+        /// <summary>
+        /// Start a new streaming transcription. Must be called before
+        /// you start adding new audio chunks.
+        /// </summary>
+        /// <remarks>
+        /// If you set microphone into constructor, it will start listening to it.
+        /// Make sure you started microphone by <see cref="MicrophoneRecord.StartRecord"/>.
+        /// There is no need to add audio chunks manually using <see cref="AddToStream"/>.
+        /// </remarks>
         public void StartStream()
         {
             if (_isStreaming)
@@ -155,6 +186,13 @@ namespace Whisper
             }
         }
 
+        /// <summary>
+        /// Manually add a new chunk of audio to streaming.
+        /// Make sure to call <see cref="StartStream"/> first.
+        /// </summary>
+        /// <remarks>
+        /// If you set microphone into constructor, it will be called automatically.
+        /// </remarks>
         public async void AddToStream(AudioChunk chunk)
         {
             if (!_isStreaming)
@@ -189,6 +227,10 @@ namespace Whisper
             }
         }
 
+        /// <summary>
+        /// Stop current streaming transcription. It will process last
+        /// audio chunks and raise <see cref="OnStreamFinished"/> when it's done.
+        /// </summary>
         public async void StopStream()
         {
             if (!_isStreaming)
@@ -271,6 +313,7 @@ namespace Whisper
             var currentOutput = _output + currentSegment;
 
             // send update to user
+            OnSegmentUpdated?.Invoke(res);
             OnResultUpdated?.Invoke(currentOutput);
             
             // check if finished working on current chunk
@@ -293,8 +336,9 @@ namespace Whisper
 
                 var segment = new ArraySegment<float>(buffer, bufferLen - updBufferLen, updBufferLen);
                 _oldBuffer = segment.ToArray();
-
                 _step = 0;
+                
+                OnSegmentFinished?.Invoke(res);
             }
             else
             {
@@ -317,7 +361,7 @@ namespace Whisper
             AddToStream(chunk);
         }
         
-        private void MicrophoneOnRecordStop(float[] data, int frequency, int channels, float length)
+        private void MicrophoneOnRecordStop(AudioChunk recordedAudio)
         {
             StopStream();
         }
