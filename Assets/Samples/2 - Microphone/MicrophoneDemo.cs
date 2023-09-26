@@ -67,7 +67,7 @@ namespace Whisper.Samples
             }
         }
         
-        private async void OnRecordStop(float[] data, int frequency, int channels, float length)
+        private async void OnRecordStop(AudioChunk recordedAudio)
         {
             buttonText.text = "Record";
             _buffer = "";
@@ -75,12 +75,12 @@ namespace Whisper.Samples
             var sw = new Stopwatch();
             sw.Start();
             
-            var res = await whisper.GetTextAsync(data, frequency, channels);
+            var res = await whisper.GetTextAsync(recordedAudio.Data, recordedAudio.Frequency, recordedAudio.Channels);
             if (res == null || !outputText) 
                 return;
 
             var time = sw.ElapsedMilliseconds;
-            var rate = length / (time * 0.001f);
+            var rate = recordedAudio.Length / (time * 0.001f);
             timeText.text = $"Time: {time} ms\nRate: {rate:F1}x";
 
             var text = res.Result;

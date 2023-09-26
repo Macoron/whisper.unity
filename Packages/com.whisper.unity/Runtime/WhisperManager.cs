@@ -7,6 +7,9 @@ using Whisper.Utils;
 
 namespace Whisper
 {
+    /// <summary>
+    /// Manages Whisper model lifecycle in Unity scene.
+    /// </summary>
     public class WhisperManager : MonoBehaviour
     {
         [Tooltip("Log level for whisper loading and inference")]
@@ -16,49 +19,24 @@ namespace Whisper
         [SerializeField] 
         [Tooltip("Path to model weights file")]
         private string modelPath = "Whisper/ggml-tiny.bin";
-
-        public string ModelPath
-        {
-            get => modelPath;
-            set
-            {
-                if (IsLoaded || IsLoading)
-                {
-                    throw new InvalidOperationException("Cannot change model path after loading the model");
-                }
-
-                modelPath = value;
-            }
-        }
-
+        
         [SerializeField]
         [Tooltip("Determines whether the StreamingAssets folder should be prepended to the model path")]
         private bool isModelPathInStreamingAssets = true;
-
-        public bool IsModelPathInStreamingAssets
-        {
-            get => isModelPathInStreamingAssets;
-            set
-            {
-                if (IsLoaded || IsLoading)
-                {
-                    throw new InvalidOperationException("Cannot change model path after loading the model");
-                }
-
-                isModelPathInStreamingAssets = value;
-            }
-        }
-
-        [SerializeField] [Tooltip("Should model weights be loaded on awake?")]
+        
+        [SerializeField] 
+        [Tooltip("Should model weights be loaded on awake?")]
         private bool initOnAwake = true;
 
-        [Header("Language")] [Tooltip("Output text language. Use empty or \"auto\" for auto-detection.")]
+        [Header("Language")] 
+        [Tooltip("Output text language. Use empty or \"auto\" for auto-detection.")]
         public string language = "en";
 
         [Tooltip("Force output text to English translation. Improves translation quality.")]
         public bool translateToEnglish;
 
-        [Header("Advanced settings")] [SerializeField]
+        [Header("Advanced settings")] 
+        [SerializeField]
         private WhisperSamplingStrategy strategy = WhisperSamplingStrategy.WHISPER_SAMPLING_GREEDY;
 
         [Tooltip("Do not use past transcription (if any) as initial prompt for the decoder.")]
@@ -106,14 +84,49 @@ namespace Whisper
                  "These can significantly reduce the quality of the output.")]
         public int audioCtx;
 
+        /// <summary>
+        /// Raised when whisper transcribed a new text segment from audio. 
+        /// </summary>
         public event OnNewSegmentDelegate OnNewSegment;
+        
+        /// <summary>
+        /// Raised when whisper made some progress in transcribing audio.
+        /// Progress changes from 0 to 100 included.
+        /// </summary>
         public event OnProgressDelegate OnProgress;
 
         private WhisperWrapper _whisper;
         private WhisperParams _params;
         private readonly MainThreadDispatcher _dispatcher = new MainThreadDispatcher();
 
+        public string ModelPath
+        {
+            get => modelPath;
+            set
+            {
+                if (IsLoaded || IsLoading)
+                {
+                    throw new InvalidOperationException("Cannot change model path after loading the model");
+                }
 
+                modelPath = value;
+            }
+        }
+        
+        public bool IsModelPathInStreamingAssets
+        {
+            get => isModelPathInStreamingAssets;
+            set
+            {
+                if (IsLoaded || IsLoading)
+                {
+                    throw new InvalidOperationException("Cannot change model path after loading the model");
+                }
+
+                isModelPathInStreamingAssets = value;
+            }
+        }
+        
         /// <summary>
         /// Checks if whisper weights are loaded and ready to be used.
         /// </summary>
@@ -165,7 +178,7 @@ namespace Whisper
             IsLoading = true;
             try
             {
-                var path = IsModelPathInStreamingAssets
+                var path = isModelPathInStreamingAssets
                     ? Path.Combine(Application.streamingAssetsPath, modelPath)
                     : modelPath;
                 _whisper = await WhisperWrapper.InitFromFileAsync(path);
@@ -183,6 +196,9 @@ namespace Whisper
             IsLoading = false;
         }
 
+        /// <summary>
+        /// Checks if currently loaded whisper model supports multilingual transcription.
+        /// </summary>
         public bool IsMultilingual()
         {
             if (!IsLoaded)
@@ -195,8 +211,9 @@ namespace Whisper
         }
 
         /// <summary>
-        /// Get transcription from audio clip.
+        /// Start async transcription of audio clip.
         /// </summary>
+        /// <returns>Full audio transcript. Null if transcription failed.</returns>
         public async Task<WhisperResult> GetTextAsync(AudioClip clip)
         {
             var isLoaded = await CheckIfLoaded();
@@ -209,8 +226,12 @@ namespace Whisper
         }
         
         /// <summary>
-        /// Get transcription from audio buffer.
+        /// Start async transcription of audio buffer.
         /// </summary>
+        /// <param name="samples">Raw audio buffer.</param>
+        /// <param name="frequency">Audio sample rate.</param>
+        /// <param name="channels">Audio channels count.</param>
+        /// <returns>Full audio transcript. Null if transcription failed.</returns>
         public async Task<WhisperResult> GetTextAsync(float[] samples, int frequency, int channels)
         {
             var isLoaded = await CheckIfLoaded();
@@ -222,6 +243,12 @@ namespace Whisper
             return res;
         }
         
+        /// <summary>
+        /// Create a new instance of Whisper streaming transcription.
+        /// </summary>
+        /// <param name="frequency">Audio sample rate.</param>
+        /// <param name="channels">Audio channels count.</param>
+        /// <returns>New streaming transcription. Null if failed.</returns>
         public async Task<WhisperStream> CreateStream(int frequency, int channels)
         {
             var isLoaded = await CheckIfLoaded();
@@ -238,6 +265,10 @@ namespace Whisper
             return stream;
         }
         
+        /// <summary>
+        /// Create a new instance of Whisper streaming transcription from microphone input.
+        /// </summary>
+        /// <returns>New streaming transcription. Null if failed.</returns>
         public async Task<WhisperStream> CreateStream(MicrophoneRecord microphone)
         {
             var isLoaded = await CheckIfLoaded();

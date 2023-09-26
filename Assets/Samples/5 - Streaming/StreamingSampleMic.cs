@@ -5,7 +5,7 @@ using Whisper.Utils;
 namespace Whisper.Samples
 {
     /// <summary>
-    /// 
+    /// Stream transcription from microphone input.
     /// </summary>
     public class StreamingSampleMic : MonoBehaviour
     {
@@ -23,8 +23,10 @@ namespace Whisper.Samples
         {
             _stream = await whisper.CreateStream(microphoneRecord);
             _stream.OnResultUpdated += OnResult;
+            _stream.OnSegmentUpdated += OnSegmentUpdated;
+            _stream.OnSegmentFinished += OnSegmentFinished;
             _stream.OnStreamFinished += OnFinished;
-        
+
             microphoneRecord.OnRecordStop += OnRecordStop;
             button.onClick.AddListener(OnButtonPressed);
         }
@@ -42,7 +44,7 @@ namespace Whisper.Samples
             buttonText.text = microphoneRecord.IsRecording ? "Stop" : "Record";
         }
     
-        private void OnRecordStop(float[] data, int frequency, int channels, float length)
+        private void OnRecordStop(AudioChunk recordedAudio)
         {
             buttonText.text = "Record";
         }
@@ -51,6 +53,16 @@ namespace Whisper.Samples
         {
             text.text = result;
             UiUtils.ScrollDown(scroll);
+        }
+        
+        private void OnSegmentUpdated(WhisperResult segment)
+        {
+            print($"Segment updated: {segment.Result}");
+        }
+        
+        private void OnSegmentFinished(WhisperResult segment)
+        {
+            print($"Segment finished: {segment.Result}");
         }
         
         private void OnFinished(string finalResult)
