@@ -64,14 +64,10 @@ jobs:
       - name: Latest Cmake
         run: |
           apt-get update
-          apt-get -y install gnupg
-          apt-get -y install ca-certificates
-          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-          apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
-          
-          apt-get update
           apt-get install -y build-essential
-          apt-get install -y cmake
+          apt-get install -y wget
+          wget https://github.com/Kitware/CMake/releases/download/v3.24.1/cmake-3.24.1-Linux-x86_64.sh -q -O /tmp/cmake-install.sh
+          /tmp/cmake-install.sh --skip-license 
 
       - name: Change gcc and g++
         run: apt-get install -y gcc-8 g++-8
