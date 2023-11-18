@@ -9,7 +9,7 @@ on:
       whisper_cpp_repo_ref:
         description: 'Tag, branch or commit'
         required: true
-        default: 'v1.4.2'
+        default: 'v1.5.0'
 jobs:
   build-windows:
     name: Build for Windows (x86_64)
@@ -64,7 +64,7 @@ jobs:
       - name: Latest Cmake
         run: |
           apt-get update \
-            && apt-get  install build-essential \
+            && apt-get install -y build-essential \
             && apt-get install -y wget \
             && rm -rf /var/lib/apt/lists/* \
             && wget https://github.com/Kitware/CMake/releases/download/v3.24.1/cmake-3.24.1-Linux-x86_64.sh \
