@@ -65,6 +65,12 @@ jobs:
         run: |
           apt-get update
           apt-get install -y build-essential
+
+      - name: Latest Cmake
+        run: |
+          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
+          apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+          apt-get update
           apt-get install -y cmake
 
       - name: Change gcc and g++
