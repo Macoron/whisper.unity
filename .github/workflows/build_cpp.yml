@@ -64,7 +64,7 @@ jobs:
       - name: Latest Cmake
         run: |
           apt-get update \
-            && apt-get -y install build-essential \
+            && apt-get  install build-essential \
             && apt-get install -y wget \
             && rm -rf /var/lib/apt/lists/* \
             && wget https://github.com/Kitware/CMake/releases/download/v3.24.1/cmake-3.24.1-Linux-x86_64.sh \
@@ -76,7 +76,9 @@ jobs:
                 && ln -s /opt/cmake-3.24.1/bin/* /usr/local/bin
 
       - name: Change gcc and g++
-        run: apt-get install -y gcc-8 g++-8
+        run: |
+          apt-get update
+          apt-get install -y gcc-8 g++-8
           
       - name: Run build script
         run: |
