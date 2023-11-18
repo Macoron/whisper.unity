@@ -61,16 +61,15 @@ jobs:
           ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
           path: whisper-cpp
         
-      - name: Dependencies
-        run: |
-          apt-get update
-          apt-get install -y build-essential
-
       - name: Latest Cmake
         run: |
+          apt-get update
+          apt-get install ca-certificates
           wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
           apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+          
           apt-get update
+          apt-get install -y build-essential
           apt-get install -y cmake
 
       - name: Change gcc and g++
