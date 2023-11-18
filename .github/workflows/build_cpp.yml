@@ -66,7 +66,7 @@ jobs:
           apt-get update
           apt-get -y install gnupg
           apt-get -y install ca-certificates
-          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
+          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
           apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
           
           apt-get update
