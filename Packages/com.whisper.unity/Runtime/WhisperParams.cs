@@ -6,6 +6,47 @@ using Whisper.Utils;
 namespace Whisper
 {
     /// <summary>
+    /// Wrapper of native C++ whisper context params.
+    /// Used during whisper model initialization.
+    /// </summary>
+    public class WhisperContextParams
+    {
+        private WhisperNativeContextParams _param;
+
+        /// <summary>
+        /// Native C++ struct parameters.
+        /// Do not change it in runtime directly, use setters.
+        /// </summary>
+        public WhisperNativeContextParams NativeParams => _param;
+
+        /// <summary>
+        /// Attempt to use GPU avaliable for this platform (CUDA or Metal).
+        /// </summary>
+        public bool UseGpu
+        {
+            get => _param.use_gpu;
+            set => _param.use_gpu = value;
+        }
+
+        private WhisperContextParams(WhisperNativeContextParams param)
+        {
+            _param = param;
+        }
+
+        /// <summary>
+        /// Create a new default Whisper Context parameters.
+        /// </summary>
+        public static WhisperContextParams GetDefaultParams()
+        {
+            LogUtils.Verbose($"Requesting default Whisper Context params...");
+            var nativeParams = WhisperNative.whisper_context_default_params();
+            LogUtils.Verbose("Default Whisper Context params generated!");
+
+            return new WhisperContextParams(nativeParams);
+        }
+    }
+
+    /// <summary>
     /// Wrapper of native C++ whisper parameters.
     /// Use it to safely change inference parameters.
     /// </summary>

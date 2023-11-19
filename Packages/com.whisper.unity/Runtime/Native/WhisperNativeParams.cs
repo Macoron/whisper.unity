@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Local
@@ -8,7 +9,7 @@ using whisper_token_ptr = System.IntPtr;
 using whisper_context_ptr = System.IntPtr;
 using whisper_state_ptr = System.IntPtr;
 using whisper_token = System.Int32;
-using System;
+
 
 namespace Whisper.Native
 {
@@ -49,7 +50,18 @@ namespace Whisper.Native
 
         public float vlen;        // voice length of the token
     }
-    
+
+    /// <summary>
+    /// This is direct copy of C++ struct.
+    /// Do not change or add any fields without changing it in whisper.cpp.
+    /// Do not change it in runtime directly, use <see cref="WhisperContextParams"/>.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WhisperNativeContextParams
+    {
+        [MarshalAs(UnmanagedType.U1)] public bool use_gpu;
+    };
+
     /// <summary>
     /// This is direct copy of C++ struct.
     /// Do not change or add any fields without changing it in whisper.cpp.

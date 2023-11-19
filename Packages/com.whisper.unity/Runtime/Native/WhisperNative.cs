@@ -18,11 +18,12 @@ namespace Whisper.Native
 #else
         private const string LibraryName = "libwhisper";
 #endif
+
         [DllImport(LibraryName)]
-        public static extern whisper_context_ptr whisper_init_from_file(string path_model);
-    
+        public static extern whisper_context_ptr whisper_init_from_file_with_params(string path_model, WhisperNativeContextParams @params);
+
         [DllImport(LibraryName)]
-        public static extern whisper_context_ptr whisper_init_from_buffer(IntPtr buffer, UIntPtr buffer_size);
+        public static extern whisper_context_ptr whisper_init_from_buffer_with_params(IntPtr buffer, UIntPtr buffer_size, WhisperNativeContextParams @params);
         
         [DllImport(LibraryName)]
         public static extern int whisper_lang_max_id();
@@ -38,7 +39,10 @@ namespace Whisper.Native
     
         [DllImport(LibraryName)]
         public static extern WhisperNativeParams whisper_full_default_params(WhisperSamplingStrategy strategy);
-    
+
+        [DllImport(LibraryName)]
+        public static extern WhisperNativeContextParams whisper_context_default_params();
+
         [DllImport(LibraryName)]
         public static extern int whisper_full(whisper_context_ptr ctx, WhisperNativeParams param, 
             float* samples, int n_samples);
