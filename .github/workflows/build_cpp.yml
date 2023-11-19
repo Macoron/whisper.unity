@@ -9,7 +9,7 @@ on:
       whisper_cpp_repo_ref:
         description: 'Tag, branch or commit'
         required: true
-        default: 'v1.4.2'
+        default: 'v1.5.0'
 jobs:
   build-windows:
     name: Build for Windows (x86_64)
@@ -61,14 +61,24 @@ jobs:
           ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
           path: whisper-cpp
         
-      - name: Dependencies
+      - name: Latest Cmake
         run: |
-          apt-get update
-          apt-get install -y build-essential
-          apt-get install -y cmake
+          apt-get update \
+            && apt-get install -y build-essential \
+            && apt-get install -y wget \
+            && rm -rf /var/lib/apt/lists/* \
+            && wget https://github.com/Kitware/CMake/releases/download/v3.24.1/cmake-3.24.1-Linux-x86_64.sh \
+                -q -O /tmp/cmake-install.sh \
+                && chmod u+x /tmp/cmake-install.sh \
+                && mkdir /opt/cmake-3.24.1 \
+                && /tmp/cmake-install.sh --skip-license --prefix=/opt/cmake-3.24.1 \
+                && rm /tmp/cmake-install.sh \
+                && ln -s /opt/cmake-3.24.1/bin/* /usr/local/bin
 
       - name: Change gcc and g++
-        run: apt-get install -y gcc-8 g++-8
+        run: |
+          apt-get update
+          apt-get install -y gcc-8 g++-8
           
       - name: Run build script
         run: |
