@@ -19,15 +19,6 @@ namespace Whisper
         /// </summary>
         public WhisperNativeContextParams NativeParams => _param;
 
-        /// <summary>
-        /// Attempt to use GPU avaliable for this platform (CUDA or Metal).
-        /// </summary>
-        public bool UseGpu
-        {
-            get => _param.use_gpu;
-            set => _param.use_gpu = value;
-        }
-
         private WhisperContextParams(WhisperNativeContextParams param)
         {
             _param = param;

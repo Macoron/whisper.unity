@@ -59,7 +59,7 @@ namespace Whisper.Native
     [StructLayout(LayoutKind.Sequential)]
     public struct WhisperNativeContextParams
     {
-        [MarshalAs(UnmanagedType.U1)] public bool use_gpu;
+        [MarshalAs(UnmanagedType.U1)] bool use_gpu;
     };
 
     /// <summary>
