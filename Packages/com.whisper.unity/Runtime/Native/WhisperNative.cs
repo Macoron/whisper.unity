@@ -36,7 +36,10 @@ namespace Whisper.Native
         
         [DllImport(LibraryName)]
         public static extern whisper_token whisper_token_eot(whisper_context_ptr ctx);
-    
+
+        [DllImport(LibraryName)]
+        public static extern IntPtr whisper_print_system_info();
+
         [DllImport(LibraryName)]
         public static extern WhisperNativeParams whisper_full_default_params(WhisperSamplingStrategy strategy);
 

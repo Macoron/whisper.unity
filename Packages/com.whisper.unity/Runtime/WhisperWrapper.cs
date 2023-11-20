@@ -407,6 +407,25 @@ namespace Whisper
             var asyncTask = Task.Factory.StartNew(() => InitFromBuffer(buffer, contextParams));
             return await asyncTask;
         }
+
+        /// <summary>
+        /// Get human readable information about what extensions compiled library expects.
+        /// It will check if Whisper expects for AVX, CUDA, CoreML, etc.
+        /// </summary>
+        /// <remarks>
+        /// It doesnt mean your hardware support it. It means that library expects
+        /// your hardware to support it. For example, CPU which doesn't support
+        /// AVX will still print "AVX=1", because library was compiled to expect AVX.
+        /// </remarks>
+        public static string GetSystemInfo()
+        {
+            LogUtils.Verbose($"Requesting system information...");
+            var systemInfoPtr = WhisperNative.whisper_print_system_info();
+            LogUtils.Verbose("System information recived!");
+
+            var systemInfo = TextUtils.StringFromNativeUtf8(systemInfoPtr);
+            return systemInfo;
+        }
         
         private struct WhisperUserData
         {
