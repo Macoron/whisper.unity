@@ -12,11 +12,15 @@ namespace Whisper.Native
     /// </summary>
     public static unsafe class WhisperNative
     {
-        
+
 #if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
         private const string LibraryName = "__Internal";
 #else
+#if UNITY_STANDALONE_WIN && WHISPER_CUDA
+        private const string LibraryName = "libwhisper_cuda";
+#else
         private const string LibraryName = "libwhisper";
+#endif
 #endif
 
         [DllImport(LibraryName)]
