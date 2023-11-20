@@ -67,7 +67,7 @@ jobs:
         id: cuda-toolkit
         uses: Jimver/cuda-toolkit@v0.2.10
         with:
-          cuda: '12.3.1'
+          cuda: '12.2.0'
         
       - name: Run build script
         run: |
