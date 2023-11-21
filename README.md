@@ -15,7 +15,7 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 - Free and open source, can be used in commercial projects
 
 **Supported platforms:**
-- [x] Windows (x86_64)
+- [x] Windows (x86_64, [optional CUDA](#cuda-support))
 - [x] MacOS (Intel and ARM)
 - [x] iOS (Device and Simulator)
 - [x] Android (ARM64)
@@ -39,6 +39,13 @@ Alternatively you can add this repository to your project as a **Unity Package**
 ```
 https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity
 ```
+### CUDA Support
+> Unity project compiled with enabled CUDA expects your end-users to have Nvidia GPU and CUDA libraries. Trying to run build without it will result error.
+
+To run inference with CUDA, you would need to have supported GPU and installed CUDA Toolkit (tested with [12.2.0](https://developer.nvidia.com/cuda-12-2-0-download-archive)). 
+
+After that go to the **Project Settings => Whisper => Enable CUDA**. This should force package use library compiled for CUDA.
+
 ### Downloading other model weights
 You can try different Whisper model weights. For example, you can improve English language transcription by using English-only weights or by trying bigger models.
 
@@ -55,7 +62,7 @@ In case you want to build libraries on your machine:
 3. Open whisper.unity folder with command line
 4. If you are using **Windows** write:
 ```bash
-.\build_cpp.bat path\to\whisper
+.\build_cpp.bat cpu path\to\whisper
 ```
 5. If you are using **MacOS** write:
 ```bash
