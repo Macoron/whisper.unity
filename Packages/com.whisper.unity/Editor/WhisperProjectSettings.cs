@@ -71,7 +71,7 @@ static class WhisperProjectSettingsProvider
         PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone, out defines);
 #else
         var definesStr = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
-        defines = definesStr.Split(";");
+        defines = definesStr.Split(';');
 #endif
 
         return defines;
