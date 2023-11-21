@@ -41,7 +41,7 @@ static class WhisperProjectSettingsProvider
                 return;
 
             string[] newDefines;
-            PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone, out var defines);
+            var defines = GetStandaloneDefines();
 
             if (value)
             {
@@ -58,7 +58,32 @@ static class WhisperProjectSettingsProvider
                 newDefines = defines.Where(x => x != "WHISPER_CUDA").ToArray();
             }
 
-            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, newDefines);
+            SetStandaloneDefines(newDefines);
         }
+    }
+
+    // This is for older Unity compability
+    private static string[] GetStandaloneDefines()
+    {
+        string[] defines;
+
+#if UNITY_2021_3_OR_NEWER
+        PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone, out defines);
+#else
+        var definesStr = PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone);
+        defines = definesStr.Split(";");
+#endif
+
+        return defines;
+    }
+
+    private static void SetStandaloneDefines(string[] newDefines)
+    {
+#if UNITY_2021_3_OR_NEWER
+        PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, newDefines);
+#else
+        var definesStr = string.Join(";", newDefines);
+        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, definesStr);
+#endif
     }
 }
