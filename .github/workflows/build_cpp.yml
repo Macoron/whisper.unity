@@ -156,7 +156,7 @@ jobs:
           apt-get update \
             && apt-get install -y build-essential \
             && apt-get install -y wget \
-            && apt-get install -y lsb-release \
+            && apt-get install -y lsb-release, sudo \
             && rm -rf /var/lib/apt/lists/* \
             && wget https://github.com/Kitware/CMake/releases/download/v3.24.1/cmake-3.24.1-Linux-x86_64.sh \
                 -q -O /tmp/cmake-install.sh \
