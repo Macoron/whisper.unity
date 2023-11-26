@@ -14,13 +14,19 @@ namespace Whisper.Native
     {
 
 #if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
-        private const string LibraryName = "__Internal";
-#else
-#if UNITY_STANDALONE_WIN && WHISPER_CUDA
+        private const string LibraryName = "__Internal"; 
+#elif WHISPER_CUDA   
+        
+#if (UNITY_EDITOR && (UNITY_EDITOR_WIN || UNITY_EDITOR_LINUX))
+        private const string LibraryName = "libwhisper_cuda";
+#elif (!UNITY_EDITOR  && (UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX))
         private const string LibraryName = "libwhisper_cuda";
 #else
         private const string LibraryName = "libwhisper";
 #endif
+
+#else
+        private const string LibraryName = "libwhisper";
 #endif
 
         [DllImport(LibraryName)]

@@ -21,7 +21,7 @@ jobs:
           - 2019.4.40f1
     steps:
       - uses: actions/checkout@v3
-      - uses: game-ci/unity-test-runner@v2
+      - uses: game-ci/unity-test-runner@v4
         id: tests
         with:
           testMode: playmode
