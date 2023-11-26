@@ -160,9 +160,9 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp_linux.sh ../whisper-cpp/ cuda
+          sh build_cpp_linux.sh ../whisper-cpp cuda
           cd ${{ github.workspace }}/whisper-cpp/build/
-          ren libwhisper.so libwhisper_cuda.so
+          mv libwhisper.so libwhisper_cuda.so
           
       - name: Upload results
         uses: actions/upload-artifact@v3
