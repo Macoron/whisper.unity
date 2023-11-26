@@ -175,6 +175,7 @@ jobs:
         uses: Jimver/cuda-toolkit@v0.2.11
         with:
           cuda: '12.2.0'
+          method: 'network'
           
       - name: Run build script
         run: |
