@@ -178,6 +178,8 @@ jobs:
           method: 'network'
           non-cuda-sub-packages: '["libcublas"]'
           linux-local-args: '["--toolkit"]'
+        env:
+          DEBIAN_FRONTEND: noninteractive
           
       - name: Run build script
         run: |
