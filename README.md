@@ -17,9 +17,9 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 **Supported platforms:**
 - [x] Windows (x86_64, [optional CUDA](#cuda-support))
 - [x] MacOS (Intel and ARM)
+- [x] Linux (x86_64, [optional CUDA](#cuda-support))
 - [x] iOS (Device and Simulator)
 - [x] Android (ARM64)
-- [x] Linux (x86_64, Ubuntu 18.04 and newer)
 - [ ] WebGL (see [this issue](https://github.com/Macoron/whisper.unity/issues/20))
 
 ## Samples
@@ -70,7 +70,7 @@ sh build_cpp.sh path/to/whisper all path/to/ndk/android.toolchain.cmake
 ```
 6. If you are using **Linux** write
 ```bash
-sh build_cpp_linux.sh path/to/whisper
+sh build_cpp_linux.sh path/to/whisper cpu
 ```
 7. If build was successful compiled libraries should be automatically update package `Plugins` folder. 
  
