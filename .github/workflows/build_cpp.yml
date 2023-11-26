@@ -84,9 +84,8 @@ jobs:
           if-no-files-found: error
           
   build-linux:
-    name: Build for Linux (Ubuntu 18.04 x86_64)
-    runs-on: ubuntu-latest
-    container: ubuntu:18.04
+    name: Build for Linux (x86_64)
+    runs-on: ubuntu-20.04
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -99,33 +98,11 @@ jobs:
           repository: ${{ github.event.inputs.whisper_cpp_repo }}
           ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
           path: whisper-cpp
-        
-      - name: Latest Cmake
-        run: |
-          apt-get update \
-            && apt-get install -y build-essential \
-            && apt-get install -y wget \
-            && rm -rf /var/lib/apt/lists/* \
-            && wget https://github.com/Kitware/CMake/releases/download/v3.24.1/cmake-3.24.1-Linux-x86_64.sh \
-                -q -O /tmp/cmake-install.sh \
-                && chmod u+x /tmp/cmake-install.sh \
-                && mkdir /opt/cmake-3.24.1 \
-                && /tmp/cmake-install.sh --skip-license --prefix=/opt/cmake-3.24.1 \
-                && rm /tmp/cmake-install.sh \
-                && ln -s /opt/cmake-3.24.1/bin/* /usr/local/bin
-
-      - name: Change gcc and g++
-        run: |
-          apt-get update
-          apt-get install -y gcc-8 g++-8
           
       - name: Run build script
         run: |
           cd whisper-unity
           sh build_cpp_linux.sh ../whisper-cpp/ cpu
-        env:
-         CC:   gcc-8
-         CXX:  g++-8
           
       - name: Upload results
         uses: actions/upload-artifact@v3
@@ -136,7 +113,7 @@ jobs:
 
   build-linux-cuda:
     name: Build for Linux (x86_64, CUDA)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -154,7 +131,7 @@ jobs:
         id: cuda-toolkit
         uses: Jimver/cuda-toolkit@v0.2.11
         with:
-          cuda: '12.1.0'
+          cuda: '12.2.0'
           method: 'network'
           
       - name: Run build script
