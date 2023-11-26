@@ -175,6 +175,9 @@ jobs:
         uses: Jimver/cuda-toolkit@v0.2.11
         with:
           cuda: '12.1.0'
+          method: 'network'
+          non-cuda-sub-packages: '["libcublas"]'
+          linux-local-args: '["--toolkit"]'
           
       - name: Run build script
         run: |
