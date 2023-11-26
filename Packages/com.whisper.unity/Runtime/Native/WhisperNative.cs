@@ -16,7 +16,9 @@ namespace Whisper.Native
 #if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
         private const string LibraryName = "__Internal";
 #else
-#if UNITY_STANDALONE_WIN && WHISPER_CUDA
+#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && WHISPER_CUDA
+        private const string LibraryName = "libwhisper_cuda";
+#elif (UNITY_STANDALONE_LINUX || UNITY_EDITOR_LINUX) && WHISPER_CUDA
         private const string LibraryName = "libwhisper_cuda";
 #else
         private const string LibraryName = "libwhisper";
