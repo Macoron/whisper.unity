@@ -251,17 +251,29 @@ namespace Whisper
 
             return segment;
         }
-        
+
         /// <summary>
-        /// Loads whisper model from file path.
+        /// Loads whisper model from file path with default context params.
         /// </summary>
         /// <param name="modelPath">Absolute file path to model weights.</param>
         /// <returns>Loaded whisper model. Null if loading failed.</returns>
         public static WhisperWrapper InitFromFile(string modelPath)
         {
+            var param = WhisperContextParams.GetDefaultParams();
+            return InitFromFile(modelPath, param);
+        }
+
+        /// <summary>
+        /// Loads whisper model from file path.
+        /// </summary>
+        /// <param name="modelPath">Absolute file path to model weights.</param>
+        /// <param name="contextParams">Whisper context params used during model loading.</param>
+        /// <returns>Loaded whisper model. Null if loading failed.</returns>
+        public static WhisperWrapper InitFromFile(string modelPath, WhisperContextParams contextParams)
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
             var buffer = FileUtils.ReadFile(modelPath);
-            var res = InitFromBuffer(buffer);
+            var res = InitFromBuffer(buffer, contextParams);
             return res;
 #else
             // load model weights
@@ -283,7 +295,7 @@ namespace Whisper
             var sw = new Stopwatch();
             sw.Start();
             
-            var ctx = WhisperNative.whisper_init_from_file(modelPath);
+            var ctx = WhisperNative.whisper_init_from_file_with_params(modelPath, contextParams.NativeParams);
             if (ctx == IntPtr.Zero)
             {
                 LogUtils.Error("Failed to load Whisper model!");
@@ -296,27 +308,49 @@ namespace Whisper
         }
 
         /// <summary>
-        /// Start async loading of whisper model from file path.
+        /// Start async loading of whisper model from file path with default context params.
         /// </summary>
         /// <param name="modelPath">Absolute file path to model weights.</param>
         /// <returns>Loaded whisper model. Null if loading failed.</returns>
         public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath)
         {
+            var param = WhisperContextParams.GetDefaultParams();
+            return await InitFromFileAsync(modelPath, param);
+        }
+
+        /// <summary>
+        /// Start async loading of whisper model from file path.
+        /// </summary>
+        /// <param name="modelPath">Absolute file path to model weights.</param>
+        /// <param name="contextParams">Whisper context params used during model loading.</param>
+        /// <returns>Loaded whisper model. Null if loading failed.</returns>
+        public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath, WhisperContextParams contextParams)
+        {
 #if UNITY_ANDROID && !UNITY_EDITOR
             var buffer = await FileUtils.ReadFileAsync(modelPath);
-            var res = await InitFromBufferAsync(buffer);
+            var res = await InitFromBufferAsync(buffer, contextParams);
             return res;
 #else
-            var asyncTask = Task.Factory.StartNew(() => InitFromFile(modelPath));
+            var asyncTask = Task.Factory.StartNew(() => InitFromFile(modelPath, contextParams));
             return await asyncTask;          
 #endif
         }
-        
+
+        /// <summary>
+        /// Loads whisper model from byte buffer with default context params.
+        /// </summary>
+        /// <returns>Loaded whisper model. Null if loading failed.</returns>
+        public static WhisperWrapper InitFromBuffer(byte[] buffer)
+        {
+            var param = WhisperContextParams.GetDefaultParams();
+            return InitFromBuffer(buffer, param);
+        }
+
         /// <summary>
         /// Loads whisper model from byte buffer.
         /// </summary>
         /// <returns>Loaded whisper model. Null if loading failed.</returns>
-        public static WhisperWrapper InitFromBuffer(byte[] buffer)
+        public static WhisperWrapper InitFromBuffer(byte[] buffer, WhisperContextParams contextParams)
         {
             LogUtils.Log($"Trying to load Whisper model from buffer...");
             if (buffer == null || buffer.Length == 0)
@@ -339,7 +373,8 @@ namespace Whisper
                 // this only works because whisper makes copy of the buffer
                 fixed (byte* bufferPtr = buffer)
                 {
-                    ctx = WhisperNative.whisper_init_from_buffer((IntPtr) bufferPtr, length);
+                    ctx = WhisperNative.whisper_init_from_buffer_with_params((IntPtr) bufferPtr, 
+                        length, contextParams.NativeParams);
                 }
             }
             
@@ -352,15 +387,44 @@ namespace Whisper
             
             return new WhisperWrapper(ctx);
         }
-        
+
         /// <summary>
-        /// Start async loading of whisper model from byte buffer.
+        /// Start async loading of whisper model from byte buffer with default context params.
         /// </summary>
         /// <returns>Loaded whisper model. Null if loading failed.</returns>
         public static async Task<WhisperWrapper> InitFromBufferAsync(byte[] buffer)
         {
-            var asyncTask = Task.Factory.StartNew(() => InitFromBuffer(buffer));
+            var param = WhisperContextParams.GetDefaultParams();
+            return await InitFromBufferAsync(buffer, param);
+        }
+
+        /// <summary>
+        /// Start async loading of whisper model from byte buffer.
+        /// </summary>
+        /// <returns>Loaded whisper model. Null if loading failed.</returns>
+        public static async Task<WhisperWrapper> InitFromBufferAsync(byte[] buffer, WhisperContextParams contextParams)
+        {
+            var asyncTask = Task.Factory.StartNew(() => InitFromBuffer(buffer, contextParams));
             return await asyncTask;
+        }
+
+        /// <summary>
+        /// Get human readable information about what extensions compiled library expects.
+        /// It will check if Whisper expects for AVX, CUDA, CoreML, etc.
+        /// </summary>
+        /// <remarks>
+        /// It doesnt mean your hardware support it. It means that library expects
+        /// your hardware to support it. For example, CPU which doesn't support
+        /// AVX will still print "AVX=1", because library was compiled to expect AVX.
+        /// </remarks>
+        public static string GetSystemInfo()
+        {
+            LogUtils.Verbose($"Requesting system information...");
+            var systemInfoPtr = WhisperNative.whisper_print_system_info();
+            LogUtils.Verbose("System information recived!");
+
+            var systemInfo = TextUtils.StringFromNativeUtf8(systemInfoPtr);
+            return systemInfo;
         }
         
         private struct WhisperUserData
