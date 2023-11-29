@@ -30,6 +30,28 @@ build_mac() {
   echo "Build files copied to $target_path"
 }
 
+build_mac_metal() {
+  clean_build
+  echo "Starting building for Mac (Metal)..."
+
+  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_METAL=ON \
+   -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON -DWHISPER_NO_F16C=ON \
+   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
+  make
+
+  echo "Build for Mac (Metal) complete!"
+
+  artifact_path="$build_path/libwhisper.dylib"
+  target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper_metal.dylib"
+  cp "$artifact_path" "$target_path"
+
+  artifact_path="$build_path/bin/ggml-metal.metal"
+  target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/ggml-metal.metal"
+  cp "$artifact_path" "$target_path"
+
+  echo "Build files copied to $target_path"
+}
+
 build_ios() {
   clean_build
   echo "Starting building for ios..."
@@ -72,6 +94,8 @@ if [ "$targets" = "all" ]; then
   build_android
 elif [ "$targets" = "mac" ]; then
   build_mac
+elif [ "$targets" = "mac_metal" ]; then
+  build_mac_metal
 elif [ "$targets" = "ios" ]; then
   build_ios
 elif [ "$targets" = "android" ]; then
