@@ -202,7 +202,7 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v3
         with:
-          name: macos
+          name: macos-metal
           path: |
             ${{ github.workspace }}/whisper-cpp/build/libwhisper_metal.dylib
             ${{ github.workspace }}/whisper-cpp/build/bin/ggml-metal.metal   
