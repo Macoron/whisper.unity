@@ -9,7 +9,7 @@ on:
       whisper_cpp_repo_ref:
         description: 'Tag, branch or commit'
         required: true
-        default: 'v1.5.0'
+        default: 'v1.5.1'
 jobs:
   build-windows:
     name: Build for Windows (x86_64)
