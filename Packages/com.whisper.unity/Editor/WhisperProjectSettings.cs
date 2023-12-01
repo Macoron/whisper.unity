@@ -17,9 +17,10 @@ static class WhisperProjectSettingsProvider
             guiHandler = (searchContext) =>
             {
                 CudaEnabled = EditorGUILayout.Toggle("Enable CUDA", CudaEnabled);
+                MetalEnabled = EditorGUILayout.Toggle("Enable Metal", MetalEnabled);
             },
 
-            keywords = new HashSet<string>(new[] { "CUDA", "cuBLAS" })
+            keywords = new HashSet<string>(new[] { "CUDA", "cuBLAS", "Metal" })
         };
 
         return provider;
@@ -39,28 +40,51 @@ static class WhisperProjectSettingsProvider
         {
             if (value == CudaEnabled)
                 return;
-
-            string[] newDefines;
-            var defines = GetStandaloneDefines();
-
-            if (value)
-            {
-                if (defines.Contains("WHISPER_CUDA"))
-                    return;
-
-                newDefines = defines.Append("WHISPER_CUDA").ToArray();
-            }
-            else
-            {
-                if (!defines.Contains("WHISPER_CUDA"))
-                    return;
-
-                newDefines = defines.Where(x => x != "WHISPER_CUDA").ToArray();
-            }
-
-            SetStandaloneDefines(newDefines);
+            SetDefine("WHISPER_CUDA", value);
         }
     }
+    
+    public static bool MetalEnabled
+    {
+        get
+        {
+#if WHISPER_METAL
+            return true;
+#else
+            return false;
+#endif
+        }
+        set
+        {
+            if (value == MetalEnabled)
+                return;
+            SetDefine("WHISPER_METAL", value);
+        }
+    }
+
+    private static void SetDefine(string define, bool value)
+    {
+        string[] newDefines;
+        var defines = GetStandaloneDefines();
+
+        if (value)
+        {
+            if (defines.Contains(define))
+                return;
+
+            newDefines = defines.Append(define).ToArray();
+        }
+        else
+        {
+            if (!defines.Contains(define))
+                return;
+
+            newDefines = defines.Where(x => x != define).ToArray();
+        }
+
+        SetStandaloneDefines(newDefines);
+    }
+    
 
     // This is for older Unity compability
     private static string[] GetStandaloneDefines()
