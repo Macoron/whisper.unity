@@ -9,7 +9,7 @@ on:
       whisper_cpp_repo_ref:
         description: 'Tag, branch or commit'
         required: true
-        default: 'v1.4.2'
+        default: 'v1.5.1'
 jobs:
   build-windows:
     name: Build for Windows (x86_64)
@@ -33,7 +33,7 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          .\build_cpp.bat ..\whisper-cpp\
+          .\build_cpp.bat cpu ..\whisper-cpp\
           cd ${{ github.workspace }}\whisper-cpp\build\bin\Release
           ren whisper.dll libwhisper.dll
           
@@ -43,11 +43,10 @@ jobs:
           name: windows
           path: ${{ github.workspace }}/whisper-cpp/build/bin/Release/libwhisper.dll
           if-no-files-found: error
-          
-  build-linux:
-    name: Build for Linux (Ubuntu 18.04 x86_64)
-    runs-on: ubuntu-latest
-    container: ubuntu:18.04
+
+  build-windows-cuda:
+    name: Build for Windows (x86_64, CUDA)
+    runs-on: windows-latest
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -60,29 +59,93 @@ jobs:
           repository: ${{ github.event.inputs.whisper_cpp_repo }}
           ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
           path: whisper-cpp
-        
-      - name: Dependencies
-        run: |
-          apt-get update
-          apt-get install -y build-essential
-          apt-get install -y cmake
+          
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1
 
-      - name: Change gcc and g++
-        run: apt-get install -y gcc-8 g++-8
+      - name: Install CUDA Toolkit
+        id: cuda-toolkit
+        uses: Jimver/cuda-toolkit@v0.2.11
+        with:
+          cuda: '12.2.0'
+        
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          .\build_cpp.bat cuda ..\whisper-cpp\
+          cd ${{ github.workspace }}\whisper-cpp\build\bin\Release
+          ren whisper.dll libwhisper_cuda.dll
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-cuda
+          path: ${{ github.workspace }}/whisper-cpp/build/bin/Release/libwhisper_cuda.dll
+          if-no-files-found: error
+          
+  build-linux:
+    name: Build for Linux (x86_64)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
           
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp_linux.sh ../whisper-cpp/
-        env:
-         CC:   gcc-8
-         CXX:  g++-8
+          sh build_cpp_linux.sh ../whisper-cpp/ cpu
           
       - name: Upload results
         uses: actions/upload-artifact@v3
         with:
           name: linux
           path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.so
+          if-no-files-found: error
+
+  build-linux-cuda:
+    name: Build for Linux (x86_64, CUDA)
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+      
+      - name: Install CUDA Toolkit
+        id: cuda-toolkit
+        uses: Jimver/cuda-toolkit@v0.2.11
+        with:
+          cuda: '12.2.0'
+          method: 'network'
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp_linux.sh ../whisper-cpp cuda
+          cd ${{ github.workspace }}/whisper-cpp/build/
+          mv libwhisper.so libwhisper_cuda.so
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-cuda
+          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper_cuda.so
           if-no-files-found: error
           
   build-macos:
@@ -111,6 +174,38 @@ jobs:
         with:
           name: macos
           path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.dylib
+          if-no-files-found: error
+
+  build-macos-metal:
+    name: Build for MacOS Metal (ARM, x86_64)
+    runs-on: macOS-latest
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp.sh ../whisper-cpp/ mac_metal
+          cd ${{ github.workspace }}/whisper-cpp/build/
+          mv libwhisper.dylib libwhisper_metal.dylib
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-metal
+          path: |
+            ${{ github.workspace }}/whisper-cpp/build/libwhisper_metal.dylib
+            ${{ github.workspace }}/whisper-cpp/build/bin/ggml-metal.metal   
           if-no-files-found: error
           
   build-ios:

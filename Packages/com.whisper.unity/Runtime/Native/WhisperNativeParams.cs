@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Local
@@ -9,6 +10,7 @@ using whisper_context_ptr = System.IntPtr;
 using whisper_state_ptr = System.IntPtr;
 using whisper_token = System.Int32;
 
+
 namespace Whisper.Native
 {
     public enum WhisperSamplingStrategy
@@ -19,11 +21,11 @@ namespace Whisper.Native
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, whisper_state_ptr state,
-        int n_new, System.IntPtr user_data);
+        int n_new, IntPtr user_data);
     
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public delegate void whisper_progress_callback(whisper_context_ptr ctx, whisper_state_ptr state,
-        int progress, System.IntPtr user_data);
+        int progress, IntPtr user_data);
     
     /// <summary>
     /// This is direct copy of C++ struct.
@@ -48,7 +50,18 @@ namespace Whisper.Native
 
         public float vlen;        // voice length of the token
     }
-    
+
+    /// <summary>
+    /// This is direct copy of C++ struct.
+    /// Do not change or add any fields without changing it in whisper.cpp.
+    /// Do not change it in runtime directly, use <see cref="WhisperContextParams"/>.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct WhisperNativeContextParams
+    {
+        [MarshalAs(UnmanagedType.U1)] bool use_gpu;
+    };
+
     /// <summary>
     /// This is direct copy of C++ struct.
     /// Do not change or add any fields without changing it in whisper.cpp.
@@ -66,6 +79,7 @@ namespace Whisper.Native
 
         [MarshalAs(UnmanagedType.U1)] public bool translate;
         [MarshalAs(UnmanagedType.U1)] public bool no_context; // do not use past transcription (if any) as initial prompt for the decoder
+        [MarshalAs(UnmanagedType.U1)] bool no_timestamps;     // do not generate timestamps
         [MarshalAs(UnmanagedType.U1)] public bool single_segment; // force single segment output (useful for streaming)
         [MarshalAs(UnmanagedType.U1)] public bool print_special; // print special tokens (e.g. <SOT>, <EOT>, <BEG>, etc.)
         [MarshalAs(UnmanagedType.U1)] public bool print_progress; // print progress information
@@ -83,7 +97,11 @@ namespace Whisper.Native
         // [EXPERIMENTAL] speed-up techniques
         // note: these can significantly reduce the quality of the output
         [MarshalAs(UnmanagedType.U1)] public bool speed_up; // speed-up the audio by 2x using Phase Vocoder
+        [MarshalAs(UnmanagedType.U1)] bool debug_mode;        // enable debug_mode provides extra info (eg. Dump log_mel)
         public int audio_ctx; // overwrite the audio context size (0 = use default)
+
+        // [EXPERIMENTAL] [TDRZ] tinydiarize
+        [MarshalAs(UnmanagedType.U1)] bool tdrz_enable;       // enable tinydiarize speaker turn detection
 
         // tokens to provide to the whisper decoder as initial prompt
         // these are prepended to any existing text context from a previous call
@@ -129,18 +147,28 @@ namespace Whisper.Native
 
         // called for every newly generated text segment
         public whisper_new_segment_callback new_segment_callback;
-        public System.IntPtr new_segment_callback_user_data;
+        public IntPtr new_segment_callback_user_data;
 
         // called on each progress update
         public whisper_progress_callback progress_callback;
-        public System.IntPtr progress_callback_user_data;
+        public IntPtr progress_callback_user_data;
 
         // called each time before the encoder starts
         void* encoder_begin_callback;
         void* encoder_begin_callback_user_data;
 
+        // called each time before ggml computation starts
+        void* abort_callback;
+        void* abort_callback_user_data;
+
         // called by each decoder to filter obtained logits
         void* logits_filter_callback;
         void* logits_filter_callback_user_data;
+
+
+        IntPtr grammar_rules;
+        UIntPtr n_grammar_rules;
+        UIntPtr i_start_rule;
+        float grammar_penalty;
     }
 }

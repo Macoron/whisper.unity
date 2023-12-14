@@ -309,7 +309,10 @@ namespace Whisper
             _newBuffer.Clear();
 
             // start transcribing segments
-            OnSegmentStarted?.Invoke();
+            if (_step == 0)
+            {
+                OnSegmentStarted?.Invoke();
+            }
 
             // start transcribing sliding window content
             _task = _wrapper.GetTextAsync(buffer, _param.Frequency, 

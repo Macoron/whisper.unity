@@ -1,5 +1,5 @@
 # whisper.unity
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.4.2-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.4.2)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.5.1-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.5.1)
 
 [![Testing](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml/badge.svg)](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml)
 
@@ -15,11 +15,11 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 - Free and open source, can be used in commercial projects
 
 **Supported platforms:**
-- [x] Windows (x86_64)
-- [x] MacOS (Intel and ARM)
+- [x] Windows (x86_64, [optional CUDA](#cuda-support))
+- [x] MacOS (Intel and ARM, [optional Metal](#metal-support))
+- [x] Linux (x86_64, [optional CUDA](#cuda-support))
 - [x] iOS (Device and Simulator)
 - [x] Android (ARM64)
-- [x] Linux (x86_64, Ubuntu 18.04 and newer)
 - [ ] WebGL (see [this issue](https://github.com/Macoron/whisper.unity/issues/20))
 
 ## Samples
@@ -39,6 +39,18 @@ Alternatively you can add this repository to your project as a **Unity Package**
 ```
 https://github.com/Macoron/whisper.unity.git?path=/Packages/com.whisper.unity
 ```
+### CUDA Support
+> Unity project compiled with enabled CUDA expects your end-users to have Nvidia GPU and CUDA libraries. Trying to run build without it will result error.
+
+To run inference with CUDA, you would need to have supported GPU and installed CUDA Toolkit (tested with [12.2.0](https://developer.nvidia.com/cuda-12-2-0-download-archive)). 
+
+After that go to the **Project Settings => Whisper => Enable CUDA**. This should force package to use library compiled for CUDA.
+
+### Metal Support
+> Whisper.cpp supports Metal only on [Apple7 GPUs](https://developer.apple.com/documentation/metal/mtlgpufamily) family or newer (starting from Apple M1 chips). Trying to run on older hardware will fallback to CPU inference.
+
+To activate Metal inference, go to **Project Settings => Whisper => Enable Metal**. This should force package to use library compiled for Metal.
+
 ### Downloading other model weights
 You can try different Whisper model weights. For example, you can improve English language transcription by using English-only weights or by trying bigger models.
 
@@ -51,11 +63,11 @@ This project comes with prebuild libraries of whisper.cpp for all supported plat
 
 In case you want to build libraries on your machine:
 1. Clone the original [whisper.cpp](https://github.com/ggerganov/whisper.cpp) repository
-2. Checkout tag [v1.4.2](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.4.2). Other versions might not work with this Unity bindings.
+2. Checkout tag [v1.5.1](https://github.com/ggerganov/whisper.cpp/tree/v1.5.1). Other versions might not work with this Unity bindings.
 3. Open whisper.unity folder with command line
 4. If you are using **Windows** write:
 ```bash
-.\build_cpp.bat path\to\whisper
+.\build_cpp.bat cpu path\to\whisper
 ```
 5. If you are using **MacOS** write:
 ```bash
@@ -63,7 +75,7 @@ sh build_cpp.sh path/to/whisper all path/to/ndk/android.toolchain.cmake
 ```
 6. If you are using **Linux** write
 ```bash
-sh build_cpp_linux.sh path/to/whisper
+sh build_cpp_linux.sh path/to/whisper cpu
 ```
 7. If build was successful compiled libraries should be automatically update package `Plugins` folder. 
  
