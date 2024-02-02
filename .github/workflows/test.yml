@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - master
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
   testAllModes:
