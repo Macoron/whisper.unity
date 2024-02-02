@@ -30,8 +30,8 @@ namespace Whisper.Tests
         [Test]
         public void ChangeSampleRateTest()
         {
-            // create mono audio of 5 sec length
-            const int time = 5;
+            // create mono audio of 10 sec length
+            const int time = 10 * 60;
             const int srcRate = 16000;
             var src = new float[srcRate * time];
 

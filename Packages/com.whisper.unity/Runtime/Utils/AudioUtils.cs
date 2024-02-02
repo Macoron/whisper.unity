@@ -56,8 +56,8 @@ namespace Whisper.Utils
                 var low = Mathf.FloorToInt(index);
                 var dif = index - low;
 
-                if (low + 1 == srcLen)
-                    dst[i] = src[low];
+                 if (low + 1 >= srcLen)
+                    dst[i] = src[srcLen - 1];
                 else
                     dst[i] = Mathf.Lerp(src[low], src[low + 1], dif);
             }
