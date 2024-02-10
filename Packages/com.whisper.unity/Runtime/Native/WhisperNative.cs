@@ -11,7 +11,7 @@ namespace Whisper.Native
     /// </summary>
     public static unsafe class WhisperNative
     {
-#if (UNITY_IOS || UNITY_ANDROID) && !UNITY_EDITOR
+#if (UNITY_IOS || UNITY_VISIONOS || UNITY_ANDROID) && !UNITY_EDITOR
         private const string LibraryName = "__Internal";
 
 #elif WHISPER_CUDA
