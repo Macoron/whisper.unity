@@ -21,6 +21,7 @@ This is Unity3d bindings for the [whisper.cpp](https://github.com/ggerganov/whis
 - [x] iOS (Device and Simulator)
 - [x] Android (ARM64)
 - [ ] WebGL (see [this issue](https://github.com/Macoron/whisper.unity/issues/20))
+- [x] VisionOS 
 
 ## Samples
 
