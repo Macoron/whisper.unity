@@ -77,7 +77,7 @@ PluginImporter:
         AddToEmbeddedBinaries: false
         CPU: ARM64
         CompileFlags: 
-        FrameworkDependencies: 
+        FrameworkDependencies: Accelerate;
   - first:
       iPhone: iOS
     second:
