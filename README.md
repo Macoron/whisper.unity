@@ -1,5 +1,5 @@
 # whisper.unity
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.5.5-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.5.1)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.5.5-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.5.5)
 
 [![Testing](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml/badge.svg)](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml)
 
