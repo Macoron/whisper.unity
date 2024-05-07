@@ -1,5 +1,5 @@
 # whisper.unity
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.5.1-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.5.1)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![whisper.cpp](https://img.shields.io/badge/whisper.cpp-v1.5.5-green)](https://github.com/ggerganov/whisper.cpp/releases/tag/v1.5.1)
 
 [![Testing](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml/badge.svg)](https://github.com/Macoron/whisper.unity/actions/workflows/test.yml)
 
@@ -64,7 +64,7 @@ This project comes with prebuild libraries of whisper.cpp for all supported plat
 
 In case you want to build libraries on your machine:
 1. Clone the original [whisper.cpp](https://github.com/ggerganov/whisper.cpp) repository
-2. Checkout tag [v1.5.1](https://github.com/ggerganov/whisper.cpp/tree/v1.5.1). Other versions might not work with this Unity bindings.
+2. Checkout tag [v1.5.5](https://github.com/ggerganov/whisper.cpp/tree/v1.5.5). Other versions might not work with this Unity bindings.
 3. Open whisper.unity folder with command line
 4. If you are using **Windows** write:
 ```bash
