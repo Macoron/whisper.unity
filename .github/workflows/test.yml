@@ -15,7 +15,7 @@ env:
 jobs:
   testAllModes:
     name: Test in ${{ matrix.unityVersion }}
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
@@ -23,7 +23,7 @@ jobs:
           - 2019.4.40f1
     steps:
       - uses: actions/checkout@v3
-      - uses: game-ci/unity-test-runner@v4
+      - uses: game-ci/unity-test-runner@75d0d76deb40fa7c985d497a55d5877fb0f24c34
         id: tests
         with:
           testMode: playmode

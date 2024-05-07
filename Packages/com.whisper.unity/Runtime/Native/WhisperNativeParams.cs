@@ -19,6 +19,24 @@ namespace Whisper.Native
         WHISPER_SAMPLING_BEAM_SEARCH = 1, // similar to OpenAI's BeamSearchDecoder
     };
 
+    enum WhisperAlignmentHeadsPreset
+    {
+        WHISPER_AHEADS_NONE,
+        WHISPER_AHEADS_N_TOP_MOST,  // All heads from the N-top-most text-layers
+        WHISPER_AHEADS_CUSTOM,
+        WHISPER_AHEADS_TINY_EN,
+        WHISPER_AHEADS_TINY,
+        WHISPER_AHEADS_BASE_EN,
+        WHISPER_AHEADS_BASE,
+        WHISPER_AHEADS_SMALL_EN,
+        WHISPER_AHEADS_SMALL,
+        WHISPER_AHEADS_MEDIUM_EN,
+        WHISPER_AHEADS_MEDIUM,
+        WHISPER_AHEADS_LARGE_V1,
+        WHISPER_AHEADS_LARGE_V2,
+        WHISPER_AHEADS_LARGE_V3,
+    };
+
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public delegate void whisper_new_segment_callback(whisper_context_ptr ctx, whisper_state_ptr state,
         int n_new, IntPtr user_data);
@@ -48,7 +66,19 @@ namespace Whisper.Native
         public ulong t0;        // start time of the token
         public ulong t1;        //   end time of the token
 
+        // [EXPERIMENTAL] Token-level timestamps with DTW
+        // do not use if you haven't computed token-level timestamps with dtw
+        // Roughly corresponds to the moment in audio in which the token was output
+        ulong t_dtw;
+
         public float vlen;        // voice length of the token
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct WhisperNativeAheads
+    {
+        UIntPtr n_heads;
+        IntPtr heads;
     }
 
     /// <summary>
@@ -60,6 +90,16 @@ namespace Whisper.Native
     public struct WhisperNativeContextParams
     {
         [MarshalAs(UnmanagedType.U1)] bool use_gpu;
+        int gpu_device;  // CUDA device
+
+        // [EXPERIMENTAL] Token-level timestamps with DTW
+        [MarshalAs(UnmanagedType.U1)] bool dtw_token_timestamps;
+        WhisperAlignmentHeadsPreset dtw_aheads_preset;
+
+        int dtw_n_top;
+        WhisperNativeAheads dtw_aheads;
+
+        UIntPtr dtw_mem_size; // TODO: remove
     };
 
     /// <summary>
@@ -103,8 +143,13 @@ namespace Whisper.Native
         // [EXPERIMENTAL] [TDRZ] tinydiarize
         [MarshalAs(UnmanagedType.U1)] bool tdrz_enable;       // enable tinydiarize speaker turn detection
 
+        // A regular expression that matches tokens to suppress
+        byte* suppress_regex;
+
         // tokens to provide to the whisper decoder as initial prompt
         // these are prepended to any existing text context from a previous call
+        // use whisper_tokenize() to convert text to tokens
+        // maximum of whisper_n_text_ctx()/2 tokens are used (typically 224)
         public byte* initial_prompt;
         whisper_token_ptr prompt_tokens;
         int prompt_n_tokens;
@@ -164,7 +209,6 @@ namespace Whisper.Native
         // called by each decoder to filter obtained logits
         void* logits_filter_callback;
         void* logits_filter_callback_user_data;
-
 
         IntPtr grammar_rules;
         UIntPtr n_grammar_rules;
