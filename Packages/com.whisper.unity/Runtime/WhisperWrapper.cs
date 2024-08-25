@@ -274,6 +274,9 @@ namespace Whisper
             // load model weights
             LogUtils.Log($"Trying to load Whisper model from {modelPath}...");
             var buffer = FileUtils.ReadFile(modelPath);
+            if (buffer == null)
+                return null;
+            
             var res = InitFromBuffer(buffer, contextParams);
             return res;
         }
@@ -299,6 +302,9 @@ namespace Whisper
         {
             LogUtils.Log($"Trying to load Whisper model from {modelPath}...");
             var buffer = await FileUtils.ReadFileAsync(modelPath);
+            if (buffer == null)
+                return null;
+            
             var res = await InitFromBufferAsync(buffer, contextParams);
             return res;
         }

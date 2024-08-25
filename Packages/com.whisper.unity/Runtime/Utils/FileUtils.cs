@@ -34,7 +34,7 @@ namespace Whisper.Utils
 #else
             if (!File.Exists(path))
             {
-                LogUtils.Error($"Path {path} doesn't exist!");
+                LogUtils.Error($"File: '{path}' doesn't exist!");
                 return null;
             }
             return await ReadAllBytesAsync(path);
