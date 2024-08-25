@@ -44,11 +44,7 @@ namespace Whisper.Native
             Environment.SetEnvironmentVariable("GGML_METAL_PATH_RESOURCES",path);
 #endif
         }
-
-        [DllImport(LibraryName)]
-        public static extern whisper_context_ptr whisper_init_from_file_with_params(string path_model,
-            WhisperNativeContextParams @params);
-
+        
         [DllImport(LibraryName)]
         public static extern whisper_context_ptr whisper_init_from_buffer_with_params(IntPtr buffer,
             UIntPtr buffer_size, WhisperNativeContextParams @params);
