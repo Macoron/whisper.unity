@@ -15,6 +15,11 @@ namespace Whisper.Utils
 #if UNITY_ANDROID && !UNITY_EDITOR
             return ReadFileWebRequest(path);
 #else
+            if (!File.Exists(path))
+            {
+                LogUtils.Error($"Path {path} doesn't exist!");
+                return null;
+            }
             return File.ReadAllBytes(path);
 #endif
         }
@@ -27,6 +32,11 @@ namespace Whisper.Utils
 #if UNITY_ANDROID && !UNITY_EDITOR
             return await ReadFileWebRequestAsync(path);
 #else
+            if (!File.Exists(path))
+            {
+                LogUtils.Error($"File: '{path}' doesn't exist!");
+                return null;
+            }
             return await ReadAllBytesAsync(path);
 #endif
         }

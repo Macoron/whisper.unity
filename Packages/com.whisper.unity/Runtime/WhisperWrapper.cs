@@ -271,40 +271,14 @@ namespace Whisper
         /// <returns>Loaded whisper model. Null if loading failed.</returns>
         public static WhisperWrapper InitFromFile(string modelPath, WhisperContextParams contextParams)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
-            var buffer = FileUtils.ReadFile(modelPath);
-            var res = InitFromBuffer(buffer, contextParams);
-            return res;
-#else
             // load model weights
             LogUtils.Log($"Trying to load Whisper model from {modelPath}...");
-        
-            // some sanity checks
-            if (string.IsNullOrEmpty(modelPath))
-            {
-                LogUtils.Error("Whisper model path is null or empty!");
+            var buffer = FileUtils.ReadFile(modelPath);
+            if (buffer == null)
                 return null;
-            }
-            if (!File.Exists(modelPath))
-            {
-                LogUtils.Error($"Whisper model path {modelPath} doesn't exist!");
-                return null;
-            }
-        
-            // actually loading model
-            var sw = new Stopwatch();
-            sw.Start();
             
-            var ctx = WhisperNative.whisper_init_from_file_with_params(modelPath, contextParams.NativeParams);
-            if (ctx == IntPtr.Zero)
-            {
-                LogUtils.Error("Failed to load Whisper model!");
-                return null;
-            }
-            LogUtils.Log($"Whisper model is loaded, total time: {sw.ElapsedMilliseconds} ms.");
-            
-            return new WhisperWrapper(ctx);
-#endif
+            var res = InitFromBuffer(buffer, contextParams);
+            return res;
         }
 
         /// <summary>
@@ -326,14 +300,13 @@ namespace Whisper
         /// <returns>Loaded whisper model. Null if loading failed.</returns>
         public static async Task<WhisperWrapper> InitFromFileAsync(string modelPath, WhisperContextParams contextParams)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
+            LogUtils.Log($"Trying to load Whisper model from {modelPath}...");
             var buffer = await FileUtils.ReadFileAsync(modelPath);
+            if (buffer == null)
+                return null;
+            
             var res = await InitFromBufferAsync(buffer, contextParams);
             return res;
-#else
-            var asyncTask = Task.Factory.StartNew(() => InitFromFile(modelPath, contextParams));
-            return await asyncTask;          
-#endif
         }
 
         /// <summary>
