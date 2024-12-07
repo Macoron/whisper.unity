@@ -10,9 +10,14 @@ on:
         description: 'Tag, branch or commit'
         required: true
         default: 'v1.5.5'
+      target_platform:
+        description: 'Target platforms'
+        required: true
+        default: 'all'
 jobs:
   build-windows:
     name: Build for Windows (x86_64)
+    if: ${{ contains(fromJson('["windows", "all"]'), github.event.inputs.target_platform) }}
     runs-on: windows-latest
     steps:
       - name: Clone whisper.unity
@@ -46,6 +51,7 @@ jobs:
 
   build-windows-cuda:
     name: Build for Windows (x86_64, CUDA)
+    if: ${{ contains(fromJson('["windows_cuda", "all"]'), github.event.inputs.target_platform) }}
     runs-on: windows-latest
     steps:
       - name: Clone whisper.unity
@@ -85,6 +91,7 @@ jobs:
           
   build-linux:
     name: Build for Linux (x86_64)
+    if: ${{ contains(fromJson('["linux", "all"]'), github.event.inputs.target_platform) }}
     runs-on: ubuntu-20.04
     steps:
       - name: Clone whisper.unity
@@ -113,6 +120,7 @@ jobs:
 
   build-linux-cuda:
     name: Build for Linux (x86_64, CUDA)
+    if: ${{ contains(fromJson('["linux_cuda", "all"]'), github.event.inputs.target_platform) }}
     runs-on: ubuntu-20.04
     steps:
       - name: Clone whisper.unity
@@ -150,6 +158,7 @@ jobs:
           
   build-macos:
     name: Build for MacOS (ARM, x86_64)
+    if: ${{ contains(fromJson('["macos", "all"]'), github.event.inputs.target_platform) }}
     runs-on: macOS-latest
     steps:
       - name: Clone whisper.unity
@@ -178,6 +187,7 @@ jobs:
 
   build-macos-metal:
     name: Build for MacOS Metal (ARM, x86_64)
+    if: ${{ contains(fromJson('["macos_metal", "all"]'), github.event.inputs.target_platform) }}
     runs-on: macOS-latest
     steps:
       - name: Clone whisper.unity
@@ -210,6 +220,7 @@ jobs:
           
   build-ios:
     name: Build for iOS
+    if: ${{ contains(fromJson('["ios", "all"]'), github.event.inputs.target_platform) }}
     runs-on: macOS-latest
     steps:
       - name: Clone whisper.unity
@@ -238,6 +249,7 @@ jobs:
 
   build-android:
     name: Build for Android (arm64-v8a)
+    if: ${{ contains(fromJson('["android", "all"]'), github.event.inputs.target_platform) }}
     runs-on: ubuntu-latest
     steps:          
       - name: Install Java
