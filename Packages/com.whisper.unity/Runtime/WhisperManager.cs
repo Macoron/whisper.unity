@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Whisper.Native;
 using Whisper.Utils;
 
@@ -27,6 +28,15 @@ namespace Whisper
         [SerializeField] 
         [Tooltip("Should model weights be loaded on awake?")]
         private bool initOnAwake = true;
+        
+        [Header("Inference")]
+        [Tooltip("Try to load whisper in GPU for faster inference")]
+        [SerializeField]
+        private bool useGpu;
+        
+        [Tooltip("Use the Flash Attention algorithm for faster inference")]
+        [SerializeField]
+        private bool flashAttention;
 
         [Header("Language")] 
         [Tooltip("Output text language. Use empty or \"auto\" for auto-detection.")]
@@ -75,10 +85,6 @@ namespace Whisper
         [Header("Experimental settings")]
         [Tooltip("[EXPERIMENTAL] Output timestamps for each token. Need enabled tokens to work.")]
         public bool tokensTimestamps;
-
-        [Tooltip("[EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder. " +
-                 "These can significantly reduce the quality of the output.")]
-        public bool speedUp;
 
         [Tooltip("[EXPERIMENTAL] Overwrite the audio context size (0 = use default). " +
                  "These can significantly reduce the quality of the output.")]
@@ -181,7 +187,9 @@ namespace Whisper
                 var path = isModelPathInStreamingAssets
                     ? Path.Combine(Application.streamingAssetsPath, modelPath)
                     : modelPath;
-                _whisper = await WhisperWrapper.InitFromFileAsync(path);
+
+                var context = CreateContextParams();
+                _whisper = await WhisperWrapper.InitFromFileAsync(path, context);
                 _params = WhisperParams.GetDefaultParams(strategy);
                 UpdateParams();
                 
@@ -195,7 +203,7 @@ namespace Whisper
 
             IsLoading = false;
         }
-
+        
         /// <summary>
         /// Checks if currently loaded whisper model supports multilingual transcription.
         /// </summary>
@@ -294,11 +302,18 @@ namespace Whisper
             _params.Translate = translateToEnglish;
             _params.NoContext = noContext;
             _params.SingleSegment = singleSegment;
-            _params.SpeedUp = speedUp;
             _params.AudioCtx = audioCtx;
             _params.EnableTokens = enableTokens;
             _params.TokenTimestamps = tokensTimestamps;
             _params.InitialPrompt = initialPrompt;
+        }
+        
+        private WhisperContextParams CreateContextParams()
+        {
+            var context = WhisperContextParams.GetDefaultParams();
+            context.UseGpu = useGpu;
+            context.FlashAttn = flashAttention;
+            return context;
         }
 
         private async Task<bool> CheckIfLoaded()
