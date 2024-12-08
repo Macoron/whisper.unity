@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: windows
-          path: ${{ github.workspace }}/whisper-cpp/build/bin/Release/libwhisper.dll
+          path: ${{ github.workspace }}/whisper-cpp/build/bin/Release
           if-no-files-found: error
 
   build-windows-cuda:
