@@ -13,10 +13,10 @@ on:
       target_platform:
         description: 'Target platforms'
         required: true
-        default: 'all'
+        default: 'windows'
 jobs:
   build-windows:
-    name: Build for Windows (x86_64)
+    name: Build for Windows (x86_64, Vulkan)
     if: ${{ contains(fromJson('["windows", "all"]'), github.event.inputs.target_platform) }}
     runs-on: windows-latest
     steps:
@@ -35,6 +35,15 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1
         
+      - name: Install Vulkan SDK
+        uses: jakoch/install-vulkan-sdk-action@v1.0.4
+        with:
+          vulkan_version: 1.3.290.0
+          optional_components: com.lunarg.vulkan.vma
+          install_runtime: true
+          cache: true
+          stripdown: true
+
       - name: Run build script
         run: |
           cd whisper-unity
