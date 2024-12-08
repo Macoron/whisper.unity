@@ -47,7 +47,7 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          .\build_cpp.bat cpu ..\whisper-cpp\
+          .\build_cpp.bat ..\whisper-cpp\
           cd ${{ github.workspace }}\whisper-cpp\build\bin\Release
           ren whisper.dll libwhisper.dll
           
