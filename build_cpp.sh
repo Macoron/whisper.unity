@@ -16,33 +16,13 @@ build_mac() {
   clean_build
   echo "Starting building for Mac..."
 
-  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_METAL=OFF -DCMAKE_BUILD_TYPE=Release  \
-   -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON -DWHISPER_NO_F16C=ON \
-   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
-  make
+  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_BUILD_TYPE=Release  \
+    -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
+  make -j
 
   echo "Build for Mac complete!"
-
-  artifact_path="$build_path/libwhisper.dylib"
+  artifact_path="src/libwhisper.dylib"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib"
-  cp "$artifact_path" "$target_path"
-
-  echo "Build files copied to $target_path"
-}
-
-build_mac_metal() {
-  clean_build
-  echo "Starting building for Mac (Metal)..."
-
-  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_METAL=ON -DCMAKE_BUILD_TYPE=Release  \
-   -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON -DWHISPER_NO_F16C=ON \
-   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DWHISPER_METAL_EMBED_LIBRARY=ON ../
-  make
-
-  echo "Build for Mac (Metal) complete!"
-
-  artifact_path="$build_path/libwhisper.dylib"
-  target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper_metal.dylib"
   cp "$artifact_path" "$target_path"
 
   echo "Build files copied to $target_path"
@@ -53,14 +33,13 @@ build_ios() {
   echo "Starting building for ios..."
 
   cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_BUILD_TYPE=Release  \
-  -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_METAL=OFF \
-  -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_IOS_INSTALL_COMBINED=YES \
+  -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_IOS_INSTALL_COMBINED=YES \
   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
   make
 
   echo "Build for ios complete!"
 
-  artifact_path="$build_path/libwhisper.a"
+  artifact_path="src/libwhisper.a"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/iOS/libwhisper.a"
   cp "$artifact_path" "$target_path"
 
@@ -92,6 +71,8 @@ elif [ "$targets" = "mac" ]; then
   build_mac
 elif [ "$targets" = "mac_metal" ]; then
   build_mac_metal
+elif [ "$targets" = "mac_coreml" ]; then
+  build_mac_coreml
 elif [ "$targets" = "ios" ]; then
   build_ios
 elif [ "$targets" = "android" ]; then
