@@ -25,6 +25,10 @@ build_mac() {
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib"
   cp "$artifact_path" "$target_path"
 
+  target_dir="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/"
+  cp ggml/src/libggml*.dylib "$target_dir"
+  cp ggml/src/ggml-*/libggml-*.dylib "$target_dir"
+
   echo "Build files copied to $target_path"
 }
 
