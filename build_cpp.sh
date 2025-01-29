@@ -29,6 +29,11 @@ build_mac() {
   cp ggml/src/libggml*.dylib "$target_dir"
   cp ggml/src/ggml-*/libggml-*.dylib "$target_dir"
 
+  # Required by Unity to properly find the dependencies
+  for file in "$target_dir"lib*.dylib; do
+    install_name_tool -add_rpath @loader_path $file
+  done
+
   echo "Build files copied to $target_path"
 }
 
