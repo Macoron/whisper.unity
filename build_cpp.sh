@@ -12,38 +12,25 @@ clean_build(){
   cd "$build_path"
 }
 
+
 build_mac() {
-  clean_build
-  echo "Starting building for Mac..."
-
-  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_METAL=OFF -DCMAKE_BUILD_TYPE=Release  \
-   -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON -DWHISPER_NO_F16C=ON \
-   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
-  make
-
-  echo "Build for Mac complete!"
-
-  artifact_path="$build_path/libwhisper.dylib"
-  target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib"
-  cp "$artifact_path" "$target_path"
-
-  echo "Build files copied to $target_path"
-}
-
-build_mac_metal() {
   clean_build
   echo "Starting building for Mac (Metal)..."
 
-  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_METAL=ON -DCMAKE_BUILD_TYPE=Release  \
-   -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON -DWHISPER_NO_F16C=ON \
-   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DWHISPER_METAL_EMBED_LIBRARY=ON ../
+  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DGGML_METAL=ON -DCMAKE_BUILD_TYPE=Release  \
+   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DGGML_METAL_EMBED_LIBRARY=ON ../
   make
 
   echo "Build for Mac (Metal) complete!"
 
-  artifact_path="$build_path/libwhisper.dylib"
-  target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper_metal.dylib"
+  artifact_path="$build_path/src/libwhisper.1.7.5.dylib"
+  target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib"
   cp "$artifact_path" "$target_path"
+
+  artifact_path=$build_path/ggml/src
+  target_path=$unity_project/Packages/com.whisper.unity/Plugins/MacOS/
+  cp "$artifact_path"/*.dylib "$target_path"
+  cp "$artifact_path"/*/*.dylib "$target_path"
 
   echo "Build files copied to $target_path"
 }
@@ -90,8 +77,6 @@ if [ "$targets" = "all" ]; then
   build_android
 elif [ "$targets" = "mac" ]; then
   build_mac
-elif [ "$targets" = "mac_metal" ]; then
-  build_mac_metal
 elif [ "$targets" = "ios" ]; then
   build_ios
 elif [ "$targets" = "android" ]; then
