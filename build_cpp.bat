@@ -10,5 +10,5 @@ cmake -S . -B ./build -A x64 -DGGML_VULKAN=ON -DCMAKE_BUILD_TYPE=Release -DWHISP
 
 cd ./build
 msbuild ALL_BUILD.vcxproj -t:build -p:configuration=Release -p:platform=x64
-xcopy /y /q .\bin\Release\ggml.dll %unity_path%\Packages\com.whisper.unity\Plugins\Windows\ggml.dll*
+xcopy /y /q .\bin\Release\ggml*.dll %unity_path%\Packages\com.whisper.unity\Plugins\Windows\
 xcopy /y /q .\bin\Release\whisper.dll %unity_path%\Packages\com.whisper.unity\Plugins\Windows\libwhisper.dll*
