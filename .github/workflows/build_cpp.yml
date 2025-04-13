@@ -9,7 +9,7 @@ on:
       whisper_cpp_repo_ref:
         description: 'Tag, branch or commit'
         required: true
-        default: 'v1.7.2'
+        default: 'v1.7.5'
       target_platform:
         description: 'Target platforms'
         required: true
