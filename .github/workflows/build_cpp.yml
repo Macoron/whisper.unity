@@ -146,17 +146,13 @@ jobs:
         run: |
           cd whisper-unity
           sh build_cpp.sh ../whisper-cpp mac
-          cd ${{ github.workspace }}/whisper-cpp/src/
-          mv libwhisper.1.7.5.dylib libwhisper.dylib
           
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: macos-metal
           path: |
-            ${{ github.workspace }}/whisper-cpp/src/libwhisper.dylib
-            ${{ github.workspace }}/whisper-cpp/ggml/src/*.dylib
-            ${{ github.workspace }}/whisper-cpp/ggml/src/*/*.dylib
+            ${{ github.workspace }}/whisper-cpp/build/
           if-no-files-found: error
           
   build-ios:
