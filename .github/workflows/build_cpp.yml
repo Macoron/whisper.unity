@@ -128,7 +128,7 @@ jobs:
   build-macos:
     name: Build for MacOS Metal (ARM, x86_64)
     if: ${{ contains(fromJson('["macos", "all"]'), github.event.inputs.target_platform) }}
-    runs-on: macOS-latest
+    runs-on: macOS-13
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
