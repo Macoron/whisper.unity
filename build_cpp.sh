@@ -23,7 +23,7 @@ build_mac() {
 
   echo "Build for Mac (Metal) complete!"
 
-  artifact_path="$build_path/src/libwhisper.1.7.5.dylib"
+  artifact_path="$build_path/src/libwhisper.dylib"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib"
   cp "$artifact_path" "$target_path"
 

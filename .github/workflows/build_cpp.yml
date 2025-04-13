@@ -152,9 +152,7 @@ jobs:
         with:
           name: macos-metal
           path: |
-            ${{ github.workspace }}/whisper-cpp/build/src/libwhisper.dylib
-            ${{ github.workspace }}/whisper-cpp/build/ggml/src/*.dylib
-            ${{ github.workspace }}/whisper-cpp/build/ggml/src/*/*.dylib
+            ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/MacOS/*.dylib
           if-no-files-found: error
           
   build-ios:
