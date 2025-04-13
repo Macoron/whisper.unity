@@ -145,7 +145,7 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ../whisper-cpp/ mac
+          sh build_cpp.sh ../whisper-cpp mac
           cd ${{ github.workspace }}/whisper-cpp/src/
           mv libwhisper.1.7.5.dylib libwhisper.dylib
           
