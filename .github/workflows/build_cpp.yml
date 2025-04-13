@@ -125,7 +125,7 @@ jobs:
           path: ${{ github.workspace }}/whisper-cpp/build/libwhisper_cuda.so
           if-no-files-found: error
           
-  build-macos-metal:
+  build-macos:
     name: Build for MacOS Metal (ARM, x86_64)
     if: ${{ contains(fromJson('["macos", "all"]'), github.event.inputs.target_platform) }}
     runs-on: macOS-latest
@@ -145,14 +145,16 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ../whisper-cpp mac
+          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ mac
           
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: macos-metal
           path: |
-            ${{ github.workspace }}/whisper-cpp/build/
+            ${{ github.workspace }}/whisper-cpp/build/src/libwhisper.dylib
+            ${{ github.workspace }}/whisper-cpp/build/ggml/src/*.dylib
+            ${{ github.workspace }}/whisper-cpp/build/ggml/src/*/*.dylib
           if-no-files-found: error
           
   build-ios:
