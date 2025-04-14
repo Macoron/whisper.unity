@@ -61,7 +61,7 @@ jobs:
   build-linux:
     name: Build for Linux (x86_64, Vulkan)
     if: ${{ contains(fromJson('["linux", "all"]'), github.event.inputs.target_platform) }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
