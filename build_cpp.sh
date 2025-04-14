@@ -12,7 +12,6 @@ clean_build(){
   cd "$build_path"
 }
 
-
 build_mac() {
   clean_build
   echo "Starting building for Mac (Metal)..."
@@ -22,6 +21,8 @@ build_mac() {
   make
 
   echo "Build for Mac (Metal) complete!"
+
+  rm $unity_project/Packages/com.whisper.unity/Plugins/MacOS/*.dylib
 
   artifact_path="$build_path/src/libwhisper.dylib"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/MacOS/libwhisper.dylib"
