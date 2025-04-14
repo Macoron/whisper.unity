@@ -17,8 +17,8 @@ build_mac() {
   clean_build
   echo "Starting building for Mac (Metal)..."
 
-  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DGGML_METAL=ON -DCMAKE_BUILD_TYPE=Release  \
-   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DGGML_METAL_EMBED_LIBRARY=ON ../
+  cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DGGML_METAL=OFF -DCMAKE_BUILD_TYPE=Release  \
+   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DGGML_METAL_EMBED_LIBRARY=OFF ../
   make
 
   echo "Build for Mac (Metal) complete!"
