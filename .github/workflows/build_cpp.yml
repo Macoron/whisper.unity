@@ -86,7 +86,7 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp_linux.sh ../whisper-cpp/ 
+          sh build_cpp_linux.sh ${{ github.workspace }}/whisper-cpp
           
       - name: Upload results
         uses: actions/upload-artifact@v4
