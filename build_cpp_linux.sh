@@ -20,6 +20,8 @@ build() {
 
   echo "Build complete!"
 
+  rm $unity_project/Packages/com.whisper.unity/Plugins/Linux/*.so
+
   artifact_path="$build_path/src/libwhisper.so"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/Linux/libwhisper.so"
   cp "$artifact_path" "$target_path"
