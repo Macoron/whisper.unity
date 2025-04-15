@@ -156,7 +156,7 @@ jobs:
   build-android:
     name: Build for Android (arm64-v8a)
     if: ${{ contains(fromJson('["android", "all"]'), github.event.inputs.target_platform) }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:          
       - name: Install Java
         uses: actions/setup-java@v3
