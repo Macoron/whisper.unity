@@ -150,7 +150,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios
-          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/MacOS/*.a
+          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/iOS/*.a
           if-no-files-found: error
 
   build-android:
