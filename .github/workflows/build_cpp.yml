@@ -188,11 +188,11 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ../whisper-cpp/ android $ANDROID_HOME/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
+          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ android $ANDROID_HOME/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
           
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: android
-          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
+          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/Android/*.a
           if-no-files-found: error
