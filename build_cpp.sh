@@ -41,16 +41,23 @@ build_ios() {
   echo "Starting building for ios..."
 
   cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_BUILD_TYPE=Release  \
-  -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DWHISPER_METAL=OFF \
+  -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DGGML_METAL=ON \
   -DCMAKE_SYSTEM_PROCESSOR=arm64 -DCMAKE_IOS_INSTALL_COMBINED=YES \
   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
   make
 
   echo "Build for ios complete!"
 
-  artifact_path="$build_path/libwhisper.a"
+  rm $unity_project/Packages/com.whisper.unity/Plugins/iOS/*.a
+
+  artifact_path="$build_path/src/libwhisper.a"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/iOS/libwhisper.a"
   cp "$artifact_path" "$target_path"
+
+  artifact_path=$build_path/ggml/src
+  target_path=$unity_project/Packages/com.whisper.unity/Plugins/iOS/
+  cp "$artifact_path"/*.a "$target_path"
+  cp "$artifact_path"/*/*.a "$target_path"
 
   echo "Build files copied to $target_path"
 }
