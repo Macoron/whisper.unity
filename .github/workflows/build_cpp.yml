@@ -169,7 +169,7 @@ jobs:
 
       - name: Install Android NDK
         run: |
-          sdkmanager --install "build-tools;34.0.1"
+          sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.24.0"
           sdkmanager --install "ndk;25.1.8937393"
           
