@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c692733892f454141a400042ae245732
+guid: efb6b13678d5849c89a051d951055729
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -7,7 +7,7 @@ PluginImporter:
   executionOrder: {}
   defineConstraints: []
   isPreloaded: 0
-  isOverridable: 0
+  isOverridable: 1
   isExplicitlyReferenced: 0
   validateReferences: 1
   platformData:
@@ -21,17 +21,9 @@ PluginImporter:
         Exclude Linux64: 1
         Exclude OSXUniversal: 1
         Exclude VisionOS: 0
-        Exclude WebGL: 1
         Exclude Win: 1
         Exclude Win64: 1
         Exclude iOS: 0
-  - first:
-      Android: Android
-    second:
-      enabled: 0
-      settings:
-        AndroidSharedLibraryType: Executable
-        CPU: ARMv7
   - first:
       Any: 
     second:
@@ -42,9 +34,7 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        CPU: AnyCPU
         DefaultValueInitialized: true
-        OS: AnyOS
   - first:
       Standalone: Linux64
     second:
@@ -73,20 +63,12 @@ PluginImporter:
       VisionOS: VisionOS
     second:
       enabled: 1
-      settings:
-        AddToEmbeddedBinaries: false
-        CPU: AnyCPU
-        CompileFlags: 
-        FrameworkDependencies: Accelerate;Metal;
+      settings: {}
   - first:
       iPhone: iOS
     second:
       enabled: 1
-      settings:
-        AddToEmbeddedBinaries: false
-        CPU: AnyCPU
-        CompileFlags: 
-        FrameworkDependencies: Accelerate;Metal;
+      settings: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 

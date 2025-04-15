@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c692733892f454141a400042ae245732
+guid: 08fb54136deb343069669ff1161da465
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -7,7 +7,7 @@ PluginImporter:
   executionOrder: {}
   defineConstraints: []
   isPreloaded: 0
-  isOverridable: 0
+  isOverridable: 1
   isExplicitlyReferenced: 0
   validateReferences: 1
   platformData:
@@ -21,7 +21,6 @@ PluginImporter:
         Exclude Linux64: 1
         Exclude OSXUniversal: 1
         Exclude VisionOS: 0
-        Exclude WebGL: 1
         Exclude Win: 1
         Exclude Win64: 1
         Exclude iOS: 0
@@ -77,7 +76,7 @@ PluginImporter:
         AddToEmbeddedBinaries: false
         CPU: AnyCPU
         CompileFlags: 
-        FrameworkDependencies: Accelerate;Metal;
+        FrameworkDependencies: 
   - first:
       iPhone: iOS
     second:
@@ -86,7 +85,7 @@ PluginImporter:
         AddToEmbeddedBinaries: false
         CPU: AnyCPU
         CompileFlags: 
-        FrameworkDependencies: Accelerate;Metal;
+        FrameworkDependencies: 
   userData: 
   assetBundleName: 
   assetBundleVariant: 
