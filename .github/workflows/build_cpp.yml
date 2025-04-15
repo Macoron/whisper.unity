@@ -170,7 +170,7 @@ jobs:
       - name: Install Android NDK
         run: |
           sdkmanager --install "build-tools;33.0.2"
-          sdkmanager --install "cmake"
+          sdkmanager --install "cmake;3.22.1"
           sdkmanager --install "ndk;25.1.8937393"
           
       - name: Clone whisper.unity
