@@ -13,7 +13,7 @@ on:
       target_platform:
         description: 'Target platforms'
         required: true
-        default: 'windows'
+        default: 'all'
 jobs:
   build-windows:
     name: Build for Windows (x86_64, Vulkan)
