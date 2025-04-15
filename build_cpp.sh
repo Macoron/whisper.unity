@@ -33,6 +33,11 @@ build_mac() {
   cp "$artifact_path"/*.dylib "$target_path"
   cp "$artifact_path"/*/*.dylib "$target_path"
 
+  # Required by Unity to properly find the dependencies
+  for file in "$target_path"*.dylib; do
+    install_name_tool -add_rpath @loader_path $file
+  done
+
   echo "Build files copied to $target_path"
 }
 

@@ -17,32 +17,6 @@ namespace Whisper.Native
 #else
         private const string LibraryName = "libwhisper";
 #endif
-
-// this hack is needed for manual loading of dylib dependencies
-// basicly unity doesn't support chain deps, so I need to manually
-// load all dylibs in the right order
-#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-        [DllImport("libdl.dylib")]
-        private static extern IntPtr dlopen(string path, int mode);
-
-        private const int RTLD_NOW = 2;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void LoadNativeLibraries()
-        {
-#if UNITY_EDITOR_OSX
-            var folder = "Packages/com.whisper.unity/Plugins/MacOS/";
-#elif UNITY_STANDALONE_OSX
-            var folder = System.IO.Path.Combine(UnityEngine.Application.dataPath, "Plugins/");
-#endif
-            dlopen(folder + "libggml-base.dylib", RTLD_NOW);
-            dlopen(folder + "libggml-blas.dylib", RTLD_NOW);
-            dlopen(folder + "libggml-cpu.dylib", RTLD_NOW);
-            dlopen(folder + "libggml-metal.dylib", RTLD_NOW);
-            dlopen(folder + "libggml.dylib", RTLD_NOW);
-        }
-#endif
-
         
         [DllImport(LibraryName)]
         public static extern whisper_context_ptr whisper_init_from_buffer_with_params(IntPtr buffer,
