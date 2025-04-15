@@ -156,7 +156,7 @@ jobs:
   build-android:
     name: Build for Android (arm64-v8a)
     if: ${{ contains(fromJson('["android", "all"]'), github.event.inputs.target_platform) }}
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:          
       - name: Install Java
         uses: actions/setup-java@v3
@@ -169,9 +169,9 @@ jobs:
 
       - name: Install Android NDK
         run: |
-          sdkmanager --install "build-tools;33.0.2"
-          sdkmanager --install "cmake;3.22.1"
-          sdkmanager --install "ndk;21.3.6528147"
+          sdkmanager --install "build-tools;34.0.1"
+          sdkmanager --install "cmake;3.24.0"
+          sdkmanager --install "ndk;25.1.8937393"
           
       - name: Clone whisper.unity
         uses: actions/checkout@v3
