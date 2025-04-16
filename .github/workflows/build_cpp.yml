@@ -9,10 +9,15 @@ on:
       whisper_cpp_repo_ref:
         description: 'Tag, branch or commit'
         required: true
-        default: 'v1.5.5'
+        default: 'v1.7.5'
+      target_platform:
+        description: 'Target platforms'
+        required: true
+        default: 'all'
 jobs:
   build-windows:
-    name: Build for Windows (x86_64)
+    name: Build for Windows (x86_64, Vulkan)
+    if: ${{ contains(fromJson('["windows", "all"]'), github.event.inputs.target_platform) }}
     runs-on: windows-latest
     steps:
       - name: Clone whisper.unity
@@ -30,62 +35,33 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1
         
+      - name: Install Vulkan SDK
+        uses: jakoch/install-vulkan-sdk-action@v1.0.4
+        with:
+          vulkan_version: 1.3.290.0
+          optional_components: com.lunarg.vulkan.vma
+          install_runtime: true
+          cache: true
+          stripdown: true
+
       - name: Run build script
         run: |
           cd whisper-unity
-          .\build_cpp.bat cpu ..\whisper-cpp\
+          .\build_cpp.bat ..\whisper-cpp\
           cd ${{ github.workspace }}\whisper-cpp\build\bin\Release
           ren whisper.dll libwhisper.dll
           
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: ${{ github.workspace }}/whisper-cpp/build/bin/Release/libwhisper.dll
-          if-no-files-found: error
-
-  build-windows-cuda:
-    name: Build for Windows (x86_64, CUDA)
-    runs-on: windows-latest
-    steps:
-      - name: Clone whisper.unity
-        uses: actions/checkout@v3
-        with:
-          path: whisper-unity
-          
-      - name: Clone whisper.cpp
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ github.event.inputs.whisper_cpp_repo }}
-          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
-          path: whisper-cpp
-          
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1
-
-      - name: Install CUDA Toolkit
-        id: cuda-toolkit
-        uses: Jimver/cuda-toolkit@v0.2.11
-        with:
-          cuda: '12.2.0'
-        
-      - name: Run build script
-        run: |
-          cd whisper-unity
-          .\build_cpp.bat cuda ..\whisper-cpp\
-          cd ${{ github.workspace }}\whisper-cpp\build\bin\Release
-          ren whisper.dll libwhisper_cuda.dll
-          
-      - name: Upload results
-        uses: actions/upload-artifact@v3
-        with:
-          name: windows-cuda
-          path: ${{ github.workspace }}/whisper-cpp/build/bin/Release/libwhisper_cuda.dll
+          path: ${{ github.workspace }}/whisper-cpp/build/bin/Release
           if-no-files-found: error
           
   build-linux:
-    name: Build for Linux (x86_64)
-    runs-on: ubuntu-20.04
+    name: Build for Linux (x86_64, Vulkan)
+    if: ${{ contains(fromJson('["linux", "all"]'), github.event.inputs.target_platform) }}
+    runs-on: ubuntu-22.04
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -98,59 +74,31 @@ jobs:
           repository: ${{ github.event.inputs.whisper_cpp_repo }}
           ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
           path: whisper-cpp
+
+      - name: Dependencies
+        id: depends
+        run: |
+          wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list https://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential mesa-vulkan-drivers vulkan-sdk libcurl4-openssl-dev
           
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp_linux.sh ../whisper-cpp/ cpu
+          sh build_cpp_linux.sh ${{ github.workspace }}/whisper-cpp
           
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.so
-          if-no-files-found: error
-
-  build-linux-cuda:
-    name: Build for Linux (x86_64, CUDA)
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Clone whisper.unity
-        uses: actions/checkout@v3
-        with:
-          path: whisper-unity
-          
-      - name: Clone whisper.cpp
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ github.event.inputs.whisper_cpp_repo }}
-          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
-          path: whisper-cpp
-      
-      - name: Install CUDA Toolkit
-        id: cuda-toolkit
-        uses: Jimver/cuda-toolkit@v0.2.11
-        with:
-          cuda: '12.2.0'
-          method: 'network'
-          
-      - name: Run build script
-        run: |
-          cd whisper-unity
-          sh build_cpp_linux.sh ../whisper-cpp cuda
-          cd ${{ github.workspace }}/whisper-cpp/build/
-          mv libwhisper.so libwhisper_cuda.so
-          
-      - name: Upload results
-        uses: actions/upload-artifact@v3
-        with:
-          name: linux-cuda
-          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper_cuda.so
+          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/Linux/*.so
           if-no-files-found: error
           
   build-macos:
-    name: Build for MacOS (ARM, x86_64)
-    runs-on: macOS-latest
+    name: Build for MacOS Metal (ARM, x86_64)
+    if: ${{ contains(fromJson('["macos", "all"]'), github.event.inputs.target_platform) }}
+    runs-on: macOS-13
     steps:
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -167,49 +115,18 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ../whisper-cpp/ mac
+          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ mac
           
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos
-          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.dylib
-          if-no-files-found: error
-
-  build-macos-metal:
-    name: Build for MacOS Metal (ARM, x86_64)
-    runs-on: macOS-latest
-    steps:
-      - name: Clone whisper.unity
-        uses: actions/checkout@v3
-        with:
-          path: whisper-unity
-          
-      - name: Clone whisper.cpp
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ github.event.inputs.whisper_cpp_repo }}
-          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
-          path: whisper-cpp
-          
-      - name: Run build script
-        run: |
-          cd whisper-unity
-          sh build_cpp.sh ../whisper-cpp/ mac_metal
-          cd ${{ github.workspace }}/whisper-cpp/build/
-          mv libwhisper.dylib libwhisper_metal.dylib
-          
-      - name: Upload results
-        uses: actions/upload-artifact@v3
-        with:
-          name: macos-metal
-          path: |
-            ${{ github.workspace }}/whisper-cpp/build/libwhisper_metal.dylib
-            ${{ github.workspace }}/whisper-cpp/build/bin/ggml-metal.metal   
+          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/MacOS/*.dylib
           if-no-files-found: error
           
   build-ios:
     name: Build for iOS
+    if: ${{ contains(fromJson('["ios", "all"]'), github.event.inputs.target_platform) }}
     runs-on: macOS-latest
     steps:
       - name: Clone whisper.unity
@@ -227,17 +144,18 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ../whisper-cpp/ ios
+          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ ios
           
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios
-          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
+          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/iOS/*.a
           if-no-files-found: error
 
   build-android:
     name: Build for Android (arm64-v8a)
+    if: ${{ contains(fromJson('["android", "all"]'), github.event.inputs.target_platform) }}
     runs-on: ubuntu-latest
     steps:          
       - name: Install Java
@@ -253,7 +171,7 @@ jobs:
         run: |
           sdkmanager --install "build-tools;33.0.2"
           sdkmanager --install "cmake;3.22.1"
-          sdkmanager --install "ndk;21.3.6528147"
+          sdkmanager --install "ndk;25.1.8937393"
           
       - name: Clone whisper.unity
         uses: actions/checkout@v3
@@ -270,11 +188,11 @@ jobs:
       - name: Run build script
         run: |
           cd whisper-unity
-          sh build_cpp.sh ../whisper-cpp/ android $ANDROID_HOME/ndk/21.3.6528147/build/cmake/android.toolchain.cmake
+          sh build_cpp.sh ${{ github.workspace }}/whisper-cpp/ android $ANDROID_HOME/ndk/25.1.8937393/build/cmake/android.toolchain.cmake
           
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android
-          path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
+          path: ${{ github.workspace }}/whisper-unity/Packages/com.whisper.unity/Plugins/Android/*.a
           if-no-files-found: error

@@ -50,7 +50,7 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
   - first:
       Standalone: OSXUniversal
     second:
@@ -62,22 +62,22 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        CPU: x86
+        CPU: None
   - first:
       Standalone: Win64
     second:
       enabled: 0
       settings:
-        CPU: x86_64
+        CPU: None
   - first:
       VisionOS: VisionOS
     second:
       enabled: 1
       settings:
         AddToEmbeddedBinaries: false
-        CPU: ARM64
+        CPU: AnyCPU
         CompileFlags: 
-        FrameworkDependencies: Accelerate;
+        FrameworkDependencies: Accelerate;Metal;
   - first:
       iPhone: iOS
     second:
@@ -86,7 +86,7 @@ PluginImporter:
         AddToEmbeddedBinaries: false
         CPU: AnyCPU
         CompileFlags: 
-        FrameworkDependencies: Accelerate;
+        FrameworkDependencies: Accelerate;Metal;
   userData: 
   assetBundleName: 
   assetBundleVariant: 

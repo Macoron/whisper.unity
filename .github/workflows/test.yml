@@ -30,12 +30,12 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           checkName: ${{ matrix.unityVersion }} Test Results
           coverageOptions: 'generateHtmlReport;assemblyFilters:+com.whisper.unity'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Test results for ${{ matrix.unityVersion }}
           path: ${{ steps.tests.outputs.artifactsPath }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Coverage results for ${{ matrix.unityVersion }}

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 whisper_path="$1"
-targets=${2:-all}
 unity_project="$PWD"
 build_path="$1/build"
 
@@ -11,47 +10,28 @@ clean_build(){
   cd "$build_path"
 }
 
-build_cpu() {
+build() {
   clean_build
-  echo "Starting building for CPU..."
+  echo "Starting building..."
 
-  cmake -DCMAKE_BUILD_TYPE=Release \
+  cmake -DCMAKE_BUILD_TYPE=Release -DGGML_VULKAN=ON \
   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
   make
 
-  echo "Build for CPU complete!"
+  echo "Build complete!"
 
-  artifact_path="$build_path/libwhisper.so"
+  rm $unity_project/Packages/com.whisper.unity/Plugins/Linux/*.so
+
+  artifact_path="$build_path/src/libwhisper.so"
   target_path="$unity_project/Packages/com.whisper.unity/Plugins/Linux/libwhisper.so"
   cp "$artifact_path" "$target_path"
 
-  echo "Build files copied to $target_path"
-}
-
-build_cuda() {
-  clean_build
-  echo "Starting building for CUDA..."
-
-  cmake -DWHISPER_CUBLAS=ON -DCMAKE_BUILD_TYPE=Release \
-  -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF ../
-  make
-
-  echo "Build for CUDA complete!"
-
-  artifact_path="$build_path/libwhisper.so"
-  target_path="$unity_project/Packages/com.whisper.unity/Plugins/Linux/libwhisper_cuda.so"
-  cp "$artifact_path" "$target_path"
+  artifact_path=$build_path/ggml/src
+  target_path=$unity_project/Packages/com.whisper.unity/Plugins/Linux/
+  cp "$artifact_path"/*.so "$target_path"
+  cp "$artifact_path"/*/*.so "$target_path"
 
   echo "Build files copied to $target_path"
 }
 
-if [ "$targets" = "all" ]; then
-  build_cpu
-  build_cuda
-elif [ "$targets" = "cpu" ]; then
-  build_cpu
-elif [ "$targets" = "cuda" ]; then
-  build_cuda
-else
-  echo "Unknown targets: $targets"
-fi
+build

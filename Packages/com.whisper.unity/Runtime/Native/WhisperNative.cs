@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using UnityEngine;
 // ReSharper disable InconsistentNaming
 using whisper_context_ptr = System.IntPtr;
 using whisper_token = System.Int32;
@@ -13,37 +14,9 @@ namespace Whisper.Native
     {
 #if (UNITY_IOS || UNITY_VISIONOS || UNITY_ANDROID) && !UNITY_EDITOR
         private const string LibraryName = "__Internal";
-
-#elif WHISPER_CUDA
-#if UNITY_EDITOR && (UNITY_EDITOR_WIN || UNITY_EDITOR_LINUX)
-        private const string LibraryName = "libwhisper_cuda";
-#elif !UNITY_EDITOR  && (UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX)
-        private const string LibraryName = "libwhisper_cuda";
 #else
         private const string LibraryName = "libwhisper";
 #endif
-
-#elif WHISPER_METAL
-
-#if UNITY_EDITOR && UNITY_EDITOR_OSX
-        private const string LibraryName = "libwhisper_metal";
-#elif !UNITY_EDITOR && UNITY_STANDALONE_OSX
-        private const string LibraryName = "libwhisper_metal";
-#else
-        private const string LibraryName = "libwhisper";
-#endif
-
-#else
-        private const string LibraryName = "libwhisper";
-#endif
-
-        static WhisperNative()
-        {
-#if !UNITY_EDITOR && UNITY_STANDALONE_OSX
-            var path = System.IO.Path.Combine(UnityEngine.Application.dataPath, "Plugins");
-            Environment.SetEnvironmentVariable("GGML_METAL_PATH_RESOURCES",path);
-#endif
-        }
         
         [DllImport(LibraryName)]
         public static extern whisper_context_ptr whisper_init_from_buffer_with_params(IntPtr buffer,

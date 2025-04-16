@@ -25,6 +25,24 @@ namespace Whisper
         }
 
         /// <summary>
+        /// Try to load whisper in GPU for  faster inference.
+        /// </summary>
+        public bool UseGpu
+        {
+            get => _param.use_gpu;
+            set => _param.use_gpu = value;
+        }
+        
+        /// <summary>
+        /// Use the Flash Attention algorithm for faster inference.
+        /// </summary>
+        public bool FlashAttn
+        {
+            get => _param.flash_attn;
+            set => _param.flash_attn = value;
+        }
+
+        /// <summary>
         /// Create a new default Whisper Context parameters.
         /// </summary>
         public static WhisperContextParams GetDefaultParams()
@@ -280,17 +298,7 @@ namespace Whisper
          #endregion
          
          #region Speed Up
-
-         /// <summary>
-         /// [EXPERIMENTAL] Speed-up the audio by 2x using Phase Vocoder.
-         /// These can significantly reduce the quality of the output.
-         /// </summary>
-         public bool SpeedUp
-         {
-             get => _param.speed_up;
-             set => _param.speed_up = value;
-         }
-
+         
          /// <summary>
          /// [EXPERIMENTAL] Overwrite the audio context size (0 = use default).
          /// These can significantly reduce the quality of the output.
@@ -395,11 +403,6 @@ namespace Whisper
                  PrintTimestamps = false
              };
 
-             // for some reason on android one thread works
-             // 10x faster than multithreading
-#if UNITY_ANDROID && !UNITY_EDITOR
-             param.ThreadsCount = 1;
-#endif
              return param;
          }
      }   

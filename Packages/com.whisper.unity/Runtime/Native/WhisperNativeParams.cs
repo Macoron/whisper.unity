@@ -35,6 +35,7 @@ namespace Whisper.Native
         WHISPER_AHEADS_LARGE_V1,
         WHISPER_AHEADS_LARGE_V2,
         WHISPER_AHEADS_LARGE_V3,
+        WHISPER_AHEADS_LARGE_V3_TURBO,
     };
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -89,7 +90,8 @@ namespace Whisper.Native
     [StructLayout(LayoutKind.Sequential)]
     public struct WhisperNativeContextParams
     {
-        [MarshalAs(UnmanagedType.U1)] bool use_gpu;
+        [MarshalAs(UnmanagedType.U1)] public bool use_gpu;
+        [MarshalAs(UnmanagedType.U1)] public bool flash_attn;
         int gpu_device;  // CUDA device
 
         // [EXPERIMENTAL] Token-level timestamps with DTW
@@ -136,7 +138,6 @@ namespace Whisper.Native
 
         // [EXPERIMENTAL] speed-up techniques
         // note: these can significantly reduce the quality of the output
-        [MarshalAs(UnmanagedType.U1)] public bool speed_up; // speed-up the audio by 2x using Phase Vocoder
         [MarshalAs(UnmanagedType.U1)] bool debug_mode;        // enable debug_mode provides extra info (eg. Dump log_mel)
         public int audio_ctx; // overwrite the audio context size (0 = use default)
 
